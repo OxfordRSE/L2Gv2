@@ -17,9 +17,12 @@ PATH = path.join(path.dirname(__file__), 'data/')
 DATASETS = {'AS': ['snap-as/as_edges.parquet'], 
             'elliptic': ['elliptic/elliptic_edges.parquet',
                          'elliptic/elliptic_nodes.parquet'], 
-            'nfts': ['nfts/nfts_edges.parquet']}
+            'nfts': ['nfts/nfts_edges.parquet'],
+            'nAS': ['nas/nas_edges.parquet',
+                    'nas/nas_nodes.parquet']}
 FORMATS = ['networkx', 'tgeometric', 'raphtory', 'polars', 'edge_list']
-COLUMNS = ['source', 'dest'] # required columns
+EDGE_COLUMNS = ['source', 'dest'] # required columns
+NODE_COLUMNS = ['nodes'] # required column for nodes
 
 class DataLoader:
     """Take a dataframe representing a (temporal) graph and provide 
@@ -46,7 +49,7 @@ class DataLoader:
 
         # Process edges
         self.df = pl.read_parquet(edgefile)
-        for c in COLUMNS:
+        for c in EDGE_COLUMNS:
             assert c in self.df.columns
         self.temporal = True if 'timestamp' in self.df.columns else False
         if not self.temporal:
@@ -59,10 +62,15 @@ class DataLoader:
         else:
             self.nodes = pl.concat([self.df.select(pl.col('timestamp'), pl.col('source').alias('nodes')), 
                                     self.df.select(pl.col('timestamp'), pl.col('dest').alias('nodes'))]).unique().sort(by=['timestamp','nodes'])
-        
-        self.edge_features = [x for x in self.df.columns if x not in ['timestamp', 'label']+COLUMNS]
-        self.node_features = [x for x in self.nodes.columns if x not in ['timestamp', 'label']+COLUMNS]
+        for c in NODE_COLUMNS:
+            assert c in self.nodes.columns
 
+        self.edge_features = [x for x in self.df.columns if x not in ['timestamp', 'label']+EDGE_COLUMNS]
+        self.node_features = [x for x in self.nodes.columns if x not in ['timestamp', 'label']+NODE_COLUMNS]
+
+    def get_dates(self):
+        return self.datelist.to_list()
+    
     def get_edges(self):
         return self.df
     
@@ -132,7 +140,9 @@ class DataLoader:
                 edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous()
                 tg = Data(edge_index=edge_index)
                 nodes = self.nodes.filter(pl.col('timestamp')==d).select('nodes').to_numpy()
-                tg.nodes = torch.Tensor(nodes).int()
+                tg.nodes = torch.from_numpy(nodes).int()
+                features = self.nodes.filter(pl.col('timestamp')==d).select([c for c in self.node_features]).to_numpy()
+                tg.x = torch.from_numpy(features).int()
                 tg_graphs[d] = tg
         else:
             edges = self.df.select('source','dest').unique().to_numpy()
