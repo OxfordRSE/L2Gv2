@@ -132,6 +132,8 @@ class DataLoader:
         return edge_index
 
     def get_tgeometric(self, temp=True):
+        nodes = self.nodes.select('nodes').unique().to_numpy()
+        features = self.nodes.select([c for c in self.node_features]).to_numpy()
         if self.temporal and temp:
             tg_graphs = {}
             for d in tqdm(self.datelist):
@@ -139,23 +141,20 @@ class DataLoader:
                 edge_list = [tuple(x) for x in edges]
                 edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous()
                 tg = Data(edge_index=edge_index)
-                nodes = self.nodes.filter(pl.col('timestamp')==d).select('nodes').to_numpy()
                 tg.nodes = torch.from_numpy(nodes).int()
-                features = self.nodes.filter(pl.col('timestamp')==d).select([c for c in self.node_features]).to_numpy()
-                tg.x = torch.from_numpy(features).int()
+                tg.x = torch.from_numpy(features).float()
                 tg_graphs[d] = tg
         else:
             edges = self.df.select('source','dest').unique().to_numpy()
             edge_list = [tuple(x) for x in edges]
             edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous() 
             tg_graphs = Data(edge_index=edge_index)
-            nodes = self.nodes.select('nodes').unique().to_numpy()
             tg_graphs.nodes = torch.Tensor(nodes).int()
+            tg_graphs.x = torch.from_numpy(features).float()
         return tg_graphs
     
     def summary(self):
         pass
-
 #
 # From here on the code is obsolete and needs to be adjusted
 #
