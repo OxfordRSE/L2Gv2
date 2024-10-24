@@ -39,6 +39,9 @@ class DataLoader:
         self.__load_files(files)
         
     def __load_files(self, files):
+        """
+        
+        """
         edgefile = None
         nodefile = None
         for f in files:
@@ -48,39 +51,48 @@ class DataLoader:
                 nodefile = f
 
         # Process edges
-        self.df = pl.read_parquet(edgefile)
+        self.edges = pl.read_parquet(edgefile)
         for c in EDGE_COLUMNS:
-            assert c in self.df.columns
-        self.temporal = True if 'timestamp' in self.df.columns else False
+            assert c in self.edges.columns
+        self.temporal = True if 'timestamp' in self.edges.columns else False
         if not self.temporal:
-            self.df = self.df.with_columns(pl.lit(0).alias('timestamp'))
-        self.datelist = self.df.select('timestamp').to_series().unique()
+            self.edges = self.edges.with_columns(pl.lit(0).alias('timestamp'))
+        self.datelist = self.edges.select('timestamp').to_series().unique()
 
         # Process nodes
         if nodefile is not None:
             self.nodes = pl.read_parquet(nodefile)
         else:
-            self.nodes = pl.concat([self.df.select(pl.col('timestamp'), pl.col('source').alias('nodes')), 
-                                    self.df.select(pl.col('timestamp'), pl.col('dest').alias('nodes'))]).unique().sort(by=['timestamp','nodes'])
+            self.nodes = pl.concat([self.edges.select(pl.col('timestamp'), pl.col('source').alias('nodes')), 
+                                    self.edges.select(pl.col('timestamp'), pl.col('dest').alias('nodes'))]).unique().sort(by=['timestamp','nodes'])
         for c in NODE_COLUMNS:
             assert c in self.nodes.columns
 
-        self.edge_features = [x for x in self.df.columns if x not in ['timestamp', 'label']+EDGE_COLUMNS]
+        self.edge_features = [x for x in self.edges.columns if x not in ['timestamp', 'label']+EDGE_COLUMNS]
         self.node_features = [x for x in self.nodes.columns if x not in ['timestamp', 'label']+NODE_COLUMNS]
 
     def get_dates(self):
         return self.datelist.to_list()
     
     def get_edges(self):
-        return self.df
+        return self.edges
     
     def get_nodes(self):
         return self.nodes
+    
+    def get_node_list(self):
+        return self.nodes.select('nodes').unique(maintain_order=True).to_series().to_list()
+    
+    def get_node_features(self):
+        return self.node_features
+    
+    def get_edge_features(self):
+        return self.edge_features
 
-    def get_raphtory(self):
+    def get_graph(self):
         g = rGraph()
         g.load_edges_from_pandas(
-            df = self.df.to_pandas(),
+            df = self.edges.to_pandas(),
             time = 'timestamp',
             src = 'source',
             dst = 'dest',
@@ -98,10 +110,10 @@ class DataLoader:
         if self.temporal and temp:
             edge_list = {}
             for d in tqdm(self.datelist):
-                edges = self.df.filter(pl.col('timestamp')==d).select('source','dest').to_numpy()
+                edges = self.edges.filter(pl.col('timestamp')==d).select('source','dest').to_numpy()
                 edge_list[d] = [tuple(x) for x in edges]
         else:
-            edges = self.df.select('source','dest').unique().to_numpy()
+            edges = self.edges.select('source','dest').unique().to_numpy()
             edge_list = [tuple(x) for x in edges]
         return edge_list
     
@@ -109,35 +121,35 @@ class DataLoader:
         if self.temporal and temp:
             nx_graphs = {}
             for d in tqdm(self.datelist):
-                edges = self.df.filter(pl.col('timestamp')==d).select('source','dest').to_numpy()
+                edges = self.edges.filter(pl.col('timestamp')==d).select('source','dest').to_numpy()
                 edge_list = [tuple(x) for x in edges]
                 nx_graphs[d] = nx.from_edgelist(edge_list)
         else:
-            edges = self.df.select('source','dest').unique().to_numpy()
+            edges = self.edges.select('source','dest').unique().to_numpy()
             edge_list = [tuple(x) for x in edges]
             nx_graphs = nx.from_edgelist(edge_list)
         return nx_graphs
     
-    def get_edge_index(self, temp=True):
+    def get_edge_index(self, temp=True, date=None):
         if self.temporal and temp:
             edge_index = {}
             for d in tqdm(self.datelist):
-                edges = self.df.filter(pl.col('timestamp')==d).select('source','dest').to_numpy()
+                edges = self.edges.filter(pl.col('timestamp')==d).select('source','dest').to_numpy()
                 edge_list = [tuple(x) for x in edges]
                 edge_index[d] = torch.tensor(edge_list, dtype=torch.long).t().contiguous()
         else:
-            edges = self.df.select('source','dest').unique().to_numpy()
+            edges = self.edges.select('source','dest').unique().to_numpy()
             edge_list = [tuple(x) for x in edges]
             edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous()
         return edge_index
 
-    def get_tgeometric(self, temp=True):
+    def get_tgeometric(self, dict=None, temp=True):
         nodes = self.nodes.select('nodes').unique().to_numpy()
         features = self.nodes.select([c for c in self.node_features]).to_numpy()
         if self.temporal and temp:
             tg_graphs = {}
             for d in tqdm(self.datelist):
-                edges = self.df.filter(pl.col('timestamp')==d).select('source','dest').to_numpy()
+                edges = self.edges.filter(pl.col('timestamp')==d).select('source','dest').to_numpy()
                 edge_list = [tuple(x) for x in edges]
                 edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous()
                 tg = Data(edge_index=edge_index)
@@ -145,7 +157,7 @@ class DataLoader:
                 tg.x = torch.from_numpy(features).float()
                 tg_graphs[d] = tg
         else:
-            edges = self.df.select('source','dest').unique().to_numpy()
+            edges = self.edges.select('source','dest').unique().to_numpy()
             edge_list = [tuple(x) for x in edges]
             edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous() 
             tg_graphs = Data(edge_index=edge_index)
