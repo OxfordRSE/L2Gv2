@@ -77,11 +77,17 @@ class DataLoader:
     def get_edges(self):
         return self.edges
     
-    def get_nodes(self):
-        return self.nodes
+    def get_nodes(self, ts=None):
+        if ts is None:
+            return self.nodes
+        else:
+            return self.nodes.filter(pl.col('timestamp')==ts)
     
-    def get_node_list(self):
-        return self.nodes.select('nodes').unique(maintain_order=True).to_series().to_list()
+    def get_node_list(self, ts=None):
+        nodes = self.nodes
+        if ts is not None:
+            nodes = nodes.filter(pl.col('timestamp')==ts)
+        return nodes.select('nodes').unique(maintain_order=True).to_series().to_list()
     
     def get_node_features(self):
         return self.node_features
