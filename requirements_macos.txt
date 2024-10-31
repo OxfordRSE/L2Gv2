@@ -19,6 +19,7 @@ ckzg==2.0.1
 click==8.1.7
 cloudpickle==3.1.0
 comm==0.2.2
+community==1.0.0b1
 contourpy==1.3.0
 cycler==0.12.1
 cytoolz==1.0.0
@@ -36,6 +37,7 @@ eth-utils==5.1.0
 eth_abi==5.1.0
 executing==2.1.0
 filelock==3.16.1
+Flask==3.0.3
 fonttools==4.54.1
 frozenlist==1.5.0
 fsspec==2024.10.0
@@ -52,6 +54,7 @@ idna==3.10
 ipykernel==6.29.5
 ipython==8.29.0
 ipywidgets==8.1.5
+itsdangerous==2.2.0
 jedi==0.19.1
 Jinja2==3.1.4
 jmespath==1.0.1
@@ -149,6 +152,7 @@ urllib3==2.2.3
 wcwidth==0.2.13
 web3==7.4.0
 websockets==11.0.3
+Werkzeug==3.0.6
 widgetsnbextension==4.0.13
 yarl==1.17.1
 zict==3.0.0
