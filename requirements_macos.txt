@@ -1,5 +1,5 @@
 aiohappyeyeballs==2.4.3
-aiohttp==3.10.10
+aiohttp==3.11.0b0
 aiosignal==1.3.1
 alembic==1.13.3
 altair==5.4.1
@@ -7,7 +7,6 @@ annotated-types==0.7.0
 anyio==4.6.2.post1
 appnope==0.1.4
 asttokens==2.4.1
-async-timeout==4.0.3
 attrs==24.2.0
 backoff==2.2.1
 bitarray==3.0.0
@@ -35,7 +34,6 @@ eth-rlp==2.1.0
 eth-typing==5.0.1
 eth-utils==5.1.0
 eth_abi==5.1.0
-exceptiongroup==1.2.2
 executing==2.1.0
 filelock==3.16.1
 fonttools==4.54.1
@@ -51,7 +49,6 @@ httpcore==1.0.6
 httpx==0.27.2
 humbug==0.3.2
 idna==3.10
-importlib_metadata==8.5.0
 ipykernel==6.29.5
 ipython==8.29.0
 ipywidgets==8.1.5
@@ -125,6 +122,7 @@ rpds-py==0.20.0
 scikit-learn==1.5.2
 scipy==1.14.1
 seaborn==0.13.2
+setuptools==75.3.0
 six==1.16.0
 smmap==5.0.1
 sniffio==1.3.1
@@ -139,11 +137,7 @@ threadpoolctl==3.5.0
 toml==0.10.2
 toolz==1.0.0
 torch==2.5.1
-torch-cluster==1.6.3
 torch-geometric==2.6.1
-torch-scatter==2.1.2
-torch-sparse==0.6.18
-torch-spline-conv==1.2.2
 tornado==6.4.1
 tqdm==4.66.6
 traitlets==5.14.3
@@ -158,4 +152,3 @@ websockets==11.0.3
 widgetsnbextension==4.0.13
 yarl==1.17.1
 zict==3.0.0
-zipp==3.20.2
