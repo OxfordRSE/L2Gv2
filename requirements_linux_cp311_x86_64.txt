@@ -89,7 +89,8 @@ jupyter_core==5.7.2
 jupyterlab_widgets==3.0.13
 kiwisolver==1.4.7
 llvmlite==0.43.0
-local2global @ git+https://github.com/LJeub/Local2Global.git@f9cd41a75979b608755b62b7e1854102741e5704
+local2global @ git+https://github.com/LJeub/Local2Global.git@master
+local2global_embedding @ git+https://github.com/LJeub/Local2Global_embedding@master
 locket==1.0.0
 Mako==1.3.6
 markdown-it-py==3.0.0
