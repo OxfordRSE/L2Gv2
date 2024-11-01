@@ -1,22 +1,21 @@
 # l2gv2 - Local2Global
 
-## Installations
+## Installation
 
-Supported Python versions: 3.10, 3.11, 3.12
+**Supported Python Versions**: 3.10, 3.11, 3.12  
+**Supported Operating Systems**: macOS, Linux  
 
-Supported operating systems: macOS, Linux.
+To set up your environment, follow these steps
 
-First create a virtual environment:
+1. Create and activate a virtual environment
+   ```shell
+   python3 -m venv .venv
+   source .venv/bin/activate
+2. Install the dependencies
+
+    ```shell
+    pip install -r requirements.txt
+The unified `requirements.in` file includes both shared and platform-specific dependencies with version constraints where necessary. To update dependencies, modify `requirements.in` and then recompile `requirements.txt`
 
 ```shell
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### Linux
-
-> pip install -r requirements_linux_cp311_x86_64.txt
-
-### MacOS
-
-> pip install -r requirements_macos.txt 
+pip-compile requirements.in --verbose
