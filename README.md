@@ -2,7 +2,13 @@
 
 ## Installations
 
-#### Working on MacOS
+Supported Python versions: 3.10, 3.11, 3.12
+
+### Working on Linux
+
+> pip install -r requirements_linux_cp311_x86_64.txt
+
+### Working on MacOS
 
 > pip install -r requirements_macos.txt 
 >
