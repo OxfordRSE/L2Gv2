@@ -3,4 +3,9 @@ sphinx-quickstart on Mon Nov  4 11:00:53 2024.
 You can adapt this file completely to your liking, but it should at least
 contain the root `toctree` directive. -->
 
-# l2gv2
+# l2gv2 documentation
+
+* [Introduction](intro.md)
+  * [Setup](intro.md#setup)
+  * [Generate documentation](intro.md#generate-documentation)
+* [Code documentation](code.md)
