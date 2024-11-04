@@ -205,3 +205,6 @@ torch-spline-conv
 torch-cluster
 torch-scatter
 torch-sparse
+
+# editable project
+-e .
