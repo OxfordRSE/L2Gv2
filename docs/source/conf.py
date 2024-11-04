@@ -18,6 +18,8 @@ extensions = ["sphinx_markdown_builder", "sphinx.ext.autodoc", "sphinx.ext.autos
 templates_path = ["_templates"]
 exclude_patterns = []
 
+autodoc_mock_imports = ["optuna", "autograd", "pymanopt"]
+
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
