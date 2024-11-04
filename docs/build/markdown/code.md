@@ -12,7 +12,7 @@
 
 ## Induced subgraph
 
-### l2gv2.induced_subgraph.induced_subgraph(data: Data, nodes, extend_hops=0)
+### l2gv2.induced_subgraph.induced_subgraph(data: torch_geometric.data.Data, nodes, extend_hops=0)
 
 ## Manopt optimization
 
@@ -32,25 +32,15 @@ R: list of orthogonal matrices for embeddings of patches.
 
 ### l2gv2.models.VGAE_patch_embeddings(patch_data, dim=100, hidden_dim=32, num_epochs=100, decoder=None, device='cpu', lr=0.01)
 
-### *class* l2gv2.models.VGAEconv(dim, num_node_features, hidden_dim=32, cached=True, bias=True, add_self_loops=True, normalize=True)
+### *class* l2gv2.models.VGAEconv(\*args: Any, \*\*kwargs: Any)
 
 Bases: `Module`
 
-#### forward(data: Data)
-
-Define the computation performed at every call.
-
-Should be overridden by all subclasses.
-
-#### NOTE
-Although the recipe for forward pass needs to be defined within
-this function, one should call the `Module` instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.
+#### forward(data: torch_geometric.data.Data)
 
 ### l2gv2.models.chunk_embedding(chunk_size, patches, dim=2)
 
-### l2gv2.models.speye(n, dtype=torch.float32)
+### l2gv2.models.speye(n, dtype=torch.float)
 
 identity matrix of dimension n as sparse_coo_tensor.
 
