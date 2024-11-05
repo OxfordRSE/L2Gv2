@@ -35,7 +35,7 @@ The unified ``requirements.in`` file includes both shared and platform-specific 
 
     pip-compile requirements.in --verbose
 
-GitHub actions and pre-commit integration
+GitHub actions & pre-commit integration
 ------------------------------------------
 
 This project uses `pylint` for code quality and linting checks, integrated with both GitHub Actions for continuous integration and `pre-commit` (`pre-commit.com <href https://pre-commit.com>`_) for local development checks.
@@ -68,7 +68,7 @@ To set up the pre-commit hook
 Documentation
 -------------
 
-The project is setup to generate documentation with [Sphinx](https://www.sphinx-doc.org/en/master/index.html). 
+The project is setup to generate documentation with `Sphinx <https://www.sphinx-doc.org/en/master/index.html>`_). 
 
 Documentation is available at `l2gv2.readthedocs.io <https://l2gv2.readthedocs.io>`_
 
@@ -79,7 +79,7 @@ Generate `html` or `markdown` documentation locally
    sphinx-build -M html docs/source/ docs/build/
    sphinx-build -M markdown docs/source/ docs/build/
 
-Automatically refresh and serve the html documentation locally at http://127.0.0.1:8000 <http://127.0.0.1:8000>_ upon file updates during development
+Automatically refresh and serve the html documentation locally at `http://127.0.0.1:8000 <http://127.0.0.1:8000>`_ upon file updates during development
 
 .. code-block:: bash
    
