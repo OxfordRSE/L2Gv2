@@ -1,0 +1,10 @@
+repos:
+  - repo: https://github.com/pylint-dev/pylint
+    rev: v3.3.1
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: python
+        types: [python]
+        files: ^l2gv2/.*\.py$

@@ -8,6 +8,9 @@ sphinx-markdown-builder==0.6.7
 sphinx-rtd-theme==3.0.1
 sphinx-autobuild==2024.10.3
 
+# Development dependencies
+pre_commit==4.0.1
+
 # Shared dependencies
 -f https://data.pyg.org/whl/torch-2.4.0+cpu.html
 

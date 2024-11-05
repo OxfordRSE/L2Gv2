@@ -35,8 +35,38 @@ The unified ``requirements.in`` file includes both shared and platform-specific 
 
     pip-compile requirements.in --verbose
 
-Generate documentation
-----------------------
+GitHub actions and pre-commit integration
+------------------------------------------
+
+This project uses `pylint` for code quality and linting checks, integrated with both GitHub Actions for continuous integration and `pre-commit` (`pre-commit.com <href https://pre-commit.com>`_) for local development checks.
+
+The pylint GitHub workflow file is located at ``.github/workflows/pylint.yml`` 
+
+The `pre-commit` hook is set up to automatically run `pylint` on files within the ``l2gv2`` folder whenever code is committed locally (``.pre-commit-config.yaml``). This helps catch and resolve linting issues before they are pushed to the repository. 
+
+To set up the pre-commit hook
+
+1. Install `pre-commit` if it’s not already installed:
+
+   .. code-block:: bash
+
+      pip install pre-commit
+
+2. Install the pre-commit hooks defined in the configuration file:
+
+   .. code-block:: bash
+
+      pre-commit install
+
+3. Run the `pre-commit` hooks manually to check all files:
+
+   .. code-block:: bash
+
+      pre-commit run --all-files
+
+
+Documentation
+-------------
 
 The project is setup to generate documentation with [Sphinx](https://www.sphinx-doc.org/en/master/index.html). 
 
@@ -49,7 +79,7 @@ Generate `html` or `markdown` documentation locally
    sphinx-build -M html docs/source/ docs/build/
    sphinx-build -M markdown docs/source/ docs/build/
 
-Automatically update the `html` documentation and serve it at [http://127.0.0.1:8000](http://127.0.0.1:8000) on file update for development
+Automatically refresh and serve the html documentation locally at http://127.0.0.1:8000 <http://127.0.0.1:8000>_ upon file updates during development
 
 .. code-block:: bash
    
