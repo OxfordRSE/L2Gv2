@@ -11,7 +11,7 @@
 
 ## Documentation
 
-Full documentation available [here](https://github.com/lotzma/L2Gv2/blob/mihaela_start/docs/build/markdown/index.md)
+Full documentation available [here](https://l2gv2.readthedocs.io/en/latest/)
 
 
 ## Setup
