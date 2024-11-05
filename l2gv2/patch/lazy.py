@@ -17,6 +17,9 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
+
+""" TODO: module doctring """
+
 import copy
 from abc import ABC, abstractmethod
 
@@ -25,10 +28,11 @@ from tqdm.auto import tqdm
 
 
 class BaseLazyCoordinates(ABC):
-
+    """ TODO: class docstring"""
     @property
     @abstractmethod
     def shape(self):
+        """ Shape of the coordinates """
         raise NotImplementedError
 
     def __array__(self, dtype=None):
@@ -88,6 +92,8 @@ class BaseLazyCoordinates(ABC):
 
 
 class LazyCoordinates(BaseLazyCoordinates):
+    """ TODO: class doctring """
+
     def __init__(self, x, shift=None, scale=None, rot=None):
         self._x = x
         dim = self.shape[1]
@@ -107,6 +113,13 @@ class LazyCoordinates(BaseLazyCoordinates):
             self.rot = np.array(rot)
 
     def save_transform(self, filename):
+        """ Save the transformation to a file 
+        
+        Args:
+
+            filename (str): filename to save the transformation to
+        """
+
         np.savez(filename, shift=self.shift, scale=self.scale, rot=self.rot)
 
     @property
@@ -154,25 +167,29 @@ class LazyCoordinates(BaseLazyCoordinates):
         if isinstance(item, tuple):
             if x.ndim > 1:
                 return x[(slice(None), *item[1:])]
-            else:
-                return x[item[1]]
+            return x[item[1]]
+
         return x
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({repr(self._x)})'
+        return f"{self.__class__.__name__}({repr(self._x)})"
 
 
 class LazyFileCoordinates(LazyCoordinates):
+    """ TODO: class doctring """
+
     def __init__(self, filename, *args, **kwargs):
-        with open(filename, 'rb') as f:
-            major, minor = np.lib.format.read_magic(f)
+        with open(filename, "rb") as f:
+            # TODO: review this, commented out because the output is not used
+            # major, minor = np.lib.format.read_magic(f)
+
             shape, *_ = np.lib.format.read_array_header_1_0(f)
         self._shape = shape
         super().__init__(filename, *args, **kwargs)
 
     @property
     def _x(self):
-        return np.load(self.filename, mmap_mode='r')
+        return np.load(self.filename, mmap_mode="r")
 
     @_x.setter
     def _x(self, other):
@@ -191,6 +208,8 @@ class LazyFileCoordinates(LazyCoordinates):
 
 
 class LazyMeanAggregatorCoordinates(BaseLazyCoordinates):
+    """ TODO: class doctring """
+
     def __init__(self, patches):
         self.patches = []
         for patch in patches:
@@ -219,8 +238,7 @@ class LazyMeanAggregatorCoordinates(BaseLazyCoordinates):
         out = self.get_coordinates(nodes)
         if others:
             return out[(slice(None), *others)]
-        else:
-            return out
+        return out
 
     def __array__(self, dtype=None):
         # more efficient
@@ -228,12 +246,21 @@ class LazyMeanAggregatorCoordinates(BaseLazyCoordinates):
         return self.as_array(out)
 
     def as_array(self, out=None):
+        """Computes the mean embedding array.
+
+        Args:
+            out (numpy.ndarray, optional): Preallocated array for the output; 
+                if None, a new array of zeros with `self.shape` is created.
+
+        Returns:
+            numpy.ndarray: An array of mean embeddings for each node with shape `self.shape`.
+        """
         if out is None:
             out = np.zeros(self.shape)
         index = np.empty((self.nodes.max() + 1,), dtype=np.int64)
         index[self.nodes] = np.arange(len(self.nodes))
         count = np.zeros((len(self.nodes),), dtype=np.int64)
-        for patch in tqdm(self.patches, desc='get full mean embedding'):
+        for patch in tqdm(self.patches, desc="get full mean embedding"):
             nodes = patch.nodes
             out[index[nodes]] += patch.coordinates
             count[index[nodes]] += 1
@@ -241,12 +268,23 @@ class LazyMeanAggregatorCoordinates(BaseLazyCoordinates):
         return out
 
     def get_coordinates(self, nodes, out=None):
+        """ Get the mean embedding for a subset of nodes.
+
+        Args:
+            nodes (numpy.ndarray): nodes to get the embedding for
+            out (numpy.ndarray, optional): Preallocated array for the output; 
+                if None, a new array of zeros with shape `(len(nodes), self.dim)` is created.
+
+        Returns:
+            numpy.ndarray: An array of mean embeddings for each node with 
+            shape `(len(nodes), self.dim)`.
+        """
         nodes = np.asanyarray(nodes)
         if out is None:
             out = np.zeros((len(nodes), self.dim))
 
         count = np.zeros((len(nodes),), dtype=np.int)
-        for patch in tqdm(self.patches, desc='get mean embedding'):
+        for patch in tqdm(self.patches, desc="get mean embedding"):
             index = [i for i, node in enumerate(nodes) if node in patch.index]
             count[index] += 1
             out[index] += patch.get_coordinates(nodes[index])
@@ -279,10 +317,12 @@ class LazyMeanAggregatorCoordinates(BaseLazyCoordinates):
         return self
 
     def __copy__(self):
-        new = self.__new__(type(self))
+        new = self.__class__.__new__(self.__class__)
+        # TODO: review, this was changed from original code
+        # new = self.__new__(type(self))
         new.__dict__.update(self.__dict__)
         new.patches = [copy.copy(patch) for patch in self.patches]
         return new
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({repr(self.patches)})'
+        return f"{self.__class__.__name__}({repr(self.patches)})"

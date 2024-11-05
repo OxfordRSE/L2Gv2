@@ -19,32 +19,24 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-import sys
-
-import scipy as sp
-from scipy import sparse as ss
-from scipy.linalg import orthogonal_procrustes
-import numpy as np
-from scipy.sparse.linalg import lsqr, lsmr
-from scipy.spatial import procrustes
-import copy
-from collections import defaultdict
-from typing import List, Callable, Any
-import networkx as nx
 from pathlib import Path
 import json
+import copy
+from typing import List, Callable, Any
+from collections import defaultdict
+import numpy as np
+import scipy as sp
+from scipy import sparse as ss
+from scipy.sparse.linalg import lsmr
+from scipy.spatial import procrustes
+import networkx as nx
 
 import ilupp
 
 from tqdm.auto import tqdm
+from l2gv2.patch.patch import Patch
 
-from .patch import Patch
-
-rg = np.random.default_rng()
-eps = np.finfo(float).eps
-
-
-def seed(new_seed):
+def random_gen(new_seed = None):
     """
     Change seed of random number generator.
 
@@ -52,9 +44,10 @@ def seed(new_seed):
         new_seed: New seed value
 
     """
-    global rg
-    rg = np.random.default_rng(new_seed)
+    return np.random.default_rng(new_seed)
 
+rg = random_gen()
+eps = np.finfo(float).eps
 
 def ensure_extension(filename, extension):
     """
@@ -75,7 +68,9 @@ def ensure_extension(filename, extension):
     if filename.suffix == "":
         filename = filename.with_suffix(extension)
     elif filename.suffix != extension:
-        raise ValueError(f"filename should have extension {extension}, not {filename.suffix}")
+        raise ValueError(
+            f"filename should have extension {extension}, not {filename.suffix}"
+        )
     return filename
 
 
@@ -104,7 +99,9 @@ def local_error(patch: Patch, reference_coordinates):
     Returns:
         vector of error values
     """
-    return np.linalg.norm(reference_coordinates[patch.nodes, :] - patch.coordinates, axis=1)
+    return np.linalg.norm(
+        reference_coordinates[patch.nodes, :] - patch.coordinates, axis=1
+    )
 
 
 def transform_error(transforms):
@@ -113,7 +110,8 @@ def transform_error(transforms):
 
     After recovery, all transformations should be constant across patches
     as we can recover the embedding only up to a global scaling/rotation/translation.
-    The error is computed as the mean over transformation elements of the standard deviation over patches.
+    The error is computed as the mean over transformation elements of 
+    the standard deviation over patches.
 
     Args:
         transforms: list of transforms
@@ -121,7 +119,7 @@ def transform_error(transforms):
     return np.mean(np.std(transforms, axis=0))
 
 
-def orthogonal_MSE_error(rots1, rots2):
+def orthogonal_mse_error(rots1, rots2):
     """
     Compute the MSE between two sets of orthogonal transformations up to a global transformation
 
@@ -136,7 +134,7 @@ def orthogonal_MSE_error(rots1, rots2):
     rots2 = np.asarray(rots2)
     combined = np.mean(rots1 @ rots2, axis=0)
     _, s, _ = sp.linalg.svd(combined)
-    return 2*(dim - np.sum(s))
+    return 2 * (dim - np.sum(s))
 
 
 def _cov_svd(coordinates1: np.ndarray, coordinates2: np.ndarray):
@@ -168,8 +166,8 @@ def relative_orthogonal_transform(coordinates1, coordinates2):
     # Note this is completely equivalent to the approach in
     # "Closed-Form Solution of Absolute Orientation using Orthonormal Matrices"
     # Journal of the Optical Society of America A · July 1988
-    U, s, Vh = _cov_svd(coordinates1, coordinates2)
-    return U @ Vh
+    u, _, vh = _cov_svd(coordinates1, coordinates2)
+    return u @ vh
 
 
 def nearest_orthogonal(mat):
@@ -179,8 +177,8 @@ def nearest_orthogonal(mat):
     Args:
         mat: input matrix
     """
-    U, s, Vh = sp.linalg.svd(mat)
-    return U @ Vh
+    u, _, vh = sp.linalg.svd(mat)
+    return u @ vh
 
 
 def relative_scale(coordinates1, coordinates2, clamp=1e8):
@@ -196,11 +194,11 @@ def relative_scale(coordinates1, coordinates2, clamp=1e8):
     scale1 = np.linalg.norm(coordinates1 - np.mean(coordinates1, axis=0))
     scale2 = np.linalg.norm(coordinates2 - np.mean(coordinates2, axis=0))
     if scale1 > clamp * scale2:
-        print('extremely large scale clamped')
+        print("extremely large scale clamped")
         return clamp
     if scale1 * clamp < scale2:
-        print('extremely small scale clamped')
-        return 1/clamp
+        print("extremely small scale clamped")
+        return 1 / clamp
     return scale1 / scale2
 
 
@@ -208,6 +206,7 @@ class AlignmentProblem:
     """
     Implements the standard local2global algorithm using an unweighted patch graph
     """
+
     n_nodes = None
     """total number of nodes"""
 
@@ -242,22 +241,39 @@ class AlignmentProblem:
 
         Override this in subclasses for weighted alignment
         """
+        del i, j
         return 1
 
-    def __init__(self, patches: List[Patch], patch_edges=None,
-                 min_overlap=None, copy_data=True, self_loops=False, verbose=False):
+    def __init__(
+        self,
+        patches: List[Patch],
+        patch_edges=None,
+        min_overlap=None,
+        copy_data=True,
+        self_loops=False,
+        verbose=False,
+    ):
         """
         Initialise the alignment problem with a list of patches
 
         Args:
             patches: List of patches to synchronise
-            patch_edges: if provided, only compute relative transformations for given patch edges (all pairs of patches
-                         with at least ``min_overlap`` points in common are included by default)
-            min_overlap (int): minimum number of points in the overlap required for two patches to be considered
-                               connected (defaults to `dim+1`) where `dim` is the embedding dimension of the patches
+
+            patch_edges: if provided, only compute relative transformations 
+                for given patch edges (all pairs of patches
+                with at least ``min_overlap`` points in common are included by default)
+            
+            min_overlap (int): minimum number of points in the overlap required 
+                for two patches to be considered connected (defaults to `dim+1`)
+                where `dim` is the embedding dimension of the patches
+            
             copy_data (bool): if ``True``, input patches are copied (default: ``True``)
-            self_loops (bool): if ``True``, self-loops from a patch to itself are included in the synchronisation problem
+            
+            self_loops (bool): if ``True``, self-loops from a patch to itself are included in the 
+            
+            synchronisation problem
                                (default: ``False``)
+            
             verbose(bool): if True print diagnostic information (default: ``False``)
 
         """
@@ -317,7 +333,7 @@ class AlignmentProblem:
             raise RuntimeError("patch graph is not connected")
 
         if self.verbose:
-            print(f'mean patch degree: {np.mean(self.patch_degrees)}')
+            print(f"mean patch degree: {np.mean(self.patch_degrees)}")
 
     def scale_patches(self, scale_factors=None):
         """
@@ -341,26 +357,31 @@ class AlignmentProblem:
         Compute the scaling transformations that best align the patches
 
         Args:
-            max_scale: maximum allowed scale (all scales are clipped to the range [``1/max_scale``, ``max_scale``])
-                       (default: 1e8)
+            max_scale: maximum allowed scale, default: 1e8
+            (all scales are clipped to the range [``1/max_scale``, ``max_scale``])
 
         Returns:
             list of scales
 
         """
-        scaling_mat = self._transform_matrix(lambda ov1, ov2: relative_scale(ov1, ov2, max_scale), 1)
+        scaling_mat = self._transform_matrix(
+            lambda ov1, ov2: relative_scale(ov1, ov2, max_scale), 1
+        )
         vec = self._synchronise(scaling_mat, 1)
         vec = vec.flatten()
         vec = np.abs(vec)
         vec /= vec.mean()
-        vec = np.clip(vec, a_min=1/max_scale, a_max=max_scale, out=vec)  # avoid blow-up
+        vec = np.clip(
+            vec, a_min=1 / max_scale, a_max=max_scale, out=vec
+        )  # avoid blow-up
         return vec
 
     def rotate_patches(self, rotations=None):
         """align the rotation/reflection of all patches
 
         Args:
-            rotations: If provided, apply the given transformations instead of synchronizing patch rotations
+            rotations: If provided, apply the given transformations 
+                instead of synchronizing patch rotations
         """
         if rotations is None:
             rotations = (rot.T for rot in self.calc_synchronised_rotations())
@@ -374,7 +395,9 @@ class AlignmentProblem:
 
     def calc_synchronised_rotations(self):
         """Compute the orthogonal transformations that best align the patches"""
-        rots = self._transform_matrix(relative_orthogonal_transform, self.dim, symmetric_weights=True)
+        rots = self._transform_matrix(
+            relative_orthogonal_transform, self.dim, symmetric_weights=True
+        )
         vecs = self._synchronise(rots, blocksize=self.dim, symmetric=True)
         for mat in vecs:
             mat[:] = nearest_orthogonal(mat)
@@ -409,13 +432,20 @@ class AlignmentProblem:
             row.append(i)
             col.append(p2)
             val.append(1)
-            b[i, :] = np.mean(self.patches[p1].get_coordinates(overlap)
-                              - self.patches[p2].get_coordinates(overlap), axis=0)
-        A = ss.coo_matrix((val, (row, col)), shape=(len(self.patch_overlap), self.n_patches), dtype=np.int8)
-        A = A.tocsr()
+            b[i, :] = np.mean(
+                self.patches[p1].get_coordinates(overlap)
+                - self.patches[p2].get_coordinates(overlap),
+                axis=0,
+            )
+        a = ss.coo_matrix(
+            (val, (row, col)),
+            shape=(len(self.patch_overlap), self.n_patches),
+            dtype=np.int8,
+        )
+        a = a.tocsr()
         translations = np.empty((self.n_patches, self.dim))
         for d in range(self.dim):
-            translations[:, d] = lsmr(A, b[:, d], atol=1e-16, btol=1e-16)[0]
+            translations[:, d] = lsmr(a, b[:, d], atol=1e-16, btol=1e-16)[0]
             # TODO: probably doesn't need to be that accurate, this is for testing
         return translations
 
@@ -424,7 +454,8 @@ class AlignmentProblem:
         Compute node embeddings as the centroid over patch embeddings
 
         Args:
-            out: numpy array to write results to (supply a memmap for large-scale problems that do not fit in ram)
+            out: numpy array to write results to 
+                (supply a memmap for large-scale problems that do not fit in ram)
         """
         if out is None:
             embedding = np.zeros((self.n_nodes, self.dim))
@@ -432,7 +463,12 @@ class AlignmentProblem:
             embedding = out  # important: needs to be zero-initialised
 
         count = np.array([len(patch_list) for patch_list in self.patch_index])
-        for patch in tqdm(self.patches, smoothing=0, desc='Compute mean embedding', disable=self.verbose):
+        for patch in tqdm(
+            self.patches,
+            smoothing=0,
+            desc="Compute mean embedding",
+            disable=self.verbose,
+        ):
             embedding[patch.nodes] += patch.coordinates
 
         embedding /= count[:, None]
@@ -440,16 +476,23 @@ class AlignmentProblem:
         return embedding
 
     def median_embedding(self, out=None):
+        """ TODO: method docstring """
         if out is None:
             out = np.full((self.n_nodes, self.dim), np.nan)
 
-        for i, pids in tqdm(enumerate(self.patch_index), total=self.n_nodes, desc='Compute median embedding for node', disable=self.verbose):
+        for i, pids in tqdm(
+            enumerate(self.patch_index),
+            total=self.n_nodes,
+            desc="Compute median embedding for node",
+            disable=self.verbose,
+        ):
             if pids:
                 points = np.array([self.patches[pid].get_coordinate(i) for pid in pids])
                 out[i] = np.median(points, axis=0)
         return out
 
     def align_patches(self, scale=False):
+        """ TODO: method docstring """
         if scale:
             self.scale_patches()
         self.rotate_patches()
@@ -461,7 +504,8 @@ class AlignmentProblem:
 
         Args:
             scale (bool): if ``True``, rescale patches (default: ``False``)
-            realign (bool): if ``True``, recompute aligned embedding even if it already exists (default: ``False``)
+            realign (bool): if ``True``, recompute aligned embedding 
+                even if it already exists (default: ``False``)
 
         Returns:
             n_nodes x dim numpy array of embedding coordinates
@@ -478,11 +522,15 @@ class AlignmentProblem:
 
 
         """
-        filename = ensure_extension(filename, '.json')
-        patch_dict = {str(i): {int(node): [float(c) for c in coord]
-                               for node, coord in zip(patch.index, patch.coordinates)}
-                      for i, patch in enumerate(self.patches)}
-        with open(filename, 'w') as f:
+        filename = ensure_extension(filename, ".json")
+        patch_dict = {
+            str(i): {
+                int(node): [float(c) for c in coord]
+                for node, coord in zip(patch.index, patch.coordinates)
+            }
+            for i, patch in enumerate(self.patches)
+        }
+        with open(filename, "w", encoding="utf-8") as f:
             json.dump(patch_dict, f)
 
     @classmethod
@@ -494,8 +542,8 @@ class AlignmentProblem:
             filename: path to patch file
 
         """
-        filename = ensure_extension(filename, '.json')
-        with open(filename) as f:
+        filename = ensure_extension(filename, ".json")
+        with open(filename, encoding="utf-8") as f:
             patch_dict = json.load(f)
         patch_list = [None] * len(patch_dict)
         for i, patch_data in patch_dict.items():
@@ -512,14 +560,16 @@ class AlignmentProblem:
             filename: output filename
 
         """
-        filename = ensure_extension(filename, '.json')
+        filename = ensure_extension(filename, ".json")
         embedding = {str(i): c for i, c in enumerate(self.get_aligned_embedding())}
-        with open(filename, 'w') as f:
+        with open(filename, "w", encoding="utf-8") as f:
             json.dump(embedding, f)
 
     def __copy__(self):
         """return a copy of the alignment problem where all patches are copied."""
-        instance = self.__new__(type(self))
+        instance = self.__class__.__new__(self.__class__)
+        # TODO: review, this was changed from original code
+        # instance = self.__new__(type(self))
         for key, value in self.__dict__.items():
             instance.__dict__[key] = copy.copy(value)
         instance.patches = [copy.copy(patch) for patch in self.patches]
@@ -528,10 +578,19 @@ class AlignmentProblem:
     def _synchronise(self, matrix: ss.spmatrix, blocksize=1, symmetric=False):
         dim = matrix.shape[0]
         if symmetric:
-            matrix = matrix + ss.eye(dim) # shift to ensure matrix is positive semi-definite for buckling mode
-            eigs, vecs = ss.linalg.eigsh(matrix, k=blocksize, v0=rg.normal(size=dim), which='LM',
-                                         sigma=2, mode='buckling')
-            # eigsh unreliable with multiple (clustered) eigenvalues, only buckling mode seems to help reliably
+            matrix = matrix + ss.eye(
+                dim
+            )  # shift to ensure matrix is positive semi-definite for buckling mode
+            eigs, vecs = ss.linalg.eigsh(
+                matrix,
+                k=blocksize,
+                v0=rg.normal(size=dim),
+                which="LM",
+                sigma=2,
+                mode="buckling",
+            )
+            # eigsh unreliable with multiple (clustered) eigenvalues,
+            # only buckling mode seems to help reliably
 
         else:
             # scaling is not symmetric but Perron-Frobenius applies
@@ -540,13 +599,18 @@ class AlignmentProblem:
             vecs = vecs.real
 
         order = np.argsort(eigs)
-        vecs = vecs[:, order[-1:-blocksize-1:-1]]
+        vecs = vecs[:, order[-1 : -blocksize - 1 : -1]]
         if self.verbose:
-            print(f'eigenvalues: {eigs}')
-        vecs.shape = (dim//blocksize, blocksize, blocksize)
+            print(f"eigenvalues: {eigs}")
+        vecs.shape = (dim // blocksize, blocksize, blocksize)
         return vecs
 
-    def _transform_matrix(self, transform: Callable[[np.ndarray, np.ndarray], Any], dim, symmetric_weights=False):
+    def _transform_matrix(
+        self,
+        transform: Callable[[np.ndarray, np.ndarray], Any],
+        dim,
+        symmetric_weights=False,
+    ):
         """Calculate matrix of relative transformations between patches
 
         Args:
@@ -567,8 +631,12 @@ class AlignmentProblem:
 
         keys = sorted(self.patch_overlap.keys())
         # TODO: this could be sped up by a factor of two by not computing rotations twice
-        for count, (i, j) in tqdm(enumerate(keys), total=len(keys),
-                                  desc='Compute relative transformations', disable=self.verbose):
+        for count, (i, j) in tqdm(
+            enumerate(keys),
+            total=len(keys),
+            desc="Compute relative transformations",
+            disable=self.verbose,
+        ):
             if i == j:
                 element = np.eye(dim)
             else:
@@ -587,21 +655,24 @@ class AlignmentProblem:
         if symmetric_weights:
             for i in range(n):
                 for ind in range(indptr[i], indptr[i + 1]):
-                    data[ind] /= np.sqrt(weights[i]*weights[index[ind]])
+                    data[ind] /= np.sqrt(weights[i] * weights[index[ind]])
         else:
-             for i in range(n):
-                 data[indptr[i]:indptr[i+1]] /= weights[i]
+            for i in range(n):
+                data[indptr[i] : indptr[i + 1]] /= weights[i]
         if dim == 1:
             matrix = ss.csr_matrix((data, index, indptr), shape=(n, n))
         else:
-            matrix = ss.bsr_matrix((data, index, indptr), shape=(dim*n, dim*n), blocksize=(dim, dim))
+            matrix = ss.bsr_matrix(
+                (data, index, indptr), shape=(dim * n, dim * n), blocksize=(dim, dim)
+            )
         return matrix
 
 
 class WeightedAlignmentProblem(AlignmentProblem):
+    """ Variant of the local2global algorithm where patch edges are weighted 
+    according to the number of nodes in the overlap.
     """
-    Variant of the local2global algorithm where patch edges are weighted according to the number of nodes in the overlap.
-    """
+
     def weight(self, i, j):
         """
         compute weight for pair of patches
@@ -618,13 +689,16 @@ class WeightedAlignmentProblem(AlignmentProblem):
 
 
 class SVDAlignmentProblem(WeightedAlignmentProblem):
+    """ TODO: class docstring """
     def __init__(self, *args, tol=1e-6, **kwargs):
         super().__init__(*args, **kwargs)
         self.tol = tol
 
     def calc_synchronised_rotations(self):
         """Compute the orthogonal transformations that best align the patches"""
-        rots = self._transform_matrix(relative_orthogonal_transform, self.dim, symmetric_weights=False)
+        rots = self._transform_matrix(
+            relative_orthogonal_transform, self.dim, symmetric_weights=False
+        )
         vecs = self._synchronise(rots, blocksize=self.dim, symmetric=True)
         for mat in vecs:
             mat[:] = nearest_orthogonal(mat)
@@ -635,15 +709,25 @@ class SVDAlignmentProblem(WeightedAlignmentProblem):
         dim = matrix.shape[0]
 
         if dim < 20000:
-            ilu = ss.linalg.spilu(matrix + noise_level*ss.rand(dim, dim, 1/dim, format='csc', random_state=rg))
+            ilu = ss.linalg.spilu(
+                matrix
+                + noise_level
+                * ss.rand(dim, dim, 1 / dim, format="csc", random_state=rg)
+            )
 
             def cond_solve(x):
-                return ilu.solve(ilu.solve(x), 'T')
+                return ilu.solve(ilu.solve(x), "T")
 
-            M = ss.linalg.LinearOperator((dim, dim), matvec=cond_solve, matmat=cond_solve)
+            m = ss.linalg.LinearOperator(
+                (dim, dim), matvec=cond_solve, matmat=cond_solve
+            )
         else:
-            print('using ILU0')
-            ilu = ilupp.ILU0Preconditioner(matrix + noise_level*ss.rand(dim, dim, 1/dim, format='csc', random_state=rg))
+            print("using ILU0")
+            ilu = ilupp.ILU0Preconditioner(
+                matrix
+                + noise_level
+                * ss.rand(dim, dim, 1 / dim, format="csc", random_state=rg)
+            )
 
             def cond_solve(x):
                 y = x.copy()
@@ -651,8 +735,8 @@ class SVDAlignmentProblem(WeightedAlignmentProblem):
                 ilu.apply_trans(y)
                 return y
 
-            M = ss.linalg.LinearOperator((dim, dim), matvec=cond_solve)
-        return M
+            m = ss.linalg.LinearOperator((dim, dim), matvec=cond_solve)
+        return m
 
     def _synchronise(self, matrix: ss.spmatrix, blocksize=1, symmetric=False):
         """Compute synchronised group elements from matrix
@@ -666,55 +750,105 @@ class SVDAlignmentProblem(WeightedAlignmentProblem):
             eigs = eigs.real
             vecs = vecs.real
         else:
-            if dim < 5*blocksize:
+            if dim < 5 * blocksize:
                 matrix = matrix.T - ss.identity(dim)
                 matrix = matrix @ matrix.T
                 matrix += ss.identity(dim)
-                # this uses a lot of memory for large matrices due to computing full LU factorisation
-                eigs, vecs = ss.linalg.eigsh(matrix, which='LM', k=blocksize, v0=np.ones(dim), maxiter=10000, sigma=0.9,
-                                             mode='buckling')
+                # this uses a lot of memory for large matrices
+                # due to computing full LU factorisation
+                eigs, vecs = ss.linalg.eigsh(
+                    matrix,
+                    which="LM",
+                    k=blocksize,
+                    v0=np.ones(dim),
+                    maxiter=10000,
+                    sigma=0.9,
+                    mode="buckling",
+                )
             else:
                 matrix = matrix.tocsc(copy=False) - ss.identity(dim)
-
 
                 # v0 = np.tile(np.eye(blocksize), (dim // blocksize, 1))
 
                 def matmat(x):
                     x1 = matrix.T @ x
                     return matrix @ x1
-                B_op = ss.linalg.LinearOperator((dim, dim), matvec=matmat, matmat=matmat, rmatmat=matmat, rmatvec=matmat)
+
+                b_op = ss.linalg.LinearOperator(
+                    (dim, dim),
+                    matvec=matmat,
+                    matmat=matmat,
+                    rmatmat=matmat,
+                    rmatvec=matmat,
+                )
 
                 if self.verbose:
-                    print('computing ilu')
+                    print("computing ilu")
                 # ILU helps but maybe could do better
                 # fill_in = 100
 
                 #
                 # TODO: could use pytorch implementation to run this on GPU
                 if self.verbose:
-                    print('finding eigenvectors')
+                    print("finding eigenvectors")
                 #
                 v0 = rg.normal(size=(dim, blocksize))
-                M = self._preconditioner(matrix, self.tol)
+                m = self._preconditioner(matrix, self.tol)
                 max_tries = 10
                 max_iter = max(blocksize, 10)
                 for _ in range(max_tries):
                     try:
-                        eigs, vecs, res = ss.linalg.lobpcg(B_op, v0, M=M, largest=False, maxiter=max_iter,
-                                                  verbosityLevel=self.verbose, tol=self.tol, retResidualNormsHistory=True)
+                        result = ss.linalg.lobpcg(
+                            b_op,
+                            v0,
+                            M=m,
+                            largest=False,
+                            maxiter=max_iter,
+                            verbosityLevel=self.verbose,
+                            tol=self.tol,
+                            retResidualNormsHistory=True,
+                        )
+                        if len(result) == 3:
+                            # result has three items (eigenvalues, eigenvectors, residual history)
+                            eigs = result[0]
+                            vecs = result[1]
+                            res = result[2]
+                        else:
+                            # no residual history, assign None
+                            eigs, vecs = result
+                            res = None
                     except ValueError as e:
-                        print(f'LOBPCG failed with error {e}, retrying with noise in preconditioner')
-                        M = self._preconditioner(matrix, self.tol)
+                        print(
+                            f"LOBPCG failed with error {e}, retrying with noise in preconditioner"
+                        )
+                        m = self._preconditioner(matrix, self.tol)
                         v0 += rg.normal(size=v0.shape, scale=self.tol)
-                        eigs, vecs, res = ss.linalg.lobpcg(B_op, v0, largest=False, maxiter=max_iter,
-                                                           verbosityLevel=self.verbose, tol=self.tol,
-                                                           retResidualNormsHistory=True)
+                        result = ss.linalg.lobpcg(
+                            b_op,
+                            v0,
+                            largest=False,
+                            maxiter=max_iter,
+                            verbosityLevel=self.verbose,
+                            tol=self.tol,
+                            retResidualNormsHistory=True,
+                        )
+                        if len(result) == 3:
+                            # result has three items (eigenvalues, eigenvectors, residual history)
+                            eigs = result[0]
+                            vecs = result[1]
+                            res = result[2]
+                        else:
+                            # no residual history, assign None
+                            eigs, vecs = result
+                            res = None
                     if res[-1].max() > self.tol:
                         v0 = vecs + rg.normal(size=vecs.shape, scale=self.tol)
                     else:
                         break
                 else:  # LOBPCG still failed after max_tries
-                    raise RuntimeError(f'LOBPCG still failed after {max_tries=} initialisations')
+                    raise RuntimeError(
+                        f"LOBPCG still failed after {max_tries=} initialisations"
+                    )
 
                 # eigs, vecs = ss.linalg.lobpcg(B_op, v0, largest=False, maxiter=500,
                 #                               verbosityLevel=self.verbose, tol=tol)
@@ -722,7 +856,5 @@ class SVDAlignmentProblem(WeightedAlignmentProblem):
             print(f"eigs: {eigs}")
         order = np.argsort(np.abs(eigs))
         vecs = vecs[:, order[:blocksize]].real
-        vecs.shape = (dim//blocksize, blocksize, blocksize)
+        vecs.shape = (dim // blocksize, blocksize, blocksize)
         return vecs
-
-
