@@ -1,11 +1,7 @@
 
-<!-- PYLINT-BADGE: START -->
 [![Pylint](https://github.com/lotzma/L2Gv2/actions/workflows/pylint.yml/badge.svg)](https://github.com/lotzma/L2Gv2/actions/workflows/pylint.yml)
-<!-- PYLINT-BADGE: END>
-
-<!-- ALL-CONTRIBUTORS-BADGE:START -->
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # l2gv2 - Local2Global
 
