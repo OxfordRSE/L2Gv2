@@ -1,40 +1,127 @@
+""" Module for embedding patches using the VGAE model """
+import torch
+import torch_geometric as tg
+from l2gv2.models import speye, VGAEconv
+
+
 class VGAE:
+    """ Variational Graph Autoencoder """
+    def __init__(
+        self,
+        model,
+        lr: float = 1e-2,
+        num_epochs: int = 100,
+        verbose: bool = True,
+    ):
+        self.model = model
+        self.verbose = verbose
+        self.num_epochs = num_epochs
+        self.lr = lr
 
-    def __init__(self, model, loss_fun, lr: float=1e-2, num_epochs: int=100, verbose: bool=True, ):
-        self.model = 
+    def fit(
+        self,
+        data,
+        logger=lambda loss: None,
+    ):
+        """ Train the model on the given data 
+        
+        Args:
 
-    def fit(data, model, loss_fun, num_epochs=100, verbose=True, lr=0.01, logger=lambda loss: None):
-        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+            data: torch_geometric.data.Data
+
+            logger: function
+
+        Returns:
+            
+                torch.nn.Module: trained model
+        """
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
         # optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
         # schedule = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, num_epochs)
-        for e in range(num_epochs):
+        for e in range(self.num_epochs):
             optimizer.zero_grad()
-            loss = loss_fun(model, data)
+            loss = self.loss_fun(data)
             loss.backward()
             optimizer.step()
             logger(float(loss))
-            if verbose:
-                print(f'epoch {e}: loss={loss.item()}')
+            if self.verbose:
+                print(f"epoch {e}: loss={loss.item()}")
             # schedule.step()
-        return model
+        return self.model
 
-    def embed(self, patch_data, dim=100, hidden_dim=32, num_epochs=100, decoder=None, device='cpu', lr=0.01):
+    def embed(
+        self,
+        patch_data,
+        dim=100,
+        hidden_dim=32,
+        decoder=None,
+        device="cpu"
+    ):
+
+        """ Embed the given patch data using the VGAE model
+
+        Args:
+
+            patch_data: list of torch_geometric.data.Data
+
+            dim: dimension of the embedding
+
+            hidden_dim: hidden dimension of the encoder
+
+            decoder: decoder function
+
+            device: device to use
+
+        Returns:
+            
+                list of l2gv2.Patch: list of patches with embedded coordinates
+    
+                list of torch.nn.Module: list of trained models
+        """
         patch_list = []
         models = []
         for i, patch in enumerate(patch_data):
             if patch.x is None:
                 patch.x = speye(patch.num_nodes)
-            print(f"Training patch {i} with {patch.edge_index.shape[1]} edges")   #added [i] to every patch
-            model = tg.nn.VGAE(encoder=VGAEconv(dim, patch.x.shape[1], hidden_dim=hidden_dim), decoder=decoder).to(device)
+            print(
+                f"Training patch {i} with {patch.edge_index.shape[1]} edges"
+            )  # added [i] to every patch
+            model = tg.nn.VGAE(
+                encoder=VGAEconv(dim, patch.x.shape[1], hidden_dim=hidden_dim),
+                decoder=decoder,
+            ).to(device)
             patch.to(device)
 
-    def loss_fun(model, data):
-        return model.recon_loss(model.encode(data), data.edge_index) + model.kl_loss() / data.num_nodes
-
-        model = train(patch, model, loss_fun, num_epochs=num_epochs, lr=lr)
-        with torch.no_grad():
-            model.eval()
-            coordinates = model.encode(patch).to('cpu').numpy()
+            # TODO: add actual code, these are just placeholder statements to avoid linting errors
             models.append(model)
-            patch_list.append(l2g.Patch(patch.nodes.to('cpu').numpy(), coordinates))
-    return patch_list, models
+            patch_list.append(patch)
+            return patch_list, models
+
+
+    def loss_fun(self, data):
+        """ Loss function for the VGAE model 
+        
+        Args:
+
+            data: torch_geometric.data.Data
+
+        Returns:
+                
+            torch.Tensor: loss value
+        """
+        return (
+            self.model.recon_loss(self.model.encode(data), data.edge_index)
+            + self.model.kl_loss() / data.num_nodes
+        )
+
+
+        # TODO: clarify what this code does and where it should be placed
+        #
+        # model = train(patch, model, loss_fun, num_epochs=num_epochs, lr=lr)
+        # with torch.no_grad():
+        #     model.eval()
+        #     coordinates = model.encode(patch).to("cpu").numpy()
+        #     models.append(model)
+        #     patch_list.append(l2g.Patch(patch.nodes.to("cpu").numpy(), coordinates))
+
+        # return patch_list, models
