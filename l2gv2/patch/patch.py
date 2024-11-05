@@ -17,11 +17,12 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
+"""TODO: module docstring"""
 
 import copy
 
 import numpy as np
-from .lazy import BaseLazyCoordinates, LazyMeanAggregatorCoordinates, LazyFileCoordinates
+from lazy import BaseLazyCoordinates, LazyMeanAggregatorCoordinates, LazyFileCoordinates
 
 
 class Patch:
@@ -50,7 +51,6 @@ class Patch:
                 self.coordinates = np.asanyarray(coordinates)
             else:
                 self.coordinates = coordinates
-
 
     @property
     def shape(self):
@@ -82,19 +82,24 @@ class Patch:
 
     def __copy__(self):
         """return a copy of the patch"""
-        instance = self.__new__(type(self))
+        instance = self.__class__.__new__(self.__class__)
+        # TODO: review, this was changed from original code
+        # instance = self.__new__(type(self))
         instance.__dict__.update(self.__dict__)
         instance.coordinates = copy.copy(self.coordinates)
         return instance
 
 
 class MeanAggregatorPatch(Patch):
+    """ TODO: class docstring"""
+
     def __init__(self, patches):
         coordinates = LazyMeanAggregatorCoordinates(patches)
         super().__init__(coordinates.nodes, coordinates)
 
     @property
     def patches(self):
+        """TODO: property docstring"""
         return self.coordinates.patches
 
     def get_coordinate(self, node):
@@ -107,5 +112,9 @@ class MeanAggregatorPatch(Patch):
 
 
 class FilePatch(Patch):
+    """ TODO: class docstring"""
+
     def __init__(self, nodes, filename, shift=None, scale=None, rot=None):
-        super().__init__(nodes, LazyFileCoordinates(filename, shift=shift, scale=scale, rot=rot))
+        super().__init__(
+            nodes, LazyFileCoordinates(filename, shift=shift, scale=scale, rot=rot)
+        )
