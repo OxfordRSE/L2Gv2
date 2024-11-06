@@ -28,7 +28,7 @@ from tqdm.auto import tqdm
 
 
 class BaseLazyCoordinates(ABC):
-    """ TODO: class docstring"""
+    """ TODO: docstring for `BaseLazyCoordinates` """
     @property
     @abstractmethod
     def shape(self):
@@ -92,7 +92,7 @@ class BaseLazyCoordinates(ABC):
 
 
 class LazyCoordinates(BaseLazyCoordinates):
-    """ TODO: class doctring """
+    """ TODO: doctring for `LazyCoordinates` """
 
     def __init__(self, x, shift=None, scale=None, rot=None):
         self._x = x
@@ -176,7 +176,7 @@ class LazyCoordinates(BaseLazyCoordinates):
 
 
 class LazyFileCoordinates(LazyCoordinates):
-    """ TODO: class doctring """
+    """ TODO: doctring for `LazyFileCoordinates` """
 
     def __init__(self, filename, *args, **kwargs):
         with open(filename, "rb") as f:
@@ -208,7 +208,7 @@ class LazyFileCoordinates(LazyCoordinates):
 
 
 class LazyMeanAggregatorCoordinates(BaseLazyCoordinates):
-    """ TODO: class doctring """
+    """ TODO: doctring for `LazyMeanAggregatorCoordinates` """
 
     def __init__(self, patches):
         self.patches = []
@@ -246,15 +246,7 @@ class LazyMeanAggregatorCoordinates(BaseLazyCoordinates):
         return self.as_array(out)
 
     def as_array(self, out=None):
-        """Computes the mean embedding array.
-
-        Args:
-            out (numpy.ndarray, optional): Preallocated array for the output; 
-                if None, a new array of zeros with `self.shape` is created.
-
-        Returns:
-            numpy.ndarray: An array of mean embeddings for each node with shape `self.shape`.
-        """
+        """ TODO: docstring for `as_array` """
         if out is None:
             out = np.zeros(self.shape)
         index = np.empty((self.nodes.max() + 1,), dtype=np.int64)
@@ -268,17 +260,7 @@ class LazyMeanAggregatorCoordinates(BaseLazyCoordinates):
         return out
 
     def get_coordinates(self, nodes, out=None):
-        """ Get the mean embedding for a subset of nodes.
-
-        Args:
-            nodes (numpy.ndarray): nodes to get the embedding for
-            out (numpy.ndarray, optional): Preallocated array for the output; 
-                if None, a new array of zeros with shape `(len(nodes), self.dim)` is created.
-
-        Returns:
-            numpy.ndarray: An array of mean embeddings for each node with 
-            shape `(len(nodes), self.dim)`.
-        """
+        """ TODO: docstring for `get_coordinates` """
         nodes = np.asanyarray(nodes)
         if out is None:
             out = np.zeros((len(nodes), self.dim))

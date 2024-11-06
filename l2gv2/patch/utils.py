@@ -37,11 +37,10 @@ from tqdm.auto import tqdm
 from l2gv2.patch.patch import Patch
 
 def random_gen(new_seed = None):
-    """
-    Change seed of random number generator.
+    """ Change seed of random number generator.
 
     Args:
-        new_seed: New seed value
+        new_seed: New seed value, defaults to None
 
     """
     return np.random.default_rng(new_seed)
@@ -49,13 +48,13 @@ def random_gen(new_seed = None):
 rg = random_gen()
 eps = np.finfo(float).eps
 
-def ensure_extension(filename, extension):
-    """
-    check filename for extension and add it if necessary
+def ensure_extension(filename: str, extension: str):
+    """ Check filename for extension and add it if necessary
 
     Args:
-        filename: input filename
-        extension: desired extension (including `.`)
+        filename (str): input filename
+
+        extension (str): desired extension (including `.`)
 
     Returns:
         filename with extension added
@@ -74,13 +73,13 @@ def ensure_extension(filename, extension):
     return filename
 
 
-def procrustes_error(coordinates1, coordinates2):
-    """
-    compute the procrustes alignment error between two sets of coordinates
+def procrustes_error(coordinates1: np.ndarray, coordinates2: np.ndarray):
+    """ Compute the procrustes alignment error between two sets of coordinates
 
     Args:
-        coordinates1: First set of coordinates (array-like)
-        coordinates2: Second set of coordinates (array-like)
+        coordinates1 (np.ndarray): First set of coordinates (array-like)
+
+        coordinates2 (np.ndarray): Second set of coordinates (array-like)
 
     Note that the two sets of coordinates need to have the same shape.
     """
@@ -88,12 +87,12 @@ def procrustes_error(coordinates1, coordinates2):
 
 
 def local_error(patch: Patch, reference_coordinates):
-    """
-    compute the euclidean distance between patch coordinate and reference
-    coordinate for each node in patch
+    """ Compute the euclidean distance between patch coordinate 
+        and reference  coordinate for each node in patch
 
     Args:
-        patch:
+        patch (Patch):
+
         reference_coordinates:
 
     Returns:
@@ -105,11 +104,12 @@ def local_error(patch: Patch, reference_coordinates):
 
 
 def transform_error(transforms):
-    """
-    Compute the recovery error based on tracked transformations.
+    """ Compute the recovery error based on tracked transformations.
 
-    After recovery, all transformations should be constant across patches
-    as we can recover the embedding only up to a global scaling/rotation/translation.
+    After recovery, all transformations should be constant across 
+    patches as we can recover the embedding only up to a global 
+    scaling/rotation/translation.
+
     The error is computed as the mean over transformation elements of 
     the standard deviation over patches.
 
@@ -120,12 +120,12 @@ def transform_error(transforms):
 
 
 def orthogonal_mse_error(rots1, rots2):
-    """
-    Compute the MSE between two sets of orthogonal transformations up to a global transformation
+    """ Compute the MSE between two sets of orthogonal transformations up to a global transformation
 
     Args:
-        rots1: First list of orthogonal matrices
-        rots2: Second list of orthogonal matrices
+        rots1 (): First list of orthogonal matrices
+
+        rots2 (): Second list of orthogonal matrices
 
     """
     dim = len(rots1[0])
@@ -138,14 +138,17 @@ def orthogonal_mse_error(rots1, rots2):
 
 
 def _cov_svd(coordinates1: np.ndarray, coordinates2: np.ndarray):
-    """
-    Compute SVD of covariance matrix between two sets of coordinates
-
-    Args:
-        coordinates1: First set of coordinates (array-like)
-        coordinates2: Second set of coordinates (array-like)
+    """ Compute SVD of covariance matrix between two sets of coordinates
 
     Note that the two sets of coordinates need to have the same shape.
+    
+    Args:
+        coordinates1 (np.ndarray): First set of coordinates (array-like)
+
+        coordinates2 (np.ndarray): Second set of coordinates (array-like)
+
+    Returns:
+
     """
     coordinates1 = coordinates1 - coordinates1.mean(axis=0)
     coordinates2 = coordinates2 - coordinates2.mean(axis=0)
@@ -153,15 +156,18 @@ def _cov_svd(coordinates1: np.ndarray, coordinates2: np.ndarray):
     return sp.linalg.svd(cov)
 
 
-def relative_orthogonal_transform(coordinates1, coordinates2):
-    """
-    Find the best orthogonal transformation aligning two sets of coordinates for the same nodes
-
-    Args:
-        coordinates1: First set of coordinates (array-like)
-        coordinates2: Second set of coordinates (array-like)
+def relative_orthogonal_transform(coordinates1: np.ndarray, coordinates2: np.ndarray):
+    """ Find the best orthogonal transformation aligning two sets of coordinates for the same nodes
 
     Note that the two sets of coordinates need to have the same shape.
+
+    Args:
+        coordinates1 (np.ndarray): First set of coordinates (array-like)
+
+        coordinates2 (np.ndarray): Second set of coordinates (array-like)
+
+    Returns:
+
     """
     # Note this is completely equivalent to the approach in
     # "Closed-Form Solution of Absolute Orientation using Orthonormal Matrices"
@@ -171,25 +177,27 @@ def relative_orthogonal_transform(coordinates1, coordinates2):
 
 
 def nearest_orthogonal(mat):
-    """
-    Compute nearest orthogonal matrix to a given input matrix
+    """ Compute nearest orthogonal matrix to a given input matrix
 
     Args:
-        mat: input matrix
+        mat (): input matrix
     """
     u, _, vh = sp.linalg.svd(mat)
     return u @ vh
 
 
-def relative_scale(coordinates1, coordinates2, clamp=1e8):
+def relative_scale(coordinates1: np.ndarray, coordinates2: np.ndarray, clamp=1e8):
     """
     compute relative scale of two sets of coordinates for the same nodes
 
-    Args:
-        coordinates1: First set of coordinates (array-like)
-        coordinates2: Second set of coordinates (array-like)
-
     Note that the two sets of coordinates need to have the same shape.
+
+    Args:
+        coordinates1 (np.ndarray): First set of coordinates (array-like)
+
+        coordinates2 (np.ndarray): Second set of coordinates (array-like)
+
+        clamp (float): maximum allowed scale, default is 1e8 
     """
     scale1 = np.linalg.norm(coordinates1 - np.mean(coordinates1, axis=0))
     scale2 = np.linalg.norm(coordinates2 - np.mean(coordinates2, axis=0))
@@ -203,8 +211,7 @@ def relative_scale(coordinates1, coordinates2, clamp=1e8):
 
 
 class AlignmentProblem:
-    """
-    Implements the standard local2global algorithm using an unweighted patch graph
+    """ Implements the standard local2global algorithm using an unweighted patch graph
     """
 
     n_nodes = None
@@ -229,12 +236,13 @@ class AlignmentProblem:
     verbose = False
     """print debug output if `True`"""
 
-    def weight(self, i, j):
+    def weight(self, i: int, j: int):
         """Compute the weighting factor for a pair of patches
 
         Args:
-            i: First patch index
-            j: Second patch index
+            i (int): First patch index
+
+            j (int): Second patch index
 
         Returns:
             1
@@ -260,21 +268,20 @@ class AlignmentProblem:
             patches: List of patches to synchronise
 
             patch_edges: if provided, only compute relative transformations 
-                for given patch edges (all pairs of patches
-                with at least ``min_overlap`` points in common are included by default)
+                for given patch edges (all pairs of patcheswith at least 
+                ``min_overlap`` points in common are included by default); default is None
             
             min_overlap (int): minimum number of points in the overlap required 
-                for two patches to be considered connected (defaults to `dim+1`)
+                for two patches to be considered connected (defaults to `dim+1`) 
                 where `dim` is the embedding dimension of the patches
             
             copy_data (bool): if ``True``, input patches are copied (default: ``True``)
             
             self_loops (bool): if ``True``, self-loops from a patch to itself are included in the 
             
-            synchronisation problem
-                               (default: ``False``)
+            synchronisation problem: (default: ``False``)
             
-            verbose(bool): if True print diagnostic information (default: ``False``)
+            verbose (bool): if True print diagnostic information (default: ``False``)
 
         """
         if copy_data:
@@ -336,11 +343,11 @@ class AlignmentProblem:
             print(f"mean patch degree: {np.mean(self.patch_degrees)}")
 
     def scale_patches(self, scale_factors=None):
-        """
-        Synchronise scales of the embeddings for each patch
+        """ Synchronise scales of the embeddings for each patch
 
         Args:
-            scale_factors: if provided apply the given scales instead of synchronising
+            scale_factors: if provided apply the given scales 
+                instead of synchronising, default is None
         """
         if scale_factors is None:
             scale_factors = [1 / x for x in self.calc_synchronised_scales()]
@@ -353,8 +360,7 @@ class AlignmentProblem:
         return self
 
     def calc_synchronised_scales(self, max_scale=1e8):
-        """
-        Compute the scaling transformations that best align the patches
+        """ Compute the scaling transformations that best align the patches
 
         Args:
             max_scale: maximum allowed scale, default: 1e8
@@ -377,11 +383,11 @@ class AlignmentProblem:
         return vec
 
     def rotate_patches(self, rotations=None):
-        """align the rotation/reflection of all patches
+        """ Align the rotation/reflection of all patches
 
         Args:
             rotations: If provided, apply the given transformations 
-                instead of synchronizing patch rotations
+                instead of synchronizing patch rotations; default is None
         """
         if rotations is None:
             rotations = (rot.T for rot in self.calc_synchronised_rotations())
@@ -394,7 +400,7 @@ class AlignmentProblem:
         return self
 
     def calc_synchronised_rotations(self):
-        """Compute the orthogonal transformations that best align the patches"""
+        """ Compute the orthogonal transformations that best align the patches"""
         rots = self._transform_matrix(
             relative_orthogonal_transform, self.dim, symmetric_weights=True
         )
@@ -404,10 +410,11 @@ class AlignmentProblem:
         return vecs
 
     def translate_patches(self, translations=None):
-        """align the patches by translation
+        """ Align the patches by translation
 
         Args:
-            translations: If provided, apply the given translations instead of synchronizing
+            translations: If provided, apply the given translations 
+                instead of synchronizing; default is None
 
         """
         if translations is None:
@@ -420,7 +427,7 @@ class AlignmentProblem:
         return self
 
     def calc_synchronised_translations(self):
-        """Compute translations that best align the patches"""
+        """ Compute translations that best align the patches"""
         b = np.empty((len(self.patch_overlap), self.dim))
         row = []
         col = []
@@ -454,7 +461,7 @@ class AlignmentProblem:
         Compute node embeddings as the centroid over patch embeddings
 
         Args:
-            out: numpy array to write results to 
+            out: numpy array to write results to, default is None
                 (supply a memmap for large-scale problems that do not fit in ram)
         """
         if out is None:
@@ -476,7 +483,7 @@ class AlignmentProblem:
         return embedding
 
     def median_embedding(self, out=None):
-        """ TODO: method docstring """
+        """ TODO: docstring for `median_embedding` """
         if out is None:
             out = np.full((self.n_nodes, self.dim), np.nan)
 
@@ -492,20 +499,23 @@ class AlignmentProblem:
         return out
 
     def align_patches(self, scale=False):
-        """ TODO: method docstring """
+        """ TODO: docstring for `align_patches` """
         if scale:
             self.scale_patches()
         self.rotate_patches()
         self.translate_patches()
         return self
 
-    def get_aligned_embedding(self, scale=False, realign=False, out=None):
+    def get_aligned_embedding(self, scale: bool=False, realign: bool=False, out=None):
         """Return the aligned embedding
 
         Args:
             scale (bool): if ``True``, rescale patches (default: ``False``)
+
             realign (bool): if ``True``, recompute aligned embedding 
                 even if it already exists (default: ``False``)
+
+            out (): numpy array to write results to, default is None
 
         Returns:
             n_nodes x dim numpy array of embedding coordinates
@@ -514,13 +524,11 @@ class AlignmentProblem:
             self._aligned_embedding = self.align_patches(scale).mean_embedding(out)
         return self._aligned_embedding
 
-    def save_patches(self, filename):
-        """
-        save patch embeddings to json file
+    def save_patches(self, filename: str):
+        """ Save patch embeddings to json file
+        
         Args:
-            filename: path to output file
-
-
+            filename (str): path to output file
         """
         filename = ensure_extension(filename, ".json")
         patch_dict = {
@@ -534,12 +542,11 @@ class AlignmentProblem:
             json.dump(patch_dict, f)
 
     @classmethod
-    def load(cls, filename):
-        """
-        restore ``AlignmentProblem`` from patch file
+    def load(cls, filename: str):
+        """ Restore ``AlignmentProblem`` from patch file
 
         Args:
-            filename: path to patch file
+            filename (str): path to patch file
 
         """
         filename = ensure_extension(filename, ".json")
@@ -552,12 +559,11 @@ class AlignmentProblem:
             patch_list[int(i)] = Patch(nodes, coordinates)
         return cls(patch_list)
 
-    def save_embedding(self, filename):
-        """
-        save aligned embedding to json file
+    def save_embedding(self, filename: str):
+        """ Save aligned embedding to json file
 
         Args:
-            filename: output filename
+            filename (str): output filename
 
         """
         filename = ensure_extension(filename, ".json")
@@ -566,7 +572,7 @@ class AlignmentProblem:
             json.dump(embedding, f)
 
     def __copy__(self):
-        """return a copy of the alignment problem where all patches are copied."""
+        """ Return a copy of the alignment problem where all patches are copied."""
         instance = self.__class__.__new__(self.__class__)
         # TODO: review, this was changed from original code
         # instance = self.__new__(type(self))
@@ -609,14 +615,16 @@ class AlignmentProblem:
         self,
         transform: Callable[[np.ndarray, np.ndarray], Any],
         dim,
-        symmetric_weights=False,
+        symmetric_weights: bool=False,
     ):
-        """Calculate matrix of relative transformations between patches
+        """ Calculate matrix of relative transformations between patches
 
         Args:
             transform: function to compute the relative transformation
+            
             dim: output dimension of transform should be `(dim, dim)`
-            symmetric_weights: if true use symmetric weighting (default: False)
+            
+            symmetric_weights (bool): if true use symmetric weighting (default: False)
         """
         n = self.n_patches  # number of patches
         if dim != 1:
@@ -669,17 +677,17 @@ class AlignmentProblem:
 
 
 class WeightedAlignmentProblem(AlignmentProblem):
-    """ Variant of the local2global algorithm where patch edges are weighted 
-    according to the number of nodes in the overlap.
+    """ Variant of the local2global algorithm where patch edges 
+        are weighted according to the number of nodes in the overlap.
     """
 
-    def weight(self, i, j):
-        """
-        compute weight for pair of patches
+    def weight(self, i: int, j: int):
+        """ Compute weight for pair of patches
 
         Args:
-            i: first patch index
-            j: second patch index
+            i (int): first patch index
+
+            j (int): second patch index
 
         Returns:
             number of shared nodes between patches `i` and `j`
@@ -689,13 +697,13 @@ class WeightedAlignmentProblem(AlignmentProblem):
 
 
 class SVDAlignmentProblem(WeightedAlignmentProblem):
-    """ TODO: class docstring """
+    """ TODO: docstring for `SVDAlignmentProblem` """
     def __init__(self, *args, tol=1e-6, **kwargs):
         super().__init__(*args, **kwargs)
         self.tol = tol
 
     def calc_synchronised_rotations(self):
-        """Compute the orthogonal transformations that best align the patches"""
+        """ Compute the orthogonal transformations that best align the patches"""
         rots = self._transform_matrix(
             relative_orthogonal_transform, self.dim, symmetric_weights=False
         )
@@ -738,10 +746,15 @@ class SVDAlignmentProblem(WeightedAlignmentProblem):
             m = ss.linalg.LinearOperator((dim, dim), matvec=cond_solve)
         return m
 
-    def _synchronise(self, matrix: ss.spmatrix, blocksize=1, symmetric=False):
-        """Compute synchronised group elements from matrix
-        :param matrix: matrix to synchronise
-        :param blocksize: size of group element blocks
+    def _synchronise(self, matrix: ss.spmatrix, blocksize: int=1, symmetric: bool=False):
+        """ Compute synchronised group elements from matrix.
+
+        Args:
+            matrix (): matrix to synchronise
+        
+            blocksize (): size of group element blocks
+
+            symmetric (): 
         """
         dim = matrix.shape[0]
         if blocksize == 1:
