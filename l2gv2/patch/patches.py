@@ -27,17 +27,19 @@ from local2global_embedding.sparsify import (
 def geodesic_expand_overlap(
     subgraph, seed_mask, min_overlap, target_overlap, reseed_samples=10
 ):
-    """Expand patch
+    """ Expand patch
 
     Args:
-        subgraph: graph containing patch nodes and all target nodes for potential expansion
+        subgraph (): graph containing patch nodes and all target nodes for potential expansion
         
-        source_nodes: index of source nodes (initial starting nodes for expansion)
+        seed_mask ():
         
-        min_overlap: minimum overlap before stopping expansion
+        min_overlap (): minimum overlap before stopping expansion
         
-        target_overlap: maximum overlap (if expansion step results in more overlap, the nodes
-                        added are sampled at random)
+        target_overlap (): maximum overlap 
+            (if expansion step results in more overlap, the nodes added are sampled at random)
+
+        reseed_samples (): default is 10
 
     Returns:
         index tensor of new nodes to add to patch
@@ -69,18 +71,19 @@ def geodesic_expand_overlap(
     return overlap
 
 
-def merge_small_clusters(graph: TGraph, partition_tensor: torch.LongTensor, min_size):
-    """
-    Merge small clusters with adjacent clusters 
+def merge_small_clusters(graph: TGraph, partition_tensor: torch.LongTensor, min_size: int):
+    """ Merge small clusters with adjacent clusters 
     such that all clusters satisfy a minimum size constraint.
 
     This function iteratively merges the smallest cluster with its neighbouring cluster with the
     maximum normalized cut.
 
     Args:
-        graph: Input graph
-        partition_tensor: input partition vector mapping nodes to clusters
-        min_size: desired minimum size of clusters
+        graph (TGraph): Input graph
+
+        partition_tensor (torch.LongTensor): input partition vector mapping nodes to clusters
+        
+        min_size (int): desired minimum size of clusters
 
     Returns:
         new partition tensor where small clusters are merged.
@@ -136,24 +139,23 @@ def merge_small_clusters(graph: TGraph, partition_tensor: torch.LongTensor, min_
 
 
 def create_overlapping_patches(
-    graph, partition_tensor: torch.LongTensor, patch_graph, min_overlap, target_overlap
+    graph: TGraph, partition_tensor: torch.LongTensor, patch_graph, min_overlap, target_overlap
 ):
-    """
-    Create overlapping patches from a hard partition of an input graph
+    """ Create overlapping patches from a hard partition of an input graph
 
     Args:
-        graph: input graph
+        graph (TGraph): Input graph
         
-        partition_tensor: partition of input graph
+        partition_tensor (torch.LongTensor): partition of input graph
         
-        patch_graph: graph where nodes are clusters of partition 
-            and an edge indicates that the corresponding
-                     patches in the output should have at least ``min_overlap`` nodes in common
+        patch_graph (): graph where nodes are clusters of partition 
+            and an edge indicates that the corresponding patches 
+            in the output should have at least ``min_overlap`` nodes in common
         
-        min_overlap: minimum overlap for connected patches
+        min_overlap (): minimum overlap for connected patches
         
-        target_overlap: maximum overlap during expansion for an edge (additional overlap may
-                        result from expansion of other edges)
+        target_overlap (): maximum overlap during expansion 
+            for an edge (additional overlap may result from expansion of other edges)
 
     Returns:
         list of node-index tensors for patches
@@ -233,36 +235,37 @@ def _patch_overlaps(
 
 def create_patch_data(
     graph: TGraph,
-    partition_tensor,
+    partition_tensor: torch.LongTensor,
     min_overlap,
     target_overlap,
     min_patch_size=None,
-    sparsify_method="resistance",
-    target_patch_degree=4,
-    gamma=0,
-    verbose=False,
+    sparsify_method: str="resistance",
+    target_patch_degree: int=4,
+    gamma: int=0,
+    verbose: bool=False,
 ):
-    """
-    Divide data into overlapping patches
+    """ Divide data into overlapping patches
 
     Args:
-        graph: input data
+        graph (TGraph): input data
         
-        partition_tensor: starting partition for creating patches
+        partition_tensor (torch.LongTensor): starting partition for creating patches
         
         min_overlap: minimum patch overlap for connected patches
         
         target_overlap: maximum patch overlap during expansion of an edge of the patch graph
         
-        min_patch_size: minimum size of patches
+        min_patch_size (optional): minimum size of patches, defauls is None
         
-        sparsify_method: method for sparsifying patch graph 
-            (one of ``'resistance'``, ``'rmst'``, ``'none'``)
-        target_patch_degree: target patch degree for ``sparsify_method='resistance'``
+        sparsify_method (str): method for sparsifying patch graph 
+            (one of ``'resistance'``, ``'rmst'``, ``'none'``), default is ``'resistance'``
+
+        target_patch_degree (optional): target patch degree for 
+            ``sparsify_method='resistance'``, default is 4
         
-        gamma: ``gamma`` value for use with ``sparsify_method='rmst'``
+        gamma (int): ``gamma`` value for use with ``sparsify_method='rmst'``, default is 0
         
-        verbose: if true, print some info about created patches
+        verbose (bool): if true, print some info about created patches, default is False
 
     Returns:
         list of patch data, patch graph
@@ -361,13 +364,13 @@ def create_patch_data(
     return patches, pg
 
 
-def rolling_window_graph(n_patches, w):
-    """
-    Generate patch edges for a rolling window
+def rolling_window_graph(n_patches: int, w):
+    """ Generate patch edges for a rolling window
 
     Args:
-        n_patches: Number of patches
-        w: window width (patches connected to the w nearest neighbours on either side)
+        n_patches (int): Number of patches
+        
+        w (): window width (patches connected to the w nearest neighbours on either side)
 
     """
     if not isinstance(w, Iterable):
