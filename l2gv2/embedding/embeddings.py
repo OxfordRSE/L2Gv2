@@ -1,15 +1,18 @@
-""" Module for embedding patches using the VGAE model """
+"""Module for embedding patches using the VGAE model"""
+
 import torch
 import torch_geometric as tg
 from l2gv2.models import speye, VGAEconv, Patch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 class VGAE:
-    """ TODO: docstring for `VGAE` """
+    """TODO: docstring for `VGAE`"""
+
     def __init__(
         self,
-        model,
+        model: torch.nn.Module,
         lr: float = 1e-2,
         num_epochs: int = 100,
         verbose: bool = True,
@@ -23,18 +26,18 @@ class VGAE:
         self,
         data,
         logger=lambda loss: None,
-    ):
-        """ Train the model on the given data 
-        
+    ) -> torch.nn.Module:
+        """Train the model on the given data
+
         Args:
 
             data (torch_geometric.data.Data):
 
-            logger (): 
+            logger ():
 
         Returns:
-            
-            torch.nn.Module: 
+
+            torch.nn.Module:
         """
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
         # optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
@@ -51,19 +54,14 @@ class VGAE:
         return self.model
 
     def embed(
-        self,
-        patch_data: list,
-        dim: int=100,
-        hidden_dim: int=32,
-        decoder=None
+        self, patch_data: list, dim: int = 100, hidden_dim: int = 32, decoder=None
     ) -> tuple[list[Patch], list[torch.nn.Module]]:
-
-        """ TODO: docstring for `embed` 
+        """TODO: docstring for `embed`
         Args:
 
             patch_data (list): list of torch_geometric.data.Data
 
-            dim (int, optional): defaults to 100 
+            dim (int, optional): defaults to 100
 
             hidden_dim (int, optional): defaults to 32
 
@@ -71,7 +69,7 @@ class VGAE:
 
 
         Returns:
-            
+
             list of l2gv2.Patch: list of patches with embedded coordinates
 
             list of torch.nn.Module: list of trained models
@@ -95,23 +93,21 @@ class VGAE:
             patch_list.append(patch)
             return patch_list, models
 
+    def loss_fun(self, data) -> torch.Tensor:
+        """TODO: docstring for `loss_fun`
 
-    def loss_fun(self, data):
-        """ TODO: docstring for `loss_fun`
-        
         Args:
 
             data (torch_geometric.data.Data)
 
         Returns:
-                
-            torch.Tensor: 
+
+            torch.Tensor:
         """
         return (
             self.model.recon_loss(self.model.encode(data), data.edge_index)
             + self.model.kl_loss() / data.num_nodes
         )
-
 
         # TODO: clarify what this code does and where it should be placed
         #
