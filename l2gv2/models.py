@@ -1,6 +1,7 @@
-""" This module contains the functions to compute the
-embeddings of a list of patches using VGAE and Node2Vec. """
+"""This module contains the functions to compute the
+embeddings of a list of patches using VGAE and Node2Vec."""
 
+from typing import Tuple
 from tqdm import tqdm
 import torch
 import torch.nn.functional as F
@@ -9,11 +10,13 @@ from torch_geometric.utils.convert import from_networkx
 from torch_geometric.nn import Node2Vec
 
 import local2global as l2g
-from local2global import Patch
+from l2gv2.patch import Patch
+from l2gv2.patch.utils import WeightedAlignmentProblem
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def speye(n: int, dtype: torch.dtype=torch.float) -> torch.Tensor:
+
+def speye(n: int, dtype: torch.dtype = torch.float) -> torch.Tensor:
     """Returns the identity matrix of dimension n as torch.sparse_coo_tensor.
 
     Args:
@@ -34,16 +37,17 @@ def speye(n: int, dtype: torch.dtype=torch.float) -> torch.Tensor:
 
 
 class VGAEconv(torch.nn.Module):
-    """ TODO: docstring for `VGAEconv` """
+    """TODO: docstring for `VGAEconv`"""
+
     def __init__(
         self,
         dim: int,
         num_node_features: int,
-        hidden_dim:int=32,
-        cached: bool=True,
+        hidden_dim: int = 32,
+        cached: bool = True,
         bias=True,
-        add_self_loops: bool=True,
-        normalize: bool=True,
+        add_self_loops: bool = True,
+        normalize: bool = True,
     ):
         super().__init__()
         self.conv1 = tg.nn.GCNConv(
@@ -71,8 +75,8 @@ class VGAEconv(torch.nn.Module):
             normalize=normalize,
         )
 
-    def forward(self, data: tg.data.Data):
-        """ Forward pass.
+    def forward(self, data: tg.data.Data) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Forward pass.
 
         Args:
             data(torch_geometric.data.Data): object with edge_index and x attributes.
@@ -97,11 +101,11 @@ def train(
     data: tg.data.Data,
     model: torch.nn.Module,
     loss_fun,
-    num_epochs: int=100,
-    verbose: bool=True,
-    lr: float=0.01,
+    num_epochs: int = 100,
+    verbose: bool = True,
+    lr: float = 0.01,
     logger=lambda loss: None,
-):
+) -> torch.nn.Module:
     """Train a model on a dataset.
 
     Args:
@@ -112,15 +116,15 @@ def train(
         loss_fun: function that takes the model and the data and returns a scalar loss.
 
         num_epochs (int, optional): number of epochs to train the model, default is 100.
-        
+
         verbose(bool, optional): if True, print the loss at each epoch, default is True.
-        
+
         lr (float, optional): learning rate, default is 0.01.
-        
+
         logger (optional): function that takes the loss and logs it.
 
     Returns:
-        torch.nn.model: trained model.
+        torch.nn.Module: trained model.
     """
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -140,13 +144,13 @@ def train(
 
 def vgae_patch_embeddings(
     patch_data: list,
-    dim: int=100,
-    hidden_dim:int =32,
-    num_epochs: int=100,
+    dim: int = 100,
+    hidden_dim: int = 32,
+    num_epochs: int = 100,
     decoder=None,
-    lr: float=0.01
-):
-    """ TODO: docstring for `vgae_patch_embeddings`
+    lr: float = 0.01,
+) -> Tuple[list[Patch], list[torch.nn.Module]]:
+    """TODO: docstring for `vgae_patch_embeddings`
 
     Args:
         patch_data (list): list of torch_geometric.data.Data objects.
@@ -199,21 +203,21 @@ def vgae_patch_embeddings(
 def node2vec_(
     data: tg.data.Data,
     emb_dim: int,
-    w_length:  int=20,
-    c_size: int=10,
-    w_per_node: int=10,
-    n_negative_samples: int=1,
-    p: int=1,
-    q: int=1,
-    num_epochs: int=100,
-):
-    """ TODO: docstring for `node2vec_`
+    w_length: int = 20,
+    c_size: int = 10,
+    w_per_node: int = 10,
+    n_negative_samples: int = 1,
+    p: int = 1,
+    q: int = 1,
+    num_epochs: int = 100,
+) -> Patch:
+    """TODO: docstring for `node2vec_`
 
     Args:
 
-        data(torch_geometric.data.Data) 
+        data(torch_geometric.data.Data)
 
-        emb_dim (int): 
+        emb_dim (int):
 
         w_length (int, optional): The walk length, default is 20.
 
@@ -235,7 +239,7 @@ def node2vec_(
 
     Returns:
 
-        Patch: 
+        Patch:
     """
 
     node2vec_model = Node2Vec(
@@ -284,15 +288,15 @@ def node2vec_patch_embeddings(
     w_per_node=10,
     n_negative_samples=1,
     p=1,
-    q=1
-):
-    """ TODO: docstring for `node2vec_patch_embeddings`
+    q=1,
+) -> list[Patch]:
+    """TODO: docstring for `node2vec_patch_embeddings`
 
     Args:
 
         patch_data (list) torch_geometric.data.Data objects.
 
-        emb_dim (int): 
+        emb_dim (int):
 
         w_length (int, optional): The walk length, default is 20.
 
@@ -336,8 +340,10 @@ def node2vec_patch_embeddings(
     return patch_list
 
 
-def chunk_embedding(chunk_size: int, patches, dim=2):
-    """ TODO: docstring for `chunk_embedding`
+def chunk_embedding(
+    chunk_size: int, patches: list[Patch], dim=2
+) -> Tuple[torch.Tensor, WeightedAlignmentProblem]:
+    """TODO: docstring for `chunk_embedding`
 
     Note: this only works for Autonomous System dataset.
 
@@ -345,7 +351,7 @@ def chunk_embedding(chunk_size: int, patches, dim=2):
 
         chunk_size (int): The size of the chunks.
 
-        patches (list): list of torch_geometric.data.Data objects.
+        patches (list[Patch]): list of Patch objects.
 
         dim (int, optional): The dimension of the embeddings, default is 2.
 

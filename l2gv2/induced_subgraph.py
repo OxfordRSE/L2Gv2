@@ -1,20 +1,21 @@
-""" Induced subgraph utility functions. """
+"""Induced subgraph utility functions."""
+
 import torch
 import torch_geometric as tg
 
 
-def induced_subgraph(data: tg.data.Data, nodes, extend_hops: int=0):
-    """ TODO: docstring for `induced_subgraph`
-    
-    Args:
-        data (torch_geometric.data.Data): 
+def induced_subgraph(data: tg.data.Data, nodes, extend_hops: int = 0) -> tg.data.Data:
+    """TODO: docstring for `induced_subgraph`
 
-        nodes (int): 
-        
+    Args:
+        data (torch_geometric.data.Data):
+
+        nodes (int):
+
         extend_hops (int, optional): default is 0.
 
     Returns:
-        torch_geometric.data.Data:  
+        torch_geometric.data.Data:
     """
 
     nodes = torch.as_tensor(nodes, dtype=torch.long)

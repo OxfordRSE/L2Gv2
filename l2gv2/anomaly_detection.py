@@ -1,17 +1,18 @@
 """Anomaly detection module."""
 
 import numpy as np
+from l2gv2.patch import Patch
 
 
-def raw_anomaly_score_node_patch(aligned_patch_emb, emb, node):
-    """ TODO: docstring for `raw_anomaly_score_node_patch`
+def raw_anomaly_score_node_patch(aligned_patch_emb, emb, node) -> float:
+    """TODO: docstring for `raw_anomaly_score_node_patch`
 
     Args:
-        aligned_patch_emb (): 
-        
-        emb (): 
-        
-        node (): 
+        aligned_patch_emb ():
+
+        emb ():
+
+        node ():
 
     Returns:
         float: Raw anomaly score of the node in the patch.
@@ -20,31 +21,33 @@ def raw_anomaly_score_node_patch(aligned_patch_emb, emb, node):
     return np.linalg.norm(aligned_patch_emb.get_coordinate(node) - emb[node])
 
 
-def nodes_in_patches(patch_data: list):
-    """ TODO: docstring for `nodes_in_patches`
+def nodes_in_patches(patch_data: list[Patch]) -> list:
+    """TODO: docstring for `nodes_in_patches`
 
     Args:
-        patch_data (list): 
+        patch_data (list[Patch]):
 
     Returns:
-        list: 
+        list:
     """
 
     return [set(p.nodes.numpy()) for p in patch_data]
 
 
-def normalized_anomaly(patch_emb: list, patch_data: list, emb: np.array):
-    """ TODO: docstring for `normalized_anomaly`
+def normalized_anomaly(
+    patch_emb: list[Patch], patch_data: list[Patch], emb: np.array
+) -> np.array:
+    """TODO: docstring for `normalized_anomaly`
 
     Args:
-        patch_emb (list): 
-        
-        patch_data (list): 
-        
-        emb (np.array): 
+        patch_emb (list[Patch]):
+
+        patch_data (list[Patch]):
+
+        emb (np.array):
 
     Returns:
-        np.array: 
+        np.array:
     """
 
     nodes = nodes_in_patches(patch_data)
@@ -86,20 +89,22 @@ def normalized_anomaly(patch_emb: list, patch_data: list, emb: np.array):
     return final_score
 
 
-def get_outliers(patch_emb: list, patch_data: list, emb, k: float):
-    """ TODO: docstring for `get_outliers`
+def get_outliers(
+    patch_emb: list[Patch], patch_data: list[Patch], emb, k: float
+) -> list[int]:
+    """TODO: docstring for `get_outliers`
 
     Args:
-        patch_emb (list): 
+        patch_emb (list):
 
-        patch_data (list): 
-        
-        emb (np.array): 
-        
+        patch_data (list):
+
+        emb (np.array):
+
         k (float): Threshold for outliers as multiplier of the standard deviation.
 
     Returns:
-        list: 
+        list[int]:
     """
 
     out = []
