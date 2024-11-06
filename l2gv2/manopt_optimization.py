@@ -10,14 +10,14 @@ import local2global as l2g
 import numpy as np
 
 
-def double_intersections_nodes(patches):
-    """Returns a dictionary with the nodes that are shared by two patches.
+def double_intersections_nodes(patches: list):
+    """ TODO: docstring for `double_intersections_nodes`.
 
     Args:
-        patches: list of patches.
+        patches (list): 
 
     Returns:
-        double_intersections: dictionary with the nodes that are shared by two patches.
+        dict: 
     """
 
     double_intersections = {}
@@ -32,24 +32,23 @@ def double_intersections_nodes(patches):
 
 
 def anp_loss_nodes_consecutive_patches(
-    rotations, scales, translations, patches, nodes, dim, random_choice=True
+    rotations, scales, translations, patches, nodes: int, dim: int, random_choice: bool=True
 ):
-    """Returns the loss function for the optimization of the embeddings of the patches.
+    """ TODO: docstring for `anp_loss_nodes_consecutive_patches`.
 
     Args:
-        rotations: list of orthogonal matrices for embeddings of patches.
+        rotations (): 
 
-        scales: list of scales for embeddings of patches.
-        translations: list of translations for embeddings of patches.
+        scales (): 
+        translations (int): 
 
-        patches: list of patches.
+        patches (): 
 
-        nodes: dictionary with the nodes that are shared by two patches.
+        nodes (): 
 
-        dim: dimension of the embeddings.
+        dim (int): T
 
-        random_choice: if True, the loss function is computed only for 
-        a random subset of nodes shared by two patches.
+        random_choice (bool, optional): default is True.
 
     Returns:
         loss_function: loss function.
@@ -83,20 +82,20 @@ def anp_loss_nodes_consecutive_patches(
     return loss_function
 
 
-def optimization(patches, nodes, dim):
-    """ Returns the embeddings of the patches using the manopt library.
+def optimization(patches, nodes, dim: int):
+    """ TODO: docstring for `optimization`.
 
     Args:
-        patches: list of patches.
+        patches (): 
 
-        nodes: dictionary with the nodes that are shared by two patches.
+        nodes (): 
 
-        dim: dimension of the embeddings.
+        dim (int):
 
     Returns:
-        result: result of the optimization.
+        result: 
 
-        embedding: embeddings of the patches.
+        embedding: 
     """
     n_patches = len(patches)
 

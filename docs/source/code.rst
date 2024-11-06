@@ -33,13 +33,13 @@ Models
    :undoc-members:
    :show-inheritance:
 
-.. Embeddings
-.. ----------
+Embeddings
+----------
 
-.. .. automodule:: l2gv2.embedding.embeddings
-..    :members:
-..    :undoc-members:
-..    :show-inheritance:
+.. automodule:: l2gv2.embedding.embeddings
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Patch
 -----
@@ -54,12 +54,12 @@ Patch
     :undoc-members:
     :show-inheritance:
 
-.. .. automodule:: l2gv2.patch.patches
-..     :members:
-..     :undoc-members:
-..     :show-inheritance:
+.. automodule:: l2gv2.patch.patches
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
-.. .. automodule:: l2gv2.patch.utils
-..     :members:
-..     :undoc-members:
-..     :show-inheritance:
+.. automodule:: l2gv2.patch.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -3,18 +3,18 @@ import torch
 import torch_geometric as tg
 
 
-def induced_subgraph(data: tg.data.Data, nodes, extend_hops=0):
-    """ Induce a subgraph from the given nodes. 
+def induced_subgraph(data: tg.data.Data, nodes, extend_hops: int=0):
+    """ TODO: docstring for `induced_subgraph`
     
     Args:
-        data: The original graph data.
+        data (torch_geometric.data.Data): 
 
-        nodes: The nodes to induce the subgraph from.
+        nodes (int): 
         
-        extend_hops: The number of hops to extend the subgraph.
+        extend_hops (int, optional): default is 0.
 
     Returns:
-        The subgraph data object. 
+        torch_geometric.data.Data:  
     """
 
     nodes = torch.as_tensor(nodes, dtype=torch.long)

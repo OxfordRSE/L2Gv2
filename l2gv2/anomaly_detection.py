@@ -4,14 +4,14 @@ import numpy as np
 
 
 def raw_anomaly_score_node_patch(aligned_patch_emb, emb, node):
-    """Compute the raw anomaly score of a node in a patch.
+    """ TODO: docstring for `raw_anomaly_score_node_patch`
 
     Args:
-        aligned_patch_emb (AlignedEmb): Aligned embedding of the patch.
+        aligned_patch_emb (): 
         
-        emb (np.array): Embedding of the graph.
+        emb (): 
         
-        node (int): Node id.
+        node (): 
 
     Returns:
         float: Raw anomaly score of the node in the patch.
@@ -20,31 +20,31 @@ def raw_anomaly_score_node_patch(aligned_patch_emb, emb, node):
     return np.linalg.norm(aligned_patch_emb.get_coordinate(node) - emb[node])
 
 
-def nodes_in_patches(patch_data):
-    """Get the nodes in each patch.
+def nodes_in_patches(patch_data: list):
+    """ TODO: docstring for `nodes_in_patches`
 
     Args:
-        patch_data (list): List of PatchData.
+        patch_data (list): 
 
     Returns:
-        list: List of sets of nodes in each patch.
+        list: 
     """
 
     return [set(p.nodes.numpy()) for p in patch_data]
 
 
-def normalized_anomaly(patch_emb, patch_data, emb):
-    """Compute the normalized anomaly score of each node in each patch.
+def normalized_anomaly(patch_emb: list, patch_data: list, emb: np.array):
+    """ TODO: docstring for `normalized_anomaly`
 
     Args:
-        patch_emb (list): List of AlignedEmb.
+        patch_emb (list): 
         
-        patch_data (list): List of PatchData.
+        patch_data (list): 
         
-        emb (np.array): Embedding of the graph.
+        emb (np.array): 
 
     Returns:
-        np.array: Normalized anomaly score of each node in each patch.
+        np.array: 
     """
 
     nodes = nodes_in_patches(patch_data)
@@ -86,20 +86,20 @@ def normalized_anomaly(patch_emb, patch_data, emb):
     return final_score
 
 
-def get_outliers(patch_emb, patch_data, emb, k):
-    """Get the outliers of the graph.
+def get_outliers(patch_emb: list, patch_data: list, emb, k: float):
+    """ TODO: docstring for `get_outliers`
 
     Args:
-        patch_emb (list): List of AlignedEmb.
+        patch_emb (list): 
 
-        patch_data (list): List of PatchData.
+        patch_data (list): 
         
-        emb (np.array): Embedding of the graph.
+        emb (np.array): 
         
-        k (float): Threshold.
+        k (float): Threshold for outliers as multiplier of the standard deviation.
 
     Returns:
-        list: List of outliers.
+        list: 
     """
 
     out = []

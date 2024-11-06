@@ -5,7 +5,7 @@ from l2gv2.models import speye, VGAEconv
 
 
 class VGAE:
-    """ Variational Graph Autoencoder """
+    """ TODO: docstring for `VGAE` """
     def __init__(
         self,
         model,
@@ -27,13 +27,13 @@ class VGAE:
         
         Args:
 
-            data: torch_geometric.data.Data
+            data (torch_geometric.data.Data):
 
-            logger: function
+            logger (): 
 
         Returns:
             
-                torch.nn.Module: trained model
+            torch.nn.Module: 
         """
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
         # optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
@@ -51,32 +51,31 @@ class VGAE:
 
     def embed(
         self,
-        patch_data,
-        dim=100,
-        hidden_dim=32,
+        patch_data: list,
+        dim: int=100,
+        hidden_dim: int=32,
         decoder=None,
-        device="cpu"
+        device: str="cpu"
     ):
 
-        """ Embed the given patch data using the VGAE model
-
+        """ TODO: docstring for `embed` 
         Args:
 
-            patch_data: list of torch_geometric.data.Data
+            patch_data (list): list of torch_geometric.data.Data
 
-            dim: dimension of the embedding
+            dim (int, optional): defaults to 100 
 
-            hidden_dim: hidden dimension of the encoder
+            hidden_dim (int, optional): defaults to 32
 
-            decoder: decoder function
+            decoder (): defaults to None
 
-            device: device to use
+            device (str): defaults to "cpu"
 
         Returns:
             
-                list of l2gv2.Patch: list of patches with embedded coordinates
-    
-                list of torch.nn.Module: list of trained models
+            list of l2gv2.Patch: list of patches with embedded coordinates
+
+            list of torch.nn.Module: list of trained models
         """
         patch_list = []
         models = []
@@ -99,15 +98,15 @@ class VGAE:
 
 
     def loss_fun(self, data):
-        """ Loss function for the VGAE model 
+        """ TODO: docstring for `loss_fun`
         
         Args:
 
-            data: torch_geometric.data.Data
+            data (torch_geometric.data.Data)
 
         Returns:
                 
-            torch.Tensor: loss value
+            torch.Tensor: 
         """
         return (
             self.model.recon_loss(self.model.encode(data), data.edge_index)
