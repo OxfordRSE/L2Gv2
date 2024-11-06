@@ -3,6 +3,7 @@ import torch
 import torch_geometric as tg
 from l2gv2.models import speye, VGAEconv
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class VGAE:
     """ TODO: docstring for `VGAE` """
@@ -54,8 +55,7 @@ class VGAE:
         patch_data: list,
         dim: int=100,
         hidden_dim: int=32,
-        decoder=None,
-        device: str="cpu"
+        decoder=None
     ):
 
         """ TODO: docstring for `embed` 
@@ -69,7 +69,6 @@ class VGAE:
 
             decoder (): defaults to None
 
-            device (str): defaults to "cpu"
 
         Returns:
             
