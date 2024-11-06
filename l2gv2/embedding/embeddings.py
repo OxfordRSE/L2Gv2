@@ -1,7 +1,7 @@
 """ Module for embedding patches using the VGAE model """
 import torch
 import torch_geometric as tg
-from l2gv2.models import speye, VGAEconv
+from l2gv2.models import speye, VGAEconv, Patch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -56,7 +56,7 @@ class VGAE:
         dim: int=100,
         hidden_dim: int=32,
         decoder=None
-    ):
+    ) -> tuple[list[Patch], list[torch.nn.Module]]:
 
         """ TODO: docstring for `embed` 
         Args:
