@@ -1,7 +1,7 @@
 """Anomaly detection module."""
 
 import numpy as np
-from l2gv2.patch import Patch
+from l2gv2.patch.patch import Patch
 
 
 def raw_anomaly_score_node_patch(aligned_patch_emb, emb, node) -> float:
