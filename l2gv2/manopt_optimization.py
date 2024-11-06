@@ -10,7 +10,7 @@ import pymanopt.optimizers
 import numpy as np
 import local2global as l2g
 
-from l2gv2.patch import Patch
+from l2gv2.patch.patch import Patch
 
 
 def double_intersections_nodes(

@@ -10,7 +10,7 @@ from torch_geometric.utils.convert import from_networkx
 from torch_geometric.nn import Node2Vec
 
 import local2global as l2g
-from l2gv2.patch import Patch
+from l2gv2.patch.patch import Patch
 from l2gv2.patch.utils import WeightedAlignmentProblem
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
