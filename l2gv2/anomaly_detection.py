@@ -8,11 +8,11 @@ def raw_anomaly_score_node_patch(aligned_patch_emb, emb, node) -> float:
     """TODO: docstring for `raw_anomaly_score_node_patch`
 
     Args:
-        aligned_patch_emb ():
+        aligned_patch_emb ([type]): [description]
 
-        emb ():
+        emb ([type]): [description]
 
-        node ():
+        node ([type]): [description]
 
     Returns:
         float: Raw anomaly score of the node in the patch.
@@ -25,10 +25,10 @@ def nodes_in_patches(patch_data: list[Patch]) -> list:
     """TODO: docstring for `nodes_in_patches`
 
     Args:
-        patch_data (list[Patch]):
+        patch_data (list[Patch]): [description]
 
     Returns:
-        list:
+        list: [description]
     """
 
     return [set(p.nodes.numpy()) for p in patch_data]
@@ -40,14 +40,14 @@ def normalized_anomaly(
     """TODO: docstring for `normalized_anomaly`
 
     Args:
-        patch_emb (list[Patch]):
+        patch_emb (list[Patch]): [description]
 
-        patch_data (list[Patch]):
+        patch_data (list[Patch]): [description]
 
-        emb (np.array):
+        emb (np.array): [description]
 
     Returns:
-        np.array:
+        np.array: [description]
     """
 
     nodes = nodes_in_patches(patch_data)
@@ -95,16 +95,16 @@ def get_outliers(
     """TODO: docstring for `get_outliers`
 
     Args:
-        patch_emb (list):
+        patch_emb (list): [description]
 
-        patch_data (list):
+        patch_data (list): [description]
 
-        emb (np.array):
+        emb (np.array): [description]
 
         k (float): Threshold for outliers as multiplier of the standard deviation.
 
     Returns:
-        list[int]:
+        list[int]: [description]
     """
 
     out = []

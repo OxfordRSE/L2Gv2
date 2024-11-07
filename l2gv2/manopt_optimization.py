@@ -19,10 +19,10 @@ def double_intersections_nodes(
     """TODO: docstring for `double_intersections_nodes`.
 
     Args:
-        patches (list[Patch]):
+        patches (list[Patch]): [description]
 
     Returns:
-        dict[tuple[int, int], list[int]]:
+        dict[tuple[int, int], list[int]]: [description]
     """
 
     double_intersections = {}
@@ -46,22 +46,22 @@ def anp_loss_nodes_consecutive_patches(
     """TODO: docstring for `anp_loss_nodes_consecutive_patches`.
 
     Args:
-        rotations ():
+        rotations ([type]): [description]
 
-        scales ():
+        scales ([type]): [description]
 
-        translations (int):
+        translations (int): [description]
 
-        patches ():
+        patches ([type]): [description]
 
-        nodes ():
+        nodes ([type]): [description]
 
-        dim (int):
+        dim (int): [description]
 
-        random_choice (bool, optional): default is True.
+        random_choice (bool, optional): [description] default is True.
 
     Returns:
-        float: loss function.
+        float: loss function value.
     """
 
     loss_function = 0
@@ -98,16 +98,16 @@ def optimization(
     """TODO: docstring for `optimization`.
 
     Args:
-        patches ():
+        patches ([type]): [description]
 
-        nodes ():
+        nodes ([type]): [description]
 
-        dim (int):
+        dim (int): [description]
 
     Returns:
-        result:
+        result: [description]
 
-        embedding:
+        embedding: [description]
     """
     n_patches = len(patches)
 

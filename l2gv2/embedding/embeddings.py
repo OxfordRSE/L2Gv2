@@ -33,11 +33,11 @@ class VGAE:
 
             data (torch_geometric.data.Data):
 
-            logger ():
+            logger ([type]): [description]
 
         Returns:
 
-            torch.nn.Module:
+            torch.nn.Module: [description]
         """
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
         # optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
@@ -98,11 +98,11 @@ class VGAE:
 
         Args:
 
-            data (torch_geometric.data.Data)
+            data (torch_geometric.data.Data): [description]
 
         Returns:
 
-            torch.Tensor:
+            torch.Tensor: [description]
         """
         return (
             self.model.recon_loss(self.model.encode(data), data.edge_index)

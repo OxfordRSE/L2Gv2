@@ -2,6 +2,7 @@
 
 from random import choice
 from math import ceil
+from typing import List, Tuple, Optional, Literal
 from collections.abc import Iterable
 
 import torch
@@ -30,16 +31,16 @@ def geodesic_expand_overlap(
     """ Expand patch
 
     Args:
-        subgraph (): graph containing patch nodes and all target nodes for potential expansion
+        subgraph ([type]): graph containing patch nodes and all target nodes for potential expansion
         
-        seed_mask ():
+        seed_mask ([type]): [description]
         
-        min_overlap (): minimum overlap before stopping expansion
+        min_overlap ([type]): minimum overlap before stopping expansion
         
-        target_overlap (): maximum overlap 
+        target_overlap ([type]): maximum overlap 
             (if expansion step results in more overlap, the nodes added are sampled at random)
 
-        reseed_samples (): default is 10
+        reseed_samples ([type]): [description] default is 10
 
     Returns:
         index tensor of new nodes to add to patch
@@ -148,13 +149,13 @@ def create_overlapping_patches(
         
         partition_tensor (torch.LongTensor): partition of input graph
         
-        patch_graph (): graph where nodes are clusters of partition 
+        patch_graph ([type]): graph where nodes are clusters of partition 
             and an edge indicates that the corresponding patches 
             in the output should have at least ``min_overlap`` nodes in common
         
-        min_overlap (): minimum overlap for connected patches
+        min_overlap ([type]): minimum overlap for connected patches
         
-        target_overlap (): maximum overlap during expansion 
+        target_overlap ([type]): maximum overlap during expansion 
             for an edge (additional overlap may result from expansion of other edges)
 
     Returns:
@@ -232,18 +233,17 @@ def _patch_overlaps(
         )
     return patches
 
-
 def create_patch_data(
     graph: TGraph,
     partition_tensor: torch.LongTensor,
-    min_overlap,
-    target_overlap,
-    min_patch_size=None,
-    sparsify_method: str="resistance",
-    target_patch_degree: int=4,
-    gamma: int=0,
-    verbose: bool=False,
-):
+    min_overlap: int,
+    target_overlap: int,
+    min_patch_size: Optional[int] = None,
+    sparsify_method: Literal["resistance", "rmst", "none"] = "resistance",
+    target_patch_degree: int = 4,
+    gamma: int = 0,
+    verbose: bool = False,
+) -> Tuple[List, object]:
     """ Divide data into overlapping patches
 
     Args:
@@ -251,21 +251,22 @@ def create_patch_data(
         
         partition_tensor (torch.LongTensor): starting partition for creating patches
         
-        min_overlap: minimum patch overlap for connected patches
+        min_overlap ([type]): minimum patch overlap for connected patches
         
-        target_overlap: maximum patch overlap during expansion of an edge of the patch graph
+        target_overlap ([type]): maximum patch overlap during expansion 
+            of an edge of the patch graph
         
-        min_patch_size (optional): minimum size of patches, defauls is None
+        min_patch_size (Optional[type]): minimum size of patches, defauls is None
         
-        sparsify_method (str): method for sparsifying patch graph 
+        sparsify_method (Optional[[str]): method for sparsifying patch graph 
             (one of ``'resistance'``, ``'rmst'``, ``'none'``), default is ``'resistance'``
 
-        target_patch_degree (optional): target patch degree for 
+        target_patch_degree (Optional[str]): target patch degree for 
             ``sparsify_method='resistance'``, default is 4
         
-        gamma (int): ``gamma`` value for use with ``sparsify_method='rmst'``, default is 0
+        gamma (Optional[int]): ``gamma`` value for use with ``sparsify_method='rmst'``, default is 0
         
-        verbose (bool): if true, print some info about created patches, default is False
+        verbose (Optional[bool]): if true, print some info about created patches, default is False
 
     Returns:
         list of patch data, patch graph

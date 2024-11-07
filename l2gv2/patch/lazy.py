@@ -246,7 +246,11 @@ class LazyMeanAggregatorCoordinates(BaseLazyCoordinates):
         return self.as_array(out)
 
     def as_array(self, out=None):
-        """ TODO: docstring for `as_array` """
+        """ TODO: docstring for `as_array` 
+        
+        Args:            
+                out (Optional[type]): [description], defaults to None
+        """
         if out is None:
             out = np.zeros(self.shape)
         index = np.empty((self.nodes.max() + 1,), dtype=np.int64)
@@ -260,7 +264,14 @@ class LazyMeanAggregatorCoordinates(BaseLazyCoordinates):
         return out
 
     def get_coordinates(self, nodes, out=None):
-        """ TODO: docstring for `get_coordinates` """
+        """ TODO: docstring for `get_coordinates` 
+        
+        Args:
+            
+                nodes ([type]): [description]
+            
+                out (Optional[type]): [description], default is None
+        """
         nodes = np.asanyarray(nodes)
         if out is None:
             out = np.zeros((len(nodes), self.dim))

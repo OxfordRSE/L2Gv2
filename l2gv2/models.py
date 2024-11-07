@@ -217,7 +217,7 @@ def node2vec_(
 
         data(torch_geometric.data.Data)
 
-        emb_dim (int):
+        emb_dim (int): [description]
 
         w_length (int, optional): The walk length, default is 20.
 
@@ -296,7 +296,7 @@ def node2vec_patch_embeddings(
 
         patch_data (list) torch_geometric.data.Data objects.
 
-        emb_dim (int):
+        emb_dim (int): [description]
 
         w_length (int, optional): The walk length, default is 20.
 
