@@ -252,6 +252,8 @@ def consecutive_loss(
 
 
 # pylint: disable=invalid-name
+# pylint: disable=no-member
+# pylint does not infer autograd.numpy.linalg.norm so disable no-member
 def ANPloss_nodes_consecutive_patches(
     rotations, scales, translations, patches, nodes, dim, k, rand: Optional[bool] = True
 ):
@@ -312,9 +314,12 @@ def ANPloss_nodes_consecutive_patches(
 
     return l  # , fij
 # pylint: enable=invalid-name
+# pylint: enable=no-member
 
 
 # pylint: disable=invalid-name
+# pylint: disable=no-member
+# pylint does not infer autograd.numpy.linalg.norm so disable no-member
 def ANPloss_nodes(
     rotations, scales, translations, patches, nodes, dim, k, rand: Optional[bool] = True
 ):
@@ -379,7 +384,10 @@ def ANPloss_nodes(
 
     return 1 / len(patches) * l  # fij
 # pylint enable=invalid-name
+# pylint enable=no-member
 
+# pylint: disable=no-member
+# pylint does not infer autograd.numpy.random.seed so disable no-member
 def optimization(
     patches,
     nodes,
@@ -463,7 +471,7 @@ def optimization(
         )
 
     return result, embedding
-
+# pylint enable=no-member
 
 def loss_dictionary(rs, ss, ts, nodes, patches, dim, k):
     """TODO: docstring for `loss_dictionary`.
