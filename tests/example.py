@@ -77,6 +77,8 @@ def generate_data(
     ]
     return np.vstack(list_of_clusters)
 
+# TODO: fix too-many-branches
+# pylint: disable=too-many-branches
 def voronoi_patches(
     points: np.ndarray,
     sample_size: Optional[int] = 100,
@@ -250,6 +252,7 @@ def voronoi_patches(
         return [Patch(nodes, points[nodes, :]) for nodes in node_lists], patch_network
 
     return [Patch(nodes, points[nodes, :]) for nodes in node_lists]
+# pylint: enable=too-many-branches
 
 def rand_scale_patches(
     alignment_problem: ut.AlignmentProblem, min_scale: Optional[float] = 1e-2

@@ -255,6 +255,8 @@ class AlignmentProblem:
         del i, j
         return 1
 
+    # TODO: fix too-many-branches
+    # pylint: disable=too-many-branches
     def __init__(
         self,
         patches: List[Patch],
@@ -343,6 +345,7 @@ class AlignmentProblem:
 
         if self.verbose:
             print(f"mean patch degree: {np.mean(self.patch_degrees)}")
+    # pylint: enable=too-many-branches
 
     def scale_patches(self, scale_factors=None):
         """Synchronise scales of the embeddings for each patch
@@ -759,6 +762,8 @@ class SVDAlignmentProblem(WeightedAlignmentProblem):
             m = ss.linalg.LinearOperator((dim, dim), matvec=cond_solve)
         return m
 
+    # TODO: fix too-many-branches
+    # pylint: disable=too-many-branches
     def _synchronise(
         self,
         matrix: ss.spmatrix,
@@ -889,3 +894,4 @@ class SVDAlignmentProblem(WeightedAlignmentProblem):
         vecs = vecs[:, order[:blocksize]].real
         vecs.shape = (dim // blocksize, blocksize, blocksize)
         return vecs
+    # pylint: enable=too-many-branches

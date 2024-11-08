@@ -9,7 +9,6 @@ disable=
     duplicate-code,
     protected-access,
     too-many-locals,
-    too-many-branches,
     too-few-public-methods,
     too-many-instance-attributes,
     too-many-arguments,
