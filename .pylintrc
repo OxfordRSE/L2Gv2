@@ -14,5 +14,4 @@ disable=
     too-many-instance-attributes,
     too-many-arguments,
     too-many-statements,
-    too-many-positional-arguments,
-    unbalanced-tuple-unpacking
+    too-many-positional-arguments

@@ -77,7 +77,6 @@ def generate_data(
     ]
     return np.vstack(list_of_clusters)
 
-
 def voronoi_patches(
     points: np.ndarray,
     sample_size: Optional[int] = 100,
@@ -216,9 +215,14 @@ def voronoi_patches(
                 patches2 = list(patches2)
                 c2 = c1 + it + 1
                 patch_distances = cdist(centers[patches1, :], centers[patches2, :])
+
+                # TODO: fix possible unbalanced-tuple-unpacking
+                # pylint: disable=unbalanced-tuple-unpacking
                 i, j = np.unravel_index(
                     np.argmin(patch_distances), patch_distances.shape
                 )
+                # pylint: enable=unbalanced-tuple-unpacking
+
                 edges.append((patch_distances[i, j], patches1[i], patches2[j], c1, c2))
         edges.sort()
         component_graph = nx.Graph()
@@ -246,7 +250,6 @@ def voronoi_patches(
         return [Patch(nodes, points[nodes, :]) for nodes in node_lists], patch_network
 
     return [Patch(nodes, points[nodes, :]) for nodes in node_lists]
-
 
 def rand_scale_patches(
     alignment_problem: ut.AlignmentProblem, min_scale: Optional[float] = 1e-2
