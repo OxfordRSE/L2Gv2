@@ -2,7 +2,6 @@
 [![linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/pylint-dev/pylint)
 [![Pylint](https://github.com/lotzma/L2Gv2/actions/workflows/pylint.yml/badge.svg)](https://github.com/lotzma/L2Gv2/actions/workflows/pylint.yml)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
 
 # l2gv2 - Local2Global
 
@@ -51,20 +50,5 @@ pip-compile requirements.in --verbose
 
 The following people contributed to this project ([emoji key](https://allcontributors.org/docs/en/emoji-key)). 
 
-<!-- ALL-CONTRIBUTORS-LIST:START -->
-<table>
-  <tbody>
-    <tr>
-      <td align="center">
-        <a href="https://github.com/lotzma">
-            <img src="https://avatars.githubusercontent.com/u/22026207?v=4?v=4?s=100" width="100px;" alt="Martin Lotz"/>
-            <br /><sub><b>Martin Lotz</b></sub>
-            <br />🤔 📆 💻 💡
-        </a>
-    </td>  
-    </tr>
-  </tbody>
-</table>
-<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification.
