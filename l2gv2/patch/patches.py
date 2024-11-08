@@ -165,8 +165,13 @@ def create_overlapping_patches(
 
     if isinstance(partition_tensor, torch.Tensor):
         partition_tensor = partition_tensor.cpu()
+
+    # TODO: fix protected-access
+    # pylint: disable=protected-access
     graph = graph.to(NPGraph)._jitgraph
     patch_graph = patch_graph.to(NPGraph)._jitgraph
+    # pylint: enable=protected-access
+
     parts = Partition(partition_tensor)
     partition_tensor = partition_tensor.numpy()
     patches = numba.typed.List(np.asanyarray(p) for p in parts)
