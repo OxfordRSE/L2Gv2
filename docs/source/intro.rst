@@ -8,7 +8,7 @@ Setup
 
 **Supported Operating Systems**: macOS, Linux  
 
-Clone the repository on your machine:
+Clone the repository on your machine
 
 .. code-block:: bash
 
