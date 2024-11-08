@@ -7,7 +7,6 @@ disable=
     fixme,
     import-error,
     duplicate-code,
-    protected-access,
     too-many-locals,
     too-few-public-methods,
     too-many-instance-attributes,
