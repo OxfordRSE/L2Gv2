@@ -6,7 +6,7 @@
 #
 --find-links https://data.pyg.org/whl/torch-2.4.0+cpu.html
 
--e .
+-e file:///Users/mihaela/Documents/work/turing/L2Gv2
     # via -r requirements.in
 aiohappyeyeballs==2.4.3
     # via
@@ -47,6 +47,8 @@ appnope==0.1.4 ; sys_platform == "darwin"
     # via
     #   -r requirements.in
     #   ipykernel
+astroid==3.3.5
+    # via pylint
 asttokens==2.4.1
     # via
     #   -r requirements.in
@@ -61,6 +63,8 @@ attrs==24.2.0
     #   aiohttp
     #   jsonschema
     #   referencing
+autograd==1.7.0
+    # via -r requirements.in
 babel==2.16.0
     # via sphinx
 backoff==2.2.1
@@ -164,6 +168,8 @@ decorator==5.1.1
     # via
     #   -r requirements.in
     #   ipython
+dill==0.3.9
+    # via pylint
 distlib==0.3.9
     # via virtualenv
 distributed==2024.10.0
@@ -332,6 +338,8 @@ ipywidgets==8.1.5
     # via
     #   -r requirements.in
     #   raphtory
+isort==5.13.2
+    # via pylint
 itsdangerous==2.2.0
     # via
     #   -r requirements.in
@@ -395,9 +403,7 @@ llvmlite==0.43.0
     #   numba
     #   pynndescent
 local2global @ git+https://github.com/LJeub/Local2Global.git@master
-    # via
-    #   -r requirements.in
-    #   local2global-embedding
+    # via local2global-embedding
 local2global-embedding @ git+https://github.com/LJeub/Local2Global_embedding@master
     # via -r requirements.in
 locket==1.0.0
@@ -431,6 +437,8 @@ matplotlib-inline==0.1.7
     #   -r requirements.in
     #   ipykernel
     #   ipython
+mccabe==0.7.0
+    # via pylint
 mdurl==0.1.2
     # via
     #   -r requirements.in
@@ -487,7 +495,7 @@ numba==0.60.0
     #   umap-learn
 numpy==1.26.4
     # via
-    #   -r requirements.in
+    #   autograd
     #   contourpy
     #   datashader
     #   hyperopt
@@ -498,6 +506,7 @@ numpy==1.26.4
     #   pandas
     #   pyarrow
     #   pydeck
+    #   pymanopt
     #   python-louvain
     #   scikit-learn
     #   scipy
@@ -563,6 +572,7 @@ platformdirs==4.3.6
     # via
     #   -r requirements.in
     #   jupyter-core
+    #   pylint
     #   virtualenv
 pluggy==1.5.0
     # via
@@ -644,6 +654,10 @@ pygments==2.18.0
     #   ipython
     #   rich
     #   sphinx
+pylint==3.3.1
+    # via -r requirements.in
+pymanopt==2.2.1
+    # via -r requirements.in
 pymetis==2023.1.1
     # via
     #   -r requirements.in
@@ -756,6 +770,7 @@ scipy==1.14.1
     #   hyperopt
     #   ilupp
     #   local2global
+    #   pymanopt
     #   pynndescent
     #   scikit-learn
     #   torch-cluster
@@ -847,6 +862,8 @@ threadpoolctl==3.5.0
     #   scikit-learn
 toml==0.10.2
     # via streamlit
+tomlkit==0.13.2
+    # via pylint
 toolz==1.0.0
     # via
     #   -r requirements.in

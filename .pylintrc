@@ -5,7 +5,6 @@ ignore=docs/*
 notes=TODO
 disable=
     fixme,
-    import-error,
     duplicate-code,
     protected-access,
     too-many-locals,
