@@ -233,6 +233,8 @@ def _patch_overlaps(
         )
     return patches
 
+# TODO: fix too-many-branches
+# pylint: disable=too-many-branches
 def create_patch_data(
     graph: TGraph,
     partition_tensor: torch.LongTensor,
@@ -363,7 +365,7 @@ def create_patch_data(
         graph, partition_tensor_0, pg, min_overlap, target_overlap
     )
     return patches, pg
-
+# pylint: enable=too-many-branches
 
 def rolling_window_graph(n_patches: int, w):
     """ Generate patch edges for a rolling window
