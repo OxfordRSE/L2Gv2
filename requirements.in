@@ -9,6 +9,7 @@ sphinx-rtd-theme==3.0.1
 sphinx-autobuild==2024.10.3
 
 # Development dependencies
+pylint==3.3.1
 pre_commit==4.0.1
 
 # Testing dependencies
@@ -27,6 +28,7 @@ anyio==4.6.2.post1
 asttokens==2.4.1
 atomicwrites==1.4.1
 attrs==24.2.0
+autograd==1.7.0
 backoff==2.2.1
 bitarray==3.0.0
 blessed==1.20.0
@@ -112,7 +114,6 @@ nest-asyncio==1.6.0
 networkx==3.4.2
 nfts==0.0.2
 numba==0.60.0
-numpy==1.26.4
 packaging==24.1
 pandas==2.2.3
 param==2.1.1
@@ -140,6 +141,7 @@ pydantic==2.9.2
 pydantic_core==2.23.4
 pydeck==0.9.1
 Pygments==2.18.0
+pymanopt==2.2.1
 PyMetis==2023.1.1
 pynndescent==0.5.13
 pyparsing==3.2.0
@@ -197,7 +199,6 @@ zipp==3.20.2
 appnope==0.1.4; sys_platform == "darwin"
 
 # Git dependencies
-local2global @ git+https://github.com/LJeub/Local2Global.git@master
 local2global_embedding @ git+https://github.com/LJeub/Local2Global_embedding@master
 
 # Torch dependencies with platform-specific versions
