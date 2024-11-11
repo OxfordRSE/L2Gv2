@@ -35,7 +35,8 @@ def speye(n: int, dtype: torch.dtype = torch.float) -> torch.Tensor:
         (n, n),
     )
 
-
+# TODO: fix too-few-public-methods
+# pylint: disable=too-few-public-methods
 class VGAEconv(torch.nn.Module):
     """TODO: docstring for `VGAEconv`"""
 
@@ -95,7 +96,7 @@ class VGAEconv(torch.nn.Module):
         mu = self.mean_conv2(x, edge_index)
         sigma = self.var_conv2(x, edge_index)
         return mu, sigma
-
+# pylint: enable=too-few-public-methods
 
 def train(
     data: tg.data.Data,
