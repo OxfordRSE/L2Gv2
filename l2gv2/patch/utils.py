@@ -213,7 +213,8 @@ def relative_scale(coordinates1: np.ndarray, coordinates2: np.ndarray, clamp=1e8
         return 1 / clamp
     return scale1 / scale2
 
-
+# TODO: fix too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes
 class AlignmentProblem:
     """Implements the standard local2global algorithm using an unweighted patch graph"""
 
@@ -689,7 +690,7 @@ class AlignmentProblem:
                 (data, index, indptr), shape=(dim * n, dim * n), blocksize=(dim, dim)
             )
         return matrix
-
+# pylint: enable=too-many-instance-attributes
 
 class WeightedAlignmentProblem(AlignmentProblem):
     """Variant of the local2global algorithm where patch edges
@@ -762,8 +763,9 @@ class SVDAlignmentProblem(WeightedAlignmentProblem):
             m = ss.linalg.LinearOperator((dim, dim), matvec=cond_solve)
         return m
 
-    # TODO: fix too-many-branches
+    # TODO: fix too-many-branches, too-many-statements
     # pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
     def _synchronise(
         self,
         matrix: ss.spmatrix,
@@ -894,4 +896,5 @@ class SVDAlignmentProblem(WeightedAlignmentProblem):
         vecs = vecs[:, order[:blocksize]].real
         vecs.shape = (dim // blocksize, blocksize, blocksize)
         return vecs
+    # pylint: enable=too-many-statements
     # pylint: enable=too-many-branches

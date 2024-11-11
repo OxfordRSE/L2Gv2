@@ -8,7 +8,5 @@ disable=
     import-error,
     duplicate-code,
     too-many-locals,
-    too-many-instance-attributes,
     too-many-arguments,
-    too-many-statements,
     too-many-positional-arguments
