@@ -1,4 +1,1 @@
-
-from ._base import (
-    DataLoader
-)
+from ._base import DataLoader
