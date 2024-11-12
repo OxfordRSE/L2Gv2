@@ -207,138 +207,30 @@ class DataLoader:
         pass
 
 
+# TODO: uncomment and integrate into DataLoader?
+# def summary(data: nx.Graph | list[nx.Graph]):
+#     if not isinstance(data, list):
+#         data = [data]
 #
-# From here on the code is obsolete and needs to be adjusted
+#     if isinstance(data[0], nx.Graph):
+#         number_of_nodes = []
+#         number_of_edges = []
+#         avg_degree = []
+#         for G in data:
+#             number_of_nodes.append(G.number_of_nodes())
+#             number_of_edges.append(G.number_of_edges())
 #
-
-
-def load_NFTS(divided_by_time=True, connected=True, days=178):
-    DATAPATH = PATH + "ethereumSqlite/nfts.sqlite"
-
-    ds = nfts.dataset.FromSQLite(DATAPATH)
-
-    NFTS = pl.from_pandas(ds.load_dataframe("nfts"))
-    transfers = pl.from_pandas(ds.load_dataframe("transfers"))
-    current_owners = pl.from_pandas(ds.load_dataframe("current_owners"))
-
-    transfers = (
-        transfers.with_columns(pl.from_epoch("timestamp", time_unit="s"))
-        .sort("timestamp")
-        .select(["timestamp", "from_address", "to_address", "transaction_value"])
-    )
-
-    nodes = pl.concat([transfers["from_address"], transfers["to_address"]])
-    nodes = nodes.unique()
-    new_nodes = {old: new for new, old in enumerate(nodes)}
-
-    for c in transfers.columns[1:3]:
-        transfers = transfers.with_columns(transfers[c].replace(new_nodes).alias(c))
-        transfers = transfers.with_columns([transfers[c].cast(pl.Int32).alias(c)])
-
-    transfers = transfers.with_columns(pl.from_epoch("timestamp", time_unit="d"))
-
-    unique_dates = transfers["timestamp"].unique()
-    days = {old: new for new, old in enumerate(unique_dates)}
-
-    transfers = transfers.with_columns(
-        transfers["timestamp"].replace(days).cast(pl.Int32)
-    )
-
-    numb_of_days = 178
-
-    edge_index = torch.tensor(
-        transfers["from_address", "to_address"].to_numpy(), dtype=torch.long
-    )
-    edge_index = edge_index.t().contiguous()
-    edge_attr = torch.tensor(transfers["transaction_value"], dtype=torch.float)
-    time = torch.tensor(transfers["timestamp"], dtype=torch.float)
-    n = pl.concat([transfers["from_address"], transfers["to_address"]])
-    n = n.unique()
-    n = torch.tensor(n)
-    G = Data(
-        edge_index=edge_index, edge_attr=edge_attr, time=time, nodes=n, num_nodes=len(n)
-    )
-    if not divided_by_time:
-        if connected:
-            transform = LargestConnectedComponents()
-            G_conn = transform(G)
-            return G_conn
-        else:
-            return G
-
-    else:
-        daily_transfers = [
-            transfers.filter(pl.col("timestamp") == i) for i in range(numb_of_days)
-        ]
-        dict_nodes_patches = []
-
-        daily_transfers_nodes_relabelled = [t.clone() for t in daily_transfers]
-        df = daily_transfers_nodes_relabelled[0]
-        n = pl.concat([df["from_address"], df["to_address"]])
-        n = n.unique()
-        new_nodes_p = {old: new for new, old in enumerate(n)}
-        dict_nodes_patches.append(new_nodes_p)
-        for c in df.columns[1:3]:
-            df = df.with_columns(df[c].replace(new_nodes_p).alias(c))
-            df = df.with_columns([df[c].cast(pl.Int32).alias(c)])
-
-        dict_nodes_patches = []
-        daily_transfers_nodes_relabelled = []
-        for df in daily_transfers:
-            n = pl.concat([df["from_address"], df["to_address"]])
-            n = n.unique()
-            new_nodes_p = {old: new for new, old in enumerate(n)}
-            dict_nodes_patches.append(new_nodes_p)
-            for c in df.columns[1:3]:
-                df = df.with_columns(df[c].replace(new_nodes_p).alias(c))
-                df = df.with_columns([df[c].cast(pl.Int32).alias(c)])
-            daily_transfers_nodes_relabelled.append(df)
-
-        daily_g = []
-        for df in daily_transfers_nodes_relabelled:
-            ed = torch.tensor(
-                df["from_address", "to_address"].to_numpy(), dtype=torch.long
-            )
-            ed = ed.t().contiguous()
-            ed_attr = torch.tensor(df["transaction_value"], dtype=torch.float)
-            n = pl.concat([df["from_address"], df["to_address"]])
-            n = n.unique()
-            n = torch.tensor(n)
-            g = Data(edge_index=ed, edge_attr=ed_attr, nodes=n, num_nodes=len(n))
-            daily_g.append(g)
-        if connected:
-            transform = LargestConnectedComponents()
-
-            daily_g_conn = [transform(g) for g in daily_g]
-
-            return daily_g_conn
-        else:
-            return daily_g
-
-
-def summary(data):
-    if not isinstance(data, type([])):
-        data = [data]
-
-    if isinstance(data[0], type(nx.Graph())):
-        number_of_nodes = []
-        number_of_edges = []
-        avg_degree = []
-        for G in data:
-            number_of_nodes.append(G.number_of_nodes())
-            number_of_edges.append(G.number_of_edges())
-
-            avg_degree.append(sum(dict(G.degree()).values()) / G.number_of_nodes())
-        avg_n = int(np.mean(number_of_nodes))
-        avg_e = int(np.mean(number_of_edges))
-        avg_d = int(np.mean(avg_degree))
-
-        print(
-            "The dataset consists of {} graphs.\n Average number of nodes : {} \n Average number of edges : {} \n Average degree: {} ".format(
-                len(data), avg_n, avg_e, avg_d
-            )
-        )
-    else:
-        print("Converting into networkx graphs")
-        data = [to_networkx(d, to_undirected=False) for d in tqdm(data)]
-        summary(data)
+#             avg_degree.append(sum(dict(G.degree()).values()) / G.number_of_nodes())
+#         avg_n = int(np.mean(number_of_nodes))
+#         avg_e = int(np.mean(number_of_edges))
+#         avg_d = int(np.mean(avg_degree))
+#
+#         print(
+#             "The dataset consists of {} graphs.\n Average number of nodes : {} \n Average number of edges : {} \n Average degree: {} ".format(
+#                 len(data), avg_n, avg_e, avg_d
+#             )
+#         )
+#     else:
+#         print("Converting into networkx graphs")
+#         data = [to_networkx(d, to_undirected=False) for d in tqdm(data)]
+#         summary(data)
