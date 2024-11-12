@@ -1,24 +1,23 @@
+from pathlib import Path
+
 from tqdm import tqdm
-from os import path
-import numpy as np
 import polars as pl
 import torch
 import networkx as nx
-from raphtory import Graph as rGraph
-import nfts.dataset
-from torch_geometric.data import Data
+import raphtory as rp
+import torch_geometric.data
 
-PATH = path.join(path.dirname(__file__), "data/")
-# PATH = './data/'
-DATASETS = {
-    "AS": ["snap-as/as_edges.parquet"],
-    "elliptic": ["elliptic/elliptic_edges.parquet", "elliptic/elliptic_nodes.parquet"],
-    "nfts": ["nfts/nfts_edges.parquet"],
-    "nAS": ["nas/nas_edges.parquet", "nas/nas_nodes.parquet"],
-}
+DATA_PATH = Path(__file__).parent / "data"
+DATASETS = [x.stem for x in DATA_PATH.glob("*") if x.is_dir()]
 FORMATS = ["networkx", "tgeometric", "raphtory", "polars", "edge_list"]
-EDGE_COLUMNS = ["source", "dest"]  # required columns
-NODE_COLUMNS = ["nodes"]  # required column for nodes
+EDGE_COLUMNS = {"source", "dest"}  # required columns
+
+EdgeList = list[tuple[str, str]]
+
+
+def is_graph_dataset(p: Path) -> bool:
+    "Returns True if dataset represented by `p` is a valid dataset"
+    return (p / (p.stem + "_edges.parquet")).exists()
 
 
 class DataLoader:
@@ -26,36 +25,38 @@ class DataLoader:
     methods for loading the data in different formats.
     """
 
-    def __init__(
-        self, source: str = "AS", datasets: dict[str] = DATASETS, path: str = PATH
-    ):
-        assert source in datasets
-        files = datasets[source]
-        files = [path + f for f in files]
-        self.__load_files(files)
+    def __init__(self, dset: str):
+        if is_graph_dataset(Path(dset)):
+            self.path = Path(dset)
+        elif is_graph_dataset(DATA_PATH / dset):
+            self.path = DATA_PATH / dset
+        else:
+            raise FileNotFoundError(f"Dataset not found: {dset}")
 
-    def __load_files(self, files):
-        """ """
-        edgefile = None
-        nodefile = None
-        for f in files:
-            if "edges" in f:
-                edgefile = f
-            if "nodes" in f:
-                nodefile = f
+        self.paths = {"edges": self.path / (self.path.stem + "_edges.parquet")}
+        if (nodes_path := self.path / (self.path.stem + "_nodes.parquet")).exists():
+            self.paths["nodes"] = nodes_path
 
-        # Process edges
-        self.edges = pl.read_parquet(edgefile)
-        for c in EDGE_COLUMNS:
-            assert c in self.edges.columns
-        self.temporal = True if "timestamp" in self.edges.columns else False
+        self._load_files()
+
+    def _load_files(self):
+        "Loads dataset into memory"
+
+        self.edges = pl.read_parquet(self.paths["edges"])
+        assert EDGE_COLUMNS <= set(
+            self.edges.columns
+        ), f"Required edge columns not found: {EDGE_COLUMNS}"
+        self.temporal = "timestamp" in self.edges.columns
         if not self.temporal:
             self.edges = self.edges.with_columns(pl.lit(0).alias("timestamp"))
         self.datelist = self.edges.select("timestamp").to_series().unique()
 
         # Process nodes
-        if nodefile is not None:
-            self.nodes = pl.read_parquet(nodefile)
+        if self.paths.get("nodes"):
+            self.nodes = pl.read_parquet(self.paths["nodes"])
+            assert (
+                "nodes" in self.nodes.columns
+            ), "Required node columns not found: 'nodes'"
         else:
             self.nodes = (
                 pl.concat(
@@ -71,46 +72,42 @@ class DataLoader:
                 .unique()
                 .sort(by=["timestamp", "nodes"])
             )
-        for c in NODE_COLUMNS:
-            assert c in self.nodes.columns
 
         self.edge_features = [
             x
             for x in self.edges.columns
-            if x not in ["timestamp", "label"] + EDGE_COLUMNS
+            if x not in ["timestamp", "label"] + sorted(EDGE_COLUMNS)
         ]
         self.node_features = [
-            x
-            for x in self.nodes.columns
-            if x not in ["timestamp", "label"] + NODE_COLUMNS
+            x for x in self.nodes.columns if x not in ["timestamp", "label", "nodes"]
         ]
 
-    def get_dates(self):
+    def get_dates(self) -> list[str]:
         return self.datelist.to_list()
 
-    def get_edges(self):
+    def get_edges(self) -> pl.DataFrame:
         return self.edges
 
-    def get_nodes(self, ts=None):
+    def get_nodes(self, ts: str | None = None) -> pl.DataFrame:
         if ts is None:
             return self.nodes
         else:
             return self.nodes.filter(pl.col("timestamp") == ts)
 
-    def get_node_list(self, ts=None):
+    def get_node_list(self, ts: str | None = None) -> list[str]:
         nodes = self.nodes
         if ts is not None:
             nodes = nodes.filter(pl.col("timestamp") == ts)
         return nodes.select("nodes").unique(maintain_order=True).to_series().to_list()
 
-    def get_node_features(self):
+    def get_node_features(self) -> list[str]:
         return self.node_features
 
-    def get_edge_features(self):
+    def get_edge_features(self) -> list[str]:
         return self.edge_features
 
-    def get_graph(self):
-        g = rGraph()
+    def get_graph(self) -> rp.Graph:
+        g = rp.Graph()
         g.load_edges_from_pandas(
             df=self.edges.to_pandas(),
             time="timestamp",
@@ -126,7 +123,7 @@ class DataLoader:
         )
         return g
 
-    def get_edge_list(self, temp=True):
+    def get_edge_list(self, temp: bool = True) -> EdgeList | dict[str, EdgeList]:
         if self.temporal and temp:
             edge_list = {}
             for d in tqdm(self.datelist):
@@ -141,7 +138,7 @@ class DataLoader:
             edge_list = [tuple(x) for x in edges]
         return edge_list
 
-    def get_networkx(self, temp=True):
+    def get_networkx(self, temp: bool = True) -> nx.Graph | dict[str, nx.Graph]:
         if self.temporal and temp:
             nx_graphs = {}
             for d in tqdm(self.datelist):
@@ -158,7 +155,9 @@ class DataLoader:
             nx_graphs = nx.from_edgelist(edge_list)
         return nx_graphs
 
-    def get_edge_index(self, temp=True, date=None):
+    def get_edge_index(
+        self, temp: bool = True
+    ) -> torch.Tensor | dict[str, torch.Tensor]:
         if self.temporal and temp:
             edge_index = {}
             for d in tqdm(self.datelist):
@@ -177,7 +176,9 @@ class DataLoader:
             edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous()
         return edge_index
 
-    def get_tgeometric(self, dict=None, temp=True):
+    def get_tgeometric(
+        self, temp: bool = True
+    ) -> torch_geometric.data.Data | dict[str, torch_geometric.data.Data]:
         nodes = self.nodes.select("nodes").unique().to_numpy()
         features = self.nodes.select([c for c in self.node_features]).to_numpy()
         if self.temporal and temp:
@@ -190,7 +191,7 @@ class DataLoader:
                 )
                 edge_list = [tuple(x) for x in edges]
                 edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous()
-                tg = Data(edge_index=edge_index)
+                tg = torch_geometric.data.Data(edge_index=edge_index)
                 tg.nodes = torch.from_numpy(nodes).int()
                 tg.x = torch.from_numpy(features).float()
                 tg_graphs[d] = tg
@@ -198,7 +199,7 @@ class DataLoader:
             edges = self.edges.select("source", "dest").unique().to_numpy()
             edge_list = [tuple(x) for x in edges]
             edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous()
-            tg_graphs = Data(edge_index=edge_index)
+            tg_graphs = torch_geometric.data.Data(edge_index=edge_index)
             tg_graphs.nodes = torch.Tensor(nodes).int()
             tg_graphs.x = torch.from_numpy(features).float()
         return tg_graphs
