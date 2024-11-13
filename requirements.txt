@@ -6,7 +6,6 @@
 #
 --find-links https://data.pyg.org/whl/torch-2.4.0+cpu.html
 
--e file:///Users/mihaela/Documents/work/turing/L2Gv2
     # via -r requirements.in
 aiohappyeyeballs==2.4.3
     # via
