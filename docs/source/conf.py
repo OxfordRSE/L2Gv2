@@ -18,7 +18,28 @@ extensions = ["sphinx_markdown_builder", "sphinx.ext.autodoc", "sphinx.ext.autos
 templates_path = ["_templates"]
 exclude_patterns = []
 
-autodoc_mock_imports = ["optuna", "autograd", "pymanopt", "tqdm", "torch", "numba", "numpy", "pandas", "sklearn", "scipy", "community", "torch_geometric", "torch_scatter", "local2global", "raphtory", "local2global_embedding", "networkx", "matplotlib", "nfts", "polars"]
+autodoc_mock_imports = [
+    "optuna",
+    "autograd",
+    "pymanopt",
+    "tqdm",
+    "torch",
+    "numba",
+    "numpy",
+    "pandas",
+    "sklearn",
+    "scipy",
+    "community",
+    "torch_geometric",
+    "torch_scatter",
+    "local2global",
+    "raphtory",
+    "local2global_embedding",
+    "networkx",
+    "matplotlib",
+    "nfts",
+    "polars",
+]
 
 
 # -- Options for HTML output -------------------------------------------------
