@@ -17,7 +17,8 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-
+# pylint: disable=invalid-name
+""" TODO: module docstring for embedding/gae/layers/GAEconv.py. """
 import torch
 import torch_geometric as tg
 from torch.nn import functional as F
@@ -27,7 +28,17 @@ class GAEconv(torch.nn.Module):
     """
     implements the convolution operator for use with :class:`tg.nn.GAE`
     """
-    def __init__(self, dim, num_node_features, hidden_dim=32, cached=True, bias=True, add_self_loops=True, normalize=True):
+
+    def __init__(
+        self,
+        dim,
+        num_node_features,
+        hidden_dim=32,
+        cached=True,
+        bias=True,
+        add_self_loops=True,
+        normalize=True,
+    ):
         """
         Initialise parameters
 
@@ -41,10 +52,22 @@ class GAEconv(torch.nn.Module):
             normalize: if ``True``, normalise adjacency matrix
         """
         super().__init__()
-        self.conv1 = tg.nn.GCNConv(num_node_features, hidden_dim, cached=cached, bias=bias, add_self_loops=add_self_loops,
-                                   normalize=normalize)
-        self.conv2 = tg.nn.GCNConv(hidden_dim, dim, cached=cached, bias=bias, add_self_loops=add_self_loops,
-                                   normalize=normalize)
+        self.conv1 = tg.nn.GCNConv(
+            num_node_features,
+            hidden_dim,
+            cached=cached,
+            bias=bias,
+            add_self_loops=add_self_loops,
+            normalize=normalize,
+        )
+        self.conv2 = tg.nn.GCNConv(
+            hidden_dim,
+            dim,
+            cached=cached,
+            bias=bias,
+            add_self_loops=add_self_loops,
+            normalize=normalize,
+        )
 
     def forward(self, data):
         """compute coordinates given data"""

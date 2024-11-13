@@ -1,7 +1,8 @@
-import torch
-import torch.nn as nn
-import torch_geometric as tg
+""" TODO: module docstring for dgi/execute.py. """
 import argparse
+import torch
+from torch import nn
+import torch_geometric as tg
 
 
 from .models import DGI, LogReg
@@ -9,26 +10,26 @@ from .utils.loss import DGILoss
 
 
 parser = argparse.ArgumentParser(description="DGI test script")
-parser.add_argument('--datapath', default='/tmp/cora')
+parser.add_argument("--datapath", default="/tmp/cora")
 args = parser.parse_args()
 
-dataset = 'cora'
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+DATASET = "Cora"
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 loss_fun = DGILoss()
 
 # training params
-batch_size = 1
-nb_epochs = 10000
-patience = 20
-lr = 0.001
-l2_coef = 0.0
-drop_prob = 0.0
-hid_units = 512
-sparse = True
-nonlinearity = 'prelu'  # special name to separate parameters
+BATCH_SIZE = 1
+NB_EPOCHS = 10000
+PATIENCE = 20
+LR = 0.001
+L2_COEF = 0.0
+DROP_PROB = 0.0
+HID_UNITS = 512
+SPARSE = True
+NONLINEARITY = "prelu"  # special name to separate parameters
 
-data = tg.datasets.Planetoid(name='Cora', root=args.datapath)[0]
+data = tg.datasets.Planetoid(name=DATASET, root=args.datapath)[0]
 data = data.to(device)
 r_sum = data.x.sum(dim=1)
 r_sum[r_sum == 0] = 1.0  # avoid division by zero
@@ -56,40 +57,43 @@ nb_classes = data.y.max().item() + 1
 # idx_val = torch.LongTensor(idx_val)
 # idx_test = torch.LongTensor(idx_test)
 
-model = DGI(ft_size, hid_units, nonlinearity)
+model = DGI(ft_size, HID_UNITS, NONLINEARITY)
 model = model.to(device)
 
-optimiser = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=l2_coef)
+optimiser = torch.optim.Adam(model.parameters(), lr=LR, weight_decay=L2_COEF)
+
+STATE_DICT = "best_dgi.pkl"
 
 xent = nn.CrossEntropyLoss()
+# pylint: disable=invalid-name
 cnt_wait = 0
 best = 1e9
 best_t = 0
-
-for epoch in range(nb_epochs):
+for epoch in range(NB_EPOCHS):
     model.train()
     optimiser.zero_grad()
     loss = loss_fun(model, data)
 
-    print('Loss:', loss)
+    print("Loss:", loss)
 
     if loss < best:
         best = loss
         best_t = epoch
         cnt_wait = 0
-        torch.save(model.state_dict(), 'best_dgi.pkl')
+        torch.save(model.state_dict(), STATE_DICT)
     else:
         cnt_wait += 1
 
-    if cnt_wait == patience:
-        print('Early stopping!')
+    if cnt_wait == PATIENCE:
+        print("Early stopping!")
         break
 
     loss.backward()
     optimiser.step()
+# pylint: enable=invalid-name
 
-print('Loading {}th epoch'.format(best_t))
-model.load_state_dict(torch.load('best_dgi.pkl'))
+print(f"Loading {best_t}th epoch")
+model.load_state_dict(torch.load(STATE_DICT))
 
 embeds = model.embed(data)
 train_embs = embeds[data.train_mask]
@@ -104,13 +108,12 @@ tot = torch.zeros(1, device=device)
 accs = []
 
 for _ in range(50):
-    log = LogReg(hid_units, nb_classes).to(device)
+    log = LogReg(HID_UNITS, nb_classes).to(device)
 
     opt = torch.optim.Adam(log.parameters(), lr=0.01, weight_decay=0.0)
 
-    pat_steps = 0
     best_acc = torch.zeros(1, device=device)
-        
+
     for _ in range(100):
         log.train()
         opt.zero_grad()
@@ -128,7 +131,7 @@ for _ in range(50):
     print(acc)
     tot += acc
 
-print('Average accuracy:', tot / 50)
+print("Average accuracy:", tot / 50)
 
 accs = torch.stack(accs)
 print(accs.mean())

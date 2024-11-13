@@ -17,28 +17,30 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-
+""" TODO: module docstring for embedding gae/utils/mixins.py. """
 import torch
 
-
+# pylint: disable=too-few-public-methods
 class EmbeddingMixin:
+    """ TODO: class docstring for EmbeddingMixin. """
     def embed(self, data):
         """
-           Compute embedding for model and data
+        Compute embedding for model and data
 
-           Args:
-               data: network
+        Args:
+            data: network
 
-           Returns:
-               embedding coords for nodes
+        Returns:
+            embedding coords for nodes
 
-           This function switches the model to eval state before computing the embedding and restores the original
-           training state of the model
+        This function switches the model to eval state before computing 
+        the embedding and restores the original training state of the model
 
-           """
+        """
         train_state = self.training
         self.training = False
         with torch.no_grad():
             coords = self.encode(data)
         self.training = train_state
         return coords
+# pylint: enable=too-few-public-methods
