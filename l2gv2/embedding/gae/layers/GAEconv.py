@@ -23,7 +23,8 @@ import torch
 import torch_geometric as tg
 from torch.nn import functional as F
 
-
+# TODO: fix too-few-public-methods for embedding/gae/layers/GAEconv.py GAEconv
+# pylint: disable=too-few-public-methods
 class GAEconv(torch.nn.Module):
     """
     implements the convolution operator for use with :class:`tg.nn.GAE`
@@ -74,3 +75,4 @@ class GAEconv(torch.nn.Module):
         edge_index = data.edge_index
         x = F.relu(self.conv1(data.x, edge_index))
         return self.conv2(x, edge_index)
+# pylint: enable=too-few-public-methods

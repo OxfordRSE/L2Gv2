@@ -24,7 +24,8 @@ from ..utils.mixins import EmbeddingMixin
 from ..layers.decoders import DistanceDecoder
 from ..layers.GAEconv import GAEconv
 
-
+# TODO: fix too-few-public-methods for embedding/gae/models/gae.py GAE
+# pylint: disable=too-few-public-methods
 class GAE(tg.nn.GAE, EmbeddingMixin):
     """ TODO: class docstring for GAE. """
     def __init__(self, dim, hidden_dim, num_features, dist=False):
@@ -54,3 +55,4 @@ class GAE(tg.nn.GAE, EmbeddingMixin):
                     dim, num_node_features=num_features, hidden_dim=hidden_dim
                 )
             )
+# pylint: enable=too-few-public-methods
