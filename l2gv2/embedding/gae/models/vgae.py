@@ -17,7 +17,7 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-
+""" TODO: modue docstring for embedding/gae/models/vgae.py. """
 import torch_geometric as tg
 
 from ..utils.mixins import EmbeddingMixin
@@ -26,6 +26,7 @@ from ..layers.VGAEconv import VGAEconv
 
 
 class VGAE(tg.nn.VGAE, EmbeddingMixin):
+    """ TODO: class docstring for VGAE. """
     def __init__(self, dim, hidden_dim, num_features, dist=False):
         """
         initialise a Variational Graph Auto-Encoder model
@@ -34,13 +35,22 @@ class VGAE(tg.nn.VGAE, EmbeddingMixin):
             dim: output dimension
             hidden_dim: inner hidden dimension
             num_features: number of input features
-            dist: if ``True`` use distance decoder, otherwise use inner product decoder (default: ``False``)
+            dist: if ``True`` use distance decoder, 
+                otherwise use inner product decoder (default: ``False``)
 
         Returns:
             initialised :class:`tg.nn.VGAE` model
         """
         if dist:
-            super().__init__(encoder=VGAEconv(dim, num_node_features=num_features, hidden_dim=hidden_dim),
-                             decoder=DistanceDecoder())
+            super().__init__(
+                encoder=VGAEconv(
+                    dim, num_node_features=num_features, hidden_dim=hidden_dim
+                ),
+                decoder=DistanceDecoder(),
+            )
         else:
-            super().__init__(encoder=VGAEconv(dim, num_node_features=num_features, hidden_dim=hidden_dim))
+            super().__init__(
+                encoder=VGAEconv(
+                    dim, num_node_features=num_features, hidden_dim=hidden_dim
+                )
+            )

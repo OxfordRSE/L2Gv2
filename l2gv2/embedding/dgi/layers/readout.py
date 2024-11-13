@@ -1,17 +1,21 @@
+"""TODO: module docstring for dgi/layers/readout.py."""
+
 import torch
-import torch.nn as nn
+from torch import nn
 
 
 # Applies an average on seq, of shape (batch, nodes, features)
 # While taking into account the masking of msk
 class AvgReadout(nn.Module):
+    """TODO: class docstring for AvgReadout."""
+
     def __init__(self):
-        super(AvgReadout, self).__init__()
+        super().__init__()
 
     def forward(self, seq, msk):
+        """TODO: method docstring for AvgReadout.forward."""
         if msk is None:
             return torch.mean(seq, 0)
-        else:
-            msk = torch.unsqueeze(msk, -1)
-            return torch.sum(seq * msk, 0) / torch.sum(msk)
 
+        msk = torch.unsqueeze(msk, -1)
+        return torch.sum(seq * msk, 0) / torch.sum(msk)
