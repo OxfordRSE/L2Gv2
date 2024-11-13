@@ -11,4 +11,3 @@ l2gv2 documentation
 
    intro
    code
-

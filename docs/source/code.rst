@@ -1,9 +1,13 @@
 
-Code Reference
-==============
+Reference
+==========
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents
+
+   reference/l2gv2
 
 .. autosummary::
-   :toctree: _autosummary
+   :toctree: reference
    :recursive:
-
-   l2gv2
