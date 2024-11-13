@@ -168,6 +168,8 @@ def _svds_laplacian(
 
     X = rg.normal(size=(min(A.shape), k))
     for _ in range(maxrestarts):
+        # TODO: fix unbalanced-tuple-unpacking in call to sl.lobpcg
+        # pylint: disable=unbalanced-tuple-unpacking
         eigvals, eigvec, res = sl.lobpcg(
             XH_X,
             X,
@@ -178,6 +180,7 @@ def _svds_laplacian(
             retResidualNormsHistory=True,
             verbosityLevel=verbose,
         )
+        # pylint: enable=unbalanced-tuple-unpacking
         if res[-1].max() > tol:
             X = eigvec + rg.normal(size=eigvec.shape, scale=0.5 * tol)
         else:
