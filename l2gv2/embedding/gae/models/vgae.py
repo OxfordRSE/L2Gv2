@@ -24,7 +24,8 @@ from ..utils.mixins import EmbeddingMixin
 from ..layers.decoders import DistanceDecoder
 from ..layers.VGAEconv import VGAEconv
 
-
+# TODO: fix too-few-public-methods for embedding/gae/models/vgae.py VGAE
+# pylint: disable=too-few-public-methods
 class VGAE(tg.nn.VGAE, EmbeddingMixin):
     """ TODO: class docstring for VGAE. """
     def __init__(self, dim, hidden_dim, num_features, dist=False):
@@ -54,3 +55,4 @@ class VGAE(tg.nn.VGAE, EmbeddingMixin):
                     dim, num_node_features=num_features, hidden_dim=hidden_dim
                 )
             )
+# pylint: enable=too-few-public-methods

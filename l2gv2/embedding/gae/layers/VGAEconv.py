@@ -24,7 +24,8 @@ import torch
 import torch_geometric as tg
 from torch.nn import functional as F
 
-
+# TODO: fix too-few-public-methods for embedding/gae/layers/VGAEconv.py VGAEconv
+# pylint: disable=too-few-public-methods
 class VGAEconv(torch.nn.Module):
     """
     implements the convolution operator for use with :class:`torch_geometric.nn.VGAE`
@@ -85,3 +86,4 @@ class VGAEconv(torch.nn.Module):
         mu = self.mean_conv2(x, edge_index)
         sigma = self.var_conv2(x, edge_index)
         return mu, sigma
+# pylint: enable=too-few-public-methods

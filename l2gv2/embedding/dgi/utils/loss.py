@@ -2,7 +2,8 @@
 import torch_geometric as tg
 import torch
 
-
+# TODO: fix too-few-public-methods for dgi/utils/loss.py DGILoss
+# pylint: disable=too-few-public-methods
 class DGILoss(torch.nn.Module):
     """ TODO: class docstring for DGILoss. """
     def __init__(self):
@@ -24,3 +25,4 @@ class DGILoss(torch.nn.Module):
         logits = model(data.x, shuf_fts, data.edge_index, None, None, None)
 
         return self.loss_fun(logits, lbl)
+# pylint: enable=too-few-public-methods
