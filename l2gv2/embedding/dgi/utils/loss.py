@@ -1,13 +1,16 @@
+""" TODO: module docstring for dgi/utils/loss.py. """
 import torch_geometric as tg
 import torch
 
 
 class DGILoss(torch.nn.Module):
+    """ TODO: class docstring for DGILoss. """
     def __init__(self):
         super().__init__()
         self.loss_fun = torch.nn.BCEWithLogitsLoss()
 
     def forward(self, model, data: tg.data.Data):
+        """ TODO: method docstring for DGILoss.forward. """
         device = data.edge_index.device
         nb_nodes = data.num_nodes
         idx = torch.randperm(nb_nodes, device=device)

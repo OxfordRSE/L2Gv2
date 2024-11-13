@@ -1,2 +1,3 @@
+""" Imports for the DGI. """
 from .models import DGI
-from .utils import DGILoss
+from .utils.loss import DGILoss
