@@ -10,9 +10,11 @@ import local2global.example as ex
 
 
 # fixed seed for testing
-# _seed = np.random.SeedSequence(148047762894979172857694243677519903461)
+_seed = np.random.SeedSequence(148047762894979172857694243677519903461)
 
-_seed = np.random.SeedSequence()
+# random seed
+# _seed = np.random.SeedSequence()
+
 ut.seed(_seed)
 print(_seed.entropy)
 
