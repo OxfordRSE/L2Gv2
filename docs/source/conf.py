@@ -15,6 +15,14 @@ author = ""
 
 extensions = ["sphinx_markdown_builder", "sphinx.ext.autodoc", "sphinx.ext.autosummary"]
 
+autosummary_generate = True
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True, 
+    "inherited-members": True,
+    "show-inheritance": True,
+}
+
 templates_path = ["_templates"]
 exclude_patterns = []
 
