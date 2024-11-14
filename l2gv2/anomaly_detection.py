@@ -1,10 +1,11 @@
 """Anomaly detection module."""
 
+from typing import Any
 import numpy as np
 from l2gv2.patch.patch import Patch
 
 
-def raw_anomaly_score_node_patch(aligned_patch_emb, emb, node) -> float:
+def raw_anomaly_score_node_patch(aligned_patch_emb, emb, node) -> np.floating[Any]:
     """TODO: docstring for `raw_anomaly_score_node_patch`
 
     Args:
