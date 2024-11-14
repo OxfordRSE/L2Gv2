@@ -20,3 +20,17 @@ classifiers = [
 [project.urls]
 "Homepage" = "https://github.com/lotzma/L2Gv2"
 "Bug Tracker" = "https://github.com/lotzma/L2Gv2/issues"
+
+[tool.pylint.'MASTER']
+ignore = ["docs/*"]
+
+[tool.pylint.'MESSAGES CONTROL']
+notes = "TODO"
+disable = [
+    "fixme",
+    "import-error",
+    "duplicate-code",
+    "too-many-locals",
+    "too-many-arguments",
+    "too-many-positional-arguments"
+]
