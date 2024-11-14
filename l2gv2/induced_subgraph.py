@@ -8,14 +8,14 @@ def induced_subgraph(data: tg.data.Data, nodes, extend_hops: int = 0) -> tg.data
     """TODO: docstring for `induced_subgraph`
 
     Args:
-        data (torch_geometric.data.Data): [description]
+        data: [description]
 
-        nodes (int): [description]
+        nodes: [description]
 
-        extend_hops (int, optional): [description], default is 0.
+        extend_hops: [description], default is 0.
 
     Returns:
-        torch_geometric.data.Data: [description]
+        [description]
     """
 
     nodes = torch.as_tensor(nodes, dtype=torch.long)
