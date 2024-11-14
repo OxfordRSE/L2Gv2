@@ -70,8 +70,9 @@ class VGAEconv(torch.nn.Module):
     def forward(self, data: tg.data.Data):
         """
         compute mean and variance given data
+        
         Args:
-            data: input data
+            data [type]: input data
 
         Returns:
             mu, sigma
