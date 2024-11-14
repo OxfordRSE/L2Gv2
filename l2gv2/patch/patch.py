@@ -34,12 +34,13 @@ class Patch:
     coordinates = None
     """patch embedding coordinates"""
 
-    def __init__(self, nodes: iter, coordinates: str=None):
+    def __init__(self, nodes: iter, coordinates: np.ArrayLike | None = None):
         """ Initialise a patch from a list of nodes and corresponding coordinates
 
         Args:
-            nodes (iter): Iterable of integer node indeces for patch
-            coordinates (str, optional): filename for coordinate file to be loaded on demand
+            nodes: Iterable of integer node indeces for patch
+
+            coordinates: [description]. Defaults to None.
         """
         self.nodes = np.asanyarray(nodes)
         self.index = {int(n): i for i, n in enumerate(nodes)}
@@ -62,7 +63,7 @@ class Patch:
         """ Get coordinates for a list of nodes
 
         Args:
-            nodes (iter): Iterable of node indeces
+            nodes: Iterable of node indeces
         """
         return self.coordinates[[self.index[node] for node in nodes], :]
 
@@ -70,7 +71,7 @@ class Patch:
         """ Get coordinate for a single node
 
         Args:
-            node (int): The node index
+            node: The node index
         """
         return self.coordinates[self.index[node], :]
 
