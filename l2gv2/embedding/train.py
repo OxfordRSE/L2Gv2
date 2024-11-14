@@ -77,13 +77,22 @@ def train(
 
     Args:
         data: network data
+
+        
         model: embedding auto-encoder model
+        
         loss_fun: loss function to use with model (takes arguments ``model``, ``data``)
+        
         num_epochs: number of training epochs
+        
         patience: patience for early stopping
+        
         lr: learining rate (default: 0.01)
+        
         weight_decay: weight decay for optimizer (default: 0.0)
+        
         verbose: if ``True``, display training progress (default: ``True``)
+        
         logger: function that receives the training loss as input and 
             is called after each epoch (does nothing by default)
 

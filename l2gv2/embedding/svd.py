@@ -114,8 +114,10 @@ def _svds_laplacian(
         Unitary matrix having left singular vectors as columns.
         If `return_singular_vectors` is "vh", this variable is not computed,
         and None is returned instead.
+
     s : ndarray, shape=(k,)
         The singular values.
+
     vt : ndarray, shape=(k, N)
         Unitary matrix having right singular vectors as rows.
 
@@ -228,9 +230,11 @@ def _svds_laplacian(
 def bipartite_svd_patches(A: ss.spmatrix, dim, verbose=0):
     """
     SVD embedding of bipartite network
+
     Args:
-        A:
-        dim:
+        A [type]: [description]
+
+        dim [type]: [description]
 
     Returns:
 

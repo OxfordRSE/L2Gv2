@@ -36,9 +36,11 @@ class DistanceDecoder(torch.nn.Module):
         compute decoder values
 
         Args:
-            z: input coordinates
-            edge_index: edges
-            sigmoid: if ``True``, return exponential of negative distance, 
+            z [type]: input coordinates
+            
+            edge_index [type]: edges
+            
+            sigmoid [type]: if ``True``, return exponential of negative distance, 
                 else return negative distance
 
         """
@@ -50,8 +52,9 @@ class DistanceDecoder(torch.nn.Module):
         compute value for all node pairs
 
         Args:
-            z: input coordinates
-            sigmoid: if ``True``, return exponential of negative distance, 
+            z [type]: input coordinates
+
+            sigmoid [type]: if ``True``, return exponential of negative distance, 
                 else return negative distance
 
         """

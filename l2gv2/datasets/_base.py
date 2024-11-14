@@ -3,6 +3,7 @@ Datasets loader for l2gv2, main file
 """
 
 import datetime
+from typing import Union
 from pathlib import Path
 
 from tqdm import tqdm
@@ -169,7 +170,9 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
 
         return g
 
-    def get_edge_list(self, temp: bool = True) -> EdgeList | dict[datetime.datetime, EdgeList]:
+    def get_edge_list(
+        self, temp: bool = True
+    ) -> EdgeList | dict[datetime.datetime, EdgeList]:
         """Returns edge list
 
         Args:
@@ -191,14 +194,15 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
             edge_list = [tuple(x) for x in edges]
         return edge_list
 
-    def get_networkx(self, temp: bool = True) -> nx.DiGraph | dict[datetime.datetime, nx.DiGraph]:
+    def get_networkx(
+        self, temp: bool = True
+    ) -> Union[nx.DiGraph, dict[datetime.datetime, nx.DiGraph]]:
         """Returns networkx.DiGraph representation
 
         Args:
             temp (bool, optional, default=True): If true, then returns a dictionary of
                 timestamps to networkx digraphs, if false, returns a networkx digraph
         """
-
 
         if self.temporal and temp:
             nx_graphs = {}
@@ -218,7 +222,7 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
 
     def get_edge_index(
         self, temp: bool = True
-    ) -> torch.Tensor | dict[str, torch.Tensor]:
+    ) -> Union[torch.Tensor, dict[str, torch.Tensor]]:
         """Returns edge index as torch tensors
 
         Args:
@@ -246,7 +250,9 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
 
     def get_tgeometric(
         self, temp: bool = True
-    ) -> torch_geometric.data.Data | dict[str, torch_geometric.data.Data]:
+    ) -> Union[
+        torch_geometric.data.Data, dict[datetime.datetime, torch_geometric.data.Data]
+    ]:
         """Returns torch_geometric representation
 
         Args:
@@ -278,5 +284,6 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
             tg_graphs.nodes = torch.Tensor(nodes).int()
             tg_graphs.x = torch.from_numpy(features).float()
         return tg_graphs
+
 
 # TODO: integrate summary() into DataLoader

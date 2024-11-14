@@ -33,9 +33,11 @@ def reconstruction_auc(coordinates, graph: Graph, dist=False, max_samples=int(1e
     Args:
         coordinates (torch.tensor): embedding to evaluate
         graph: network data
+
         dist: if ``True``, use distance decoder to evaluate embedding, 
             otherwise use inner-product decoder
               (default: ``False``)
+        
         max_samples: maximum number of edges to use for evaluation. 
             If graph has less than ``max_samples``
             edges, all edges are used as positive examples,
