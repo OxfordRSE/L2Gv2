@@ -10,4 +10,4 @@ l2gv2 documentation
    :maxdepth: 5
 
    intro
-   code
+   reference/modules

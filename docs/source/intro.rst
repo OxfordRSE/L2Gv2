@@ -72,12 +72,18 @@ The project is setup to generate documentation with `Sphinx <https://www.sphinx-
 
 Documentation is available at `l2gv2.readthedocs.io <https://l2gv2.readthedocs.io>`_
 
+Generate the package documentation
+
+.. code-block:: bash
+
+   sphinx-apidoc -o docs/source/reference -H "Code Reference" l2gv2
+
 Generate `html` or `markdown` documentation locally
 
 .. code-block:: bash
 
-   sphinx-build -M html docs/source/ docs/build/
-   sphinx-build -M markdown docs/source/ docs/build/
+   sphinx-build html docs/source/ docs/build/
+   sphinx-build markdown docs/source/ docs/build/
 
 Automatically refresh and serve the html documentation locally at `http://127.0.0.1:8000 <http://127.0.0.1:8000>`_ upon file updates during development
 
