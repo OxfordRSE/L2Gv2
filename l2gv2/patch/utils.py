@@ -213,6 +213,7 @@ def relative_scale(coordinates1: np.ndarray, coordinates2: np.ndarray, clamp=1e8
         return 1 / clamp
     return scale1 / scale2
 
+
 # TODO: fix too-many-instance-attributes
 # pylint: disable=too-many-instance-attributes
 class AlignmentProblem:
@@ -346,6 +347,7 @@ class AlignmentProblem:
 
         if self.verbose:
             print(f"mean patch degree: {np.mean(self.patch_degrees)}")
+
     # pylint: enable=too-many-branches
 
     def scale_patches(self, scale_factors=None):
@@ -690,7 +692,10 @@ class AlignmentProblem:
                 (data, index, indptr), shape=(dim * n, dim * n), blocksize=(dim, dim)
             )
         return matrix
+
+
 # pylint: enable=too-many-instance-attributes
+
 
 class WeightedAlignmentProblem(AlignmentProblem):
     """Variant of the local2global algorithm where patch edges
@@ -896,5 +901,6 @@ class SVDAlignmentProblem(WeightedAlignmentProblem):
         vecs = vecs[:, order[:blocksize]].real
         vecs.shape = (dim // blocksize, blocksize, blocksize)
         return vecs
+
     # pylint: enable=too-many-statements
     # pylint: enable=too-many-branches

@@ -313,6 +313,8 @@ def ANPloss_nodes_consecutive_patches(
                 l += anp.linalg.norm(theta1 - theta2) ** 2
 
     return l  # , fij
+
+
 # pylint: enable=invalid-name
 # pylint: enable=no-member
 
@@ -383,8 +385,11 @@ def ANPloss_nodes(
                     # fij[(i, j+1+i, n)]=[theta1, theta2]
 
     return 1 / len(patches) * l  # fij
+
+
 # pylint enable=invalid-name
 # pylint enable=no-member
+
 
 # pylint: disable=no-member
 # pylint does not infer autograd.numpy.random.seed so disable no-member
@@ -471,7 +476,10 @@ def optimization(
         )
 
     return result, embedding
+
+
 # pylint enable=no-member
+
 
 def loss_dictionary(rs, ss, ts, nodes, patches, dim, k):
     """TODO: docstring for `loss_dictionary`.

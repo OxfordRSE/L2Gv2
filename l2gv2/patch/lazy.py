@@ -18,7 +18,7 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-""" TODO: module doctring """
+"""TODO: module doctring"""
 
 import copy
 from abc import ABC, abstractmethod
@@ -28,11 +28,12 @@ from tqdm.auto import tqdm
 
 
 class BaseLazyCoordinates(ABC):
-    """ TODO: docstring for `BaseLazyCoordinates` """
+    """TODO: docstring for `BaseLazyCoordinates`"""
+
     @property
     @abstractmethod
     def shape(self):
-        """ Shape of the coordinates """
+        """Shape of the coordinates"""
         raise NotImplementedError
 
     def __array__(self, dtype=None):
@@ -92,7 +93,7 @@ class BaseLazyCoordinates(ABC):
 
 
 class LazyCoordinates(BaseLazyCoordinates):
-    """ TODO: doctring for `LazyCoordinates` """
+    """TODO: doctring for `LazyCoordinates`"""
 
     def __init__(self, x, shift=None, scale=None, rot=None):
         self._x = x
@@ -113,8 +114,8 @@ class LazyCoordinates(BaseLazyCoordinates):
             self.rot = np.array(rot)
 
     def save_transform(self, filename):
-        """ Save the transformation to a file 
-        
+        """Save the transformation to a file
+
         Args:
 
             filename (str): filename to save the transformation to
@@ -176,7 +177,7 @@ class LazyCoordinates(BaseLazyCoordinates):
 
 
 class LazyFileCoordinates(LazyCoordinates):
-    """ TODO: doctring for `LazyFileCoordinates` """
+    """TODO: doctring for `LazyFileCoordinates`"""
 
     def __init__(self, filename, *args, **kwargs):
         with open(filename, "rb") as f:
@@ -208,7 +209,7 @@ class LazyFileCoordinates(LazyCoordinates):
 
 
 class LazyMeanAggregatorCoordinates(BaseLazyCoordinates):
-    """ TODO: doctring for `LazyMeanAggregatorCoordinates` """
+    """TODO: doctring for `LazyMeanAggregatorCoordinates`"""
 
     def __init__(self, patches):
         self.patches = []
@@ -246,9 +247,9 @@ class LazyMeanAggregatorCoordinates(BaseLazyCoordinates):
         return self.as_array(out)
 
     def as_array(self, out=None):
-        """ TODO: docstring for `as_array` 
-        
-        Args:            
+        """TODO: docstring for `as_array`
+
+        Args:
                 out (Optional[type]): [description], defaults to None
         """
         if out is None:
@@ -264,12 +265,12 @@ class LazyMeanAggregatorCoordinates(BaseLazyCoordinates):
         return out
 
     def get_coordinates(self, nodes, out=None):
-        """ TODO: docstring for `get_coordinates` 
-        
+        """TODO: docstring for `get_coordinates`
+
         Args:
-            
+
                 nodes ([type]): [description]
-            
+
                 out (Optional[type]): [description], default is None
         """
         nodes = np.asanyarray(nodes)
