@@ -84,8 +84,8 @@ class BaseLazyCoordinates(ABC):
         return new
 
     @abstractmethod
-    def __getitem__(self, item):
-        return NotImplementedError
+    def __getitem__(self, item) -> np.ndarray:
+        raise NotImplementedError
 
     def __len__(self):
         return self.shape[0]
@@ -117,7 +117,7 @@ class LazyCoordinates(BaseLazyCoordinates):
         
         Args:
 
-            filename (str): filename to save the transformation to
+            filename: filename to save the transformation to
         """
 
         np.savez(filename, shift=self.shift, scale=self.scale, rot=self.rot)
@@ -219,11 +219,11 @@ class LazyMeanAggregatorCoordinates(BaseLazyCoordinates):
             else:
                 self.patches.append(patch)
         self.dim = patches[0].shape[1]
-        self.nodes = set()
+        nodes = set()
         for patch in patches:
-            self.nodes.update(patch.nodes)
+            nodes.update(patch.nodes)
 
-        self.nodes = np.array(sorted(self.nodes))
+        self.nodes = np.array(sorted(nodes))
 
     @property
     def shape(self):
@@ -268,9 +268,9 @@ class LazyMeanAggregatorCoordinates(BaseLazyCoordinates):
         
         Args:
             
-                nodes ([type]): [description]
+                nodes: [description]
             
-                out (Optional[type]): [description], default is None
+                out: [description], default is None
         """
         nodes = np.asanyarray(nodes)
         if out is None:
