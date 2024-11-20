@@ -196,7 +196,7 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
 
     def get_networkx(
         self, temp: bool = True
-    ) -> Union[nx.DiGraph, dict[datetime.datetime, nx.DiGraph]]:
+    ) -> Union[nx.Graph, dict[datetime.datetime, nx.Graph]]:
         """Returns networkx.DiGraph representation
 
         Args:
@@ -205,7 +205,7 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
         """
 
         if self.temporal and temp:
-            nx_graphs = {}
+            nx_graphs: dict[datetime.datetime, nx.Graph] = {}
             for d in tqdm(self.datelist):
                 edges = (
                     self.edges.filter(pl.col("timestamp") == d)
@@ -214,11 +214,10 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
                 )
                 edge_list = [tuple(x) for x in edges]
                 nx_graphs[d] = nx.from_edgelist(edge_list, create_using=nx.DiGraph)
-        else:
-            edges = self.edges.select("source", "dest").unique().to_numpy()
-            edge_list = [tuple(x) for x in edges]
-            nx_graphs = nx.from_edgelist(edge_list, create_using=nx.DiGraph)
-        return nx_graphs
+            return nx_graphs
+        edges = self.edges.select("source", "dest").unique().to_numpy()
+        edge_list = [tuple(x) for x in edges]
+        return nx.from_edgelist(edge_list, create_using=nx.DiGraph)
 
     def get_edge_index(
         self, temp: bool = True
