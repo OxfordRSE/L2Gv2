@@ -34,7 +34,6 @@ autodoc_mock_imports = [
     "torch",
     "numba",
     "numpy",
-    "pandas",
     "sklearn",
     "scipy",
     "community",

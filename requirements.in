@@ -115,7 +115,6 @@ networkx==3.4.2
 nfts==0.0.2
 numba==0.60.0
 packaging==24.1
-pandas==2.2.3
 param==2.1.1
 parsimonious==0.10.0
 parso==0.8.4
