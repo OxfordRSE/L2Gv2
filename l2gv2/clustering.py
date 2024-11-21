@@ -10,8 +10,8 @@ import pymetis
 import numpy as np
 import numba
 
-from local2global_embedding.network import TGraph, NPGraph
-from local2global_embedding import progress
+from l2gv2.network import TGraph, NPGraph
+from l2gv2 import progress
 
 
 def distributed_clustering(graph: TGraph, beta, rounds=None, patience=3, min_samples=2):
