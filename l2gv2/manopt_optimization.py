@@ -2,7 +2,7 @@
 embeddings of the patches using the manopt library."""
 
 import random
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Any, Literal
 import autograd.numpy as anp
 import pymanopt
 import pymanopt.manifolds
@@ -43,7 +43,7 @@ def total_loss(
     dim,
     k,
     rand: Optional[bool] = False,
-) -> float:
+) -> tuple[np.floating[Any] | float, dict]:
     """TODO: docstring for `total_loss`.
 
     R: list of orthogonal matrices for embeddings of patches.
@@ -116,7 +116,11 @@ def loss(
     consecutive: Optional[bool] = False,
     random_choice_in_intersections: Optional[bool] = False,
     fij: Optional[bool] = False,
-) -> Tuple[float, Optional[list[float]]]:
+) -> (
+    Tuple[np.floating[Any] | float | Literal[0], dict | None]
+    | np.floating[Any]
+    | Literal[0]
+):
     """TODO: docstring for `loss`.
 
     R: list of orthogonal matrices for embeddings of patches.
@@ -165,7 +169,7 @@ def loss(
         if fij:
             return l, f
 
-        return l, None
+        return l
 
     l, f = total_loss(
         rotations,
@@ -313,6 +317,8 @@ def ANPloss_nodes_consecutive_patches(
                 l += anp.linalg.norm(theta1 - theta2) ** 2
 
     return l  # , fij
+
+
 # pylint: enable=invalid-name
 # pylint: enable=no-member
 
@@ -383,8 +389,11 @@ def ANPloss_nodes(
                     # fij[(i, j+1+i, n)]=[theta1, theta2]
 
     return 1 / len(patches) * l  # fij
+
+
 # pylint enable=invalid-name
 # pylint enable=no-member
+
 
 # pylint: disable=no-member
 # pylint does not infer autograd.numpy.random.seed so disable no-member
@@ -459,7 +468,11 @@ def optimization(
     scales = result.point[2 * n_patches :]
     emb_problem = l2g.AlignmentProblem(patches)
 
+    if emb_problem.n_nodes is None or emb_problem.dim is None:
+        raise ValueError("Both n_nodes and dim must be set to integer values.")
+
     embedding = np.empty((emb_problem.n_nodes, emb_problem.dim))
+
     for node, patch_list in enumerate(emb_problem.patch_index):
         embedding[node] = np.mean(
             [
@@ -471,7 +484,10 @@ def optimization(
         )
 
     return result, embedding
+
+
 # pylint enable=no-member
+
 
 def loss_dictionary(rs, ss, ts, nodes, patches, dim, k):
     """TODO: docstring for `loss_dictionary`.
@@ -508,8 +524,8 @@ def loss_dictionary(rs, ss, ts, nodes, patches, dim, k):
                 patches,
                 dim,
                 k,
-                consecutive=i,
-                random_choice_in_intersections=j,
+                consecutive=(i>0),
+                random_choice_in_intersections=(j>0),
                 fij=False,
             )
     return l

@@ -28,16 +28,16 @@ from local2global_embedding.sparsify import (
 def geodesic_expand_overlap(
     subgraph, seed_mask, min_overlap, target_overlap, reseed_samples=10
 ):
-    """ Expand patch
+    """Expand patch
 
     Args:
         subgraph ([type]): graph containing patch nodes and all target nodes for potential expansion
-        
+
         seed_mask ([type]): [description]
-        
+
         min_overlap ([type]): minimum overlap before stopping expansion
-        
-        target_overlap ([type]): maximum overlap 
+
+        target_overlap ([type]): maximum overlap
             (if expansion step results in more overlap, the nodes added are sampled at random)
 
         reseed_samples ([type]): [description] default is 10
@@ -72,8 +72,10 @@ def geodesic_expand_overlap(
     return overlap
 
 
-def merge_small_clusters(graph: TGraph, partition_tensor: torch.LongTensor, min_size: int):
-    """ Merge small clusters with adjacent clusters 
+def merge_small_clusters(
+    graph: TGraph, partition_tensor: torch.LongTensor, min_size: int
+):
+    """Merge small clusters with adjacent clusters
     such that all clusters satisfy a minimum size constraint.
 
     This function iteratively merges the smallest cluster with its neighbouring cluster with the
@@ -83,7 +85,7 @@ def merge_small_clusters(graph: TGraph, partition_tensor: torch.LongTensor, min_
         graph (TGraph): Input graph
 
         partition_tensor (torch.LongTensor): input partition vector mapping nodes to clusters
-        
+
         min_size (int): desired minimum size of clusters
 
     Returns:
@@ -140,22 +142,26 @@ def merge_small_clusters(graph: TGraph, partition_tensor: torch.LongTensor, min_
 
 
 def create_overlapping_patches(
-    graph: TGraph, partition_tensor: torch.LongTensor, patch_graph, min_overlap, target_overlap
+    graph: TGraph,
+    partition_tensor: torch.LongTensor,
+    patch_graph,
+    min_overlap,
+    target_overlap,
 ):
-    """ Create overlapping patches from a hard partition of an input graph
+    """Create overlapping patches from a hard partition of an input graph
 
     Args:
         graph (TGraph): Input graph
-        
+
         partition_tensor (torch.LongTensor): partition of input graph
-        
-        patch_graph ([type]): graph where nodes are clusters of partition 
-            and an edge indicates that the corresponding patches 
+
+        patch_graph ([type]): graph where nodes are clusters of partition
+            and an edge indicates that the corresponding patches
             in the output should have at least ``min_overlap`` nodes in common
-        
+
         min_overlap ([type]): minimum overlap for connected patches
-        
-        target_overlap ([type]): maximum overlap during expansion 
+
+        target_overlap ([type]): maximum overlap during expansion
             for an edge (additional overlap may result from expansion of other edges)
 
     Returns:
@@ -238,6 +244,7 @@ def _patch_overlaps(
         )
     return patches
 
+
 # TODO: fix too-many-branches
 # pylint: disable=too-many-branches
 def create_patch_data(
@@ -251,28 +258,28 @@ def create_patch_data(
     gamma: int = 0,
     verbose: bool = False,
 ) -> Tuple[List, object]:
-    """ Divide data into overlapping patches
+    """Divide data into overlapping patches
 
     Args:
         graph (TGraph): input data
-        
+
         partition_tensor (torch.LongTensor): starting partition for creating patches
-        
+
         min_overlap ([type]): minimum patch overlap for connected patches
-        
-        target_overlap ([type]): maximum patch overlap during expansion 
+
+        target_overlap ([type]): maximum patch overlap during expansion
             of an edge of the patch graph
-        
+
         min_patch_size (Optional[type]): minimum size of patches, defauls is None
-        
-        sparsify_method (Optional[[str]): method for sparsifying patch graph 
+
+        sparsify_method (Optional[[str]): method for sparsifying patch graph
             (one of ``'resistance'``, ``'rmst'``, ``'none'``), default is ``'resistance'``
 
-        target_patch_degree (Optional[str]): target patch degree for 
+        target_patch_degree (Optional[str]): target patch degree for
             ``sparsify_method='resistance'``, default is 4
-        
+
         gamma (Optional[int]): ``gamma`` value for use with ``sparsify_method='rmst'``, default is 0
-        
+
         verbose (Optional[bool]): if true, print some info about created patches, default is False
 
     Returns:
@@ -370,14 +377,17 @@ def create_patch_data(
         graph, partition_tensor_0, pg, min_overlap, target_overlap
     )
     return patches, pg
+
+
 # pylint: enable=too-many-branches
 
+
 def rolling_window_graph(n_patches: int, w):
-    """ Generate patch edges for a rolling window
+    """Generate patch edges for a rolling window
 
     Args:
         n_patches (int): Number of patches
-        
+
         w (): window width (patches connected to the w nearest neighbours on either side)
 
     """
