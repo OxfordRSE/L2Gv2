@@ -17,29 +17,35 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-import torch
-import torch.nn
+"""TODO: module docstring for utils.py"""
+
 from tempfile import TemporaryFile
 from time import perf_counter
+import torch
+import torch.nn
 
 
 def speye(n, dtype=torch.float):
     """identity matrix of dimension n as sparse_coo_tensor."""
-    return torch.sparse_coo_tensor(torch.tile(torch.arange(n, dtype=torch.long), (2, 1)),
-                                   torch.ones(n, dtype=dtype),
-                                   (n, n))
+    return torch.sparse_coo_tensor(
+        torch.tile(torch.arange(n, dtype=torch.long), (2, 1)),
+        torch.ones(n, dtype=dtype),
+        (n, n),
+    )
 
 
 def get_device(model: torch.nn.Module):
+    """ TODO: docstring for get_device."""
     return next(model.parameters()).device
 
 
 def set_device(device):
+    """ TODO: docstring for set_device."""
     if device is None:
         if torch.cuda.is_available():
-            device = torch.device('cuda')
+            device = torch.device("cuda")
         else:
-            device = torch.device('cpu')
+            device = torch.device("cpu")
     else:
         device = torch.device(device)
     return device
@@ -49,6 +55,7 @@ class EarlyStopping:
     """
     Context manager for early stopping
     """
+
     def __init__(self, patience, delta=0):
         """
         Initialise early stopping context manager
@@ -59,12 +66,12 @@ class EarlyStopping:
         """
         self.patience = patience
         self.delta = delta
-        self.best_loss = float('inf')
+        self.best_loss = float("inf")
         self.count = 0
         self._file = TemporaryFile()
 
     def __enter__(self):
-        self.best_loss = float('inf')
+        self.best_loss = float("inf")
         self.count = 0
         if self._file.closed:
             self._file = TemporaryFile()
@@ -92,7 +99,9 @@ class EarlyStopping:
         Returns:
             ``True`` if training should be stopped, ``False`` otherwise
         """
-        loss = float(loss)  # make sure no tensors used here to avoid propagating gradients
+        loss = float(
+            loss
+        )  # make sure no tensors used here to avoid propagating gradients
         if loss >= self.best_loss - self.delta:
             self.count += 1
         else:
@@ -104,8 +113,8 @@ class EarlyStopping:
         if self.count > self.patience:
             self._load_model(model)
             return True
-        else:
-            return False
+
+        return False
 
 
 class Timer:
@@ -115,8 +124,10 @@ class Timer:
     Adds the time taken within block to a running total.
 
     """
+
     def __init__(self):
         self.total = 0.0
+        self.tic = None
 
     def __enter__(self):
         self.tic = perf_counter()
@@ -127,6 +138,7 @@ class Timer:
 
 
 def flatten(l, ltypes=(list, tuple)):
+    """ TODO: docstring for flatten."""
     if isinstance(l, ltypes):
         ltype = type(l)
         l = list(l)
@@ -137,9 +149,9 @@ def flatten(l, ltypes=(list, tuple)):
                     l.pop(i)
                     i -= 1
                     break
-                else:
-                    l[i:i + 1] = l[i]
+
+                l[i : i + 1] = l[i]
             i += 1
         return ltype(l)
-    else:
-        return l
+
+    return l
