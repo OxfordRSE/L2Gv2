@@ -2,6 +2,9 @@
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
+
+# project 
+# #######
 [project]
 name = "l2gv2"
 version = "0.0.1"
@@ -21,6 +24,8 @@ classifiers = [
 "Homepage" = "https://github.com/lotzma/L2Gv2"
 "Bug Tracker" = "https://github.com/lotzma/L2Gv2/issues"
 
+# pylint
+# ######
 [tool.pylint.'MASTER']
 ignore = ["docs/*"]
 
@@ -34,3 +39,18 @@ disable = [
     "too-many-arguments",
     "too-many-positional-arguments"
 ]
+
+# pyright
+# #######
+[tool.pyright]
+include = ["l2gv2"]
+exclude = []
+ignore = []
+defineConstant = { DEBUG = true }
+
+reportMissingImports = false
+reportAttributeAccessIssue = false
+reportOptionalMemberAccess = false
+reportOptionalSubscript = false
+reportGeneralTypeIssues = false
+reportMissingTypeStubs = false
