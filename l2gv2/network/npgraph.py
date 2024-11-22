@@ -17,10 +17,10 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
+"""TODO: module docstring for network/npgraph.py"""
 
 import json
 from pathlib import Path
-from tempfile import TemporaryFile
 from random import randrange
 
 import numpy as np
@@ -28,83 +28,87 @@ import torch
 import numba
 from numba.experimental import jitclass
 
+from l2gv2 import progress
 from .graph import Graph
-from local2global_embedding import progress
 
 
 rng = np.random.default_rng()
 
 
 spec = [
-    ('edge_index', numba.int64[:, :]),
-    ('adj_index', numba.int64[:]),
-    ('degree', numba.int64[:]),
-
+    ("edge_index", numba.int64[:, :]),
+    ("adj_index", numba.int64[:]),
+    ("degree", numba.int64[:]),
 ]
 
 
+# pylint: disable=too-many-instance-attributes
 class NPGraph(Graph):
     """
     numpy backed graph class with support for memmapped edge_index
     """
+
     @staticmethod
-    def _convert_input(input):
-        if input is None:
-            return input
-        elif isinstance(input, torch.Tensor):
-            return np.asanyarray(input.cpu())
-        else:
-            return np.asanyarray(input)
+    def _convert_input(inp):
+        if inp is None:
+            return inp
+
+        if isinstance(inp, torch.Tensor):
+            return np.asanyarray(inp.cpu())
+
+        return np.asanyarray(inp)
 
     @classmethod
     def load(cls, folder, mmap_edges=None, mmap_features=None):
+        """TODO: docstring for load."""
         folder = Path(folder)
         kwargs = {}
 
-        kwargs['edge_index'] = np.load(folder / 'edge_index.npy', mmap_mode=mmap_edges)
+        kwargs["edge_index"] = np.load(folder / "edge_index.npy", mmap_mode=mmap_edges)
 
-        attr_file = folder / 'edge_attr.npy'
+        attr_file = folder / "edge_attr.npy"
         if attr_file.is_file():
-            kwargs['edge_attr'] = np.load(attr_file, mmap_mode=mmap_edges)
+            kwargs["edge_attr"] = np.load(attr_file, mmap_mode=mmap_edges)
 
-        info_file = folder / 'info.json'
+        info_file = folder / "info.json"
         if info_file.is_file():
-            with open(info_file) as f:
+            with open(info_file, encoding="utf-8") as f:
                 info = json.load(f)
             kwargs.update(info)
 
-        feat_file = folder / 'node_feat.npy'
+        feat_file = folder / "node_feat.npy"
         if feat_file.is_file():
-            kwargs['x'] = np.load(feat_file, mmap_mode=mmap_features)
+            kwargs["x"] = np.load(feat_file, mmap_mode=mmap_features)
 
-        label_file = folder / 'node_label.npy'
+        label_file = folder / "node_label.npy"
         if label_file.is_file():
-            kwargs['y'] = np.load(label_file)
+            kwargs["y"] = np.load(label_file)
 
-        index_file = folder / 'adj_index.npy'
+        index_file = folder / "adj_index.npy"
         if index_file.is_file():
-            kwargs['adj_index'] = np.load(index_file)
+            kwargs["adj_index"] = np.load(index_file)
 
         return cls(**kwargs)
 
     def save(self, folder):
+        """TODO: docstring for save."""
         folder = Path(folder)
-        np.save(folder / 'edge_index.npy', self.edge_index)
+        np.save(folder / "edge_index.npy", self.edge_index)
 
         if self.weighted:
-            np.save(folder / 'edge_attr.npy', self.edge_attr)
+            np.save(folder / "edge_attr.npy", self.edge_attr)
 
-        np.save(folder / 'adj_index.npy', self.adj_index)
+        np.save(folder / "adj_index.npy", self.adj_index)
 
-        info = {'num_nodes': self.num_nodes, 'undir': self.undir}
-        with open(folder / 'info.json', 'w') as f:
+        info = {"num_nodes": self.num_nodes, "undir": self.undir}
+        with open(folder / "info.json", "w", encoding="utf-8") as f:
             json.dump(info, f)
 
         if self.y is not None:
-            np.save(self.y, folder / 'node_label.npy')
+            np.save(self.y, folder / "node_label.npy")
 
         if self.x is not None:
-            np.save(self.x, folder / 'node_feat.npy')
+            np.save(self.x, folder / "node_feat.npy")
 
     def __init__(self, *args, ensure_sorted=False, **kwargs):
         super().__init__(*args, **kwargs)
@@ -114,12 +118,15 @@ class NPGraph(Graph):
 
         if ensure_sorted:
             if isinstance(self.edge_index, np.memmap):
-                raise NotImplementedError("Sorting for memmapped arrays not yet implemented")
-            else:
-                index = np.argsort(self.edge_index[0]*self.num_nodes + self.edge_index[1])
-                self.edge_index = self.edge_index[:, index]
-                if self.edge_attr is not None:
-                    self.edge_attr = self.edge_attr[index]
+                raise NotImplementedError(
+                    "Sorting for memmapped arrays not yet implemented"
+                )
+            index = np.argsort(
+                self.edge_index[0] * self.num_nodes + self.edge_index[1]
+            )
+            self.edge_index = self.edge_index[:, index]
+            if self.edge_attr is not None:
+                self.edge_attr = self.edge_attr[index]
         self._jitgraph = JitGraph(self.edge_index, self.num_nodes, self.adj_index, None)
         self.adj_index = self._jitgraph.adj_index
         self.degree = self._jitgraph.degree
@@ -130,19 +137,27 @@ class NPGraph(Graph):
             self.strength = np.zeros(self.num_nodes)  #: tensor of node strength
             np.add.at(self.strength, self.edge_index[0], self.weights)
         else:
-            self.weights = np.broadcast_to(np.ones(1), (self.num_edges,))  # use expand to avoid actually allocating large array
+            self.weights = np.broadcast_to(
+                np.ones(1), (self.num_edges,)
+            )  # use expand to avoid actually allocating large array
             self.strength = self.degree
-        self.device = 'cpu'
+        self.device = "cpu"
 
         if self.undir is None:
             if isinstance(self.edge_index, np.memmap):
-                raise NotImplementedError("Checking directedness for memmapped arrays not yet implemented")
-            else:
-                index = np.argsort(self.edge_index[1]*self.num_nodes + self.edge_index[0])
-                edge_reverse = self.edge_index[::-1, index]
-                self.undir = np.array_equal(self.edge_index, edge_reverse)
-                if self.weighted:
-                    self.undir = self.undir and np.array_equal(self.weights, self.weights[index])
+                raise NotImplementedError(
+                    "Checking directedness for memmapped arrays not yet implemented"
+                )
+
+            index = np.argsort(
+                self.edge_index[1] * self.num_nodes + self.edge_index[0]
+            )
+            edge_reverse = self.edge_index[::-1, index]
+            self.undir = np.array_equal(self.edge_index, edge_reverse)
+            if self.weighted:
+                self.undir = self.undir and np.array_equal(
+                    self.weights, self.weights[index]
+                )
 
     def edges(self):
         """
@@ -154,8 +169,10 @@ class NPGraph(Graph):
         """
         return list of edges where each edge is a tuple ``(source, target, weight)``
         """
-        return ((e[0], e[1], w[0] if w.size > 1 else w)
-                for e, w in zip(self.edge_index.T, self.weights))
+        return (
+            (e[0], e[1], w[0] if w.size > 1 else w)
+            for e, w in zip(self.edge_index.T, self.weights)
+        )
 
     def is_edge(self, source, target):
         return self._jitgraph.is_edge(source, target)
@@ -211,14 +228,16 @@ class NPGraph(Graph):
             y = self.y[nodes]
         else:
             y = None
-        return self.__class__(edge_index=edge_index,
-                              edge_attr=edge_attr[index] if edge_attr is not None else None,
-                              num_nodes=len(nodes),
-                              ensure_sorted=False,
-                              undir=self.undir,
-                              nodes=node_labels,
-                              x=x,
-                              y=y)
+        return self.__class__(
+            edge_index=edge_index,
+            edge_attr=edge_attr[index] if edge_attr is not None else None,
+            num_nodes=len(nodes),
+            ensure_sorted=False,
+            undir=self.undir,
+            nodes=node_labels,
+            x=x,
+            y=y,
+        )
 
     def connected_component_ids(self):
         """
@@ -270,14 +289,18 @@ class NPGraph(Graph):
             new_nodes = new_nodes[not_visited[new_nodes]]
             number_new_nodes = len(new_nodes)
             not_visited[new_nodes] = False
-            bfs_list[append_pointer:append_pointer+number_new_nodes] = new_nodes
+            bfs_list[append_pointer : append_pointer + number_new_nodes] = new_nodes
             append_pointer += number_new_nodes
         return bfs_list
 
     def partition_graph(self, partition, self_loops=True):
         partition = np.asanyarray(partition)
-        partition_edges, weights = self._jitgraph.partition_graph_edges(partition, self_loops)
-        return self.__class__(edge_index=partition_edges, edge_attr=weights, undir=self.undir)
+        partition_edges, weights = self._jitgraph.partition_graph_edges(
+            partition, self_loops
+        )
+        return self.__class__(
+            edge_index=partition_edges, edge_attr=weights, undir=self.undir
+        )
 
     def sample_negative_edges(self, num_samples):
         return self._jitgraph.sample_negative_edges(num_samples)
@@ -285,6 +308,9 @@ class NPGraph(Graph):
     def sample_positive_edges(self, num_samples):
         index = rng.integers(self.num_edges, size=(num_samples,))
         return self.edge_index[:, index]
+
+
+# pylint: enable=too-many-instance-attributes
 
 
 @numba.njit
@@ -296,8 +322,8 @@ def _subgraph_edges(edge_index, adj_index, degs, num_nodes, sources):
     target_index[sources] = np.arange(len(sources))
     count = 0
 
-    for s in range(len(sources)):
-        for i in range(adj_index[sources[s]], adj_index[sources[s]+1]):
+    for s, source in enumerate(sources):
+        for i in range(adj_index[source], adj_index[source + 1]):
             t = target_index[edge_index[1, i]]
             if t >= 0:
                 subgraph_edge_index[0, count] = s
@@ -311,7 +337,7 @@ def _subgraph_edges(edge_index, adj_index, degs, num_nodes, sources):
 def _memmap_degree(edge_index, num_nodes):
     degree = np.zeros(num_nodes, dtype=np.int64)
     with numba.objmode:
-        print('computing degrees')
+        print("computing degrees")
         progress.reset(edge_index.shape[1])
     for it, source in enumerate(edge_index[0]):
         degree[source] += 1
@@ -325,13 +351,15 @@ def _memmap_degree(edge_index, num_nodes):
 
 @jitclass(
     [
-        ('edge_index', numba.int64[:, :]),
-        ('adj_index', numba.int64[:]),
-        ('degree', numba.int64[:]),
-        ('num_nodes', numba.int64)
+        ("edge_index", numba.int64[:, :]),
+        ("adj_index", numba.int64[:]),
+        ("degree", numba.int64[:]),
+        ("num_nodes", numba.int64),
     ]
 )
 class JitGraph:
+    """TODO: docstring for JitGraph."""
+
     def __init__(self, edge_index, num_nodes=None, adj_index=None, degree=None):
         if num_nodes is None:
             num_nodes_int = edge_index.max() + 1
@@ -339,7 +367,7 @@ class JitGraph:
             num_nodes_int = num_nodes
 
         if adj_index is None:
-            adj_index_ar = np.zeros((num_nodes_int+1,), dtype=np.int64)
+            adj_index_ar = np.zeros((num_nodes_int + 1,), dtype=np.int64)
         else:
             adj_index_ar = adj_index
 
@@ -350,7 +378,7 @@ class JitGraph:
                     degree[s] += 1
                 adj_index_ar[1:] = degree.cumsum()
             else:
-                degree = adj_index_ar[1:]-adj_index_ar[:-1]
+                degree = adj_index_ar[1:] - adj_index_ar[:-1]
 
         self.edge_index = edge_index
         self.adj_index = adj_index_ar
@@ -358,15 +386,23 @@ class JitGraph:
         self.num_nodes = num_nodes_int
 
     def is_edge(self, source, target):
+        """TODO: docstring for is_edge."""
         if source not in range(self.num_nodes) or target not in range(self.num_nodes):
             return False
-        index = np.searchsorted(self.edge_index[1, self.adj_index[source]:self.adj_index[source + 1]], target)
-        if index < self.degree[source] and self.edge_index[1, self.adj_index[source] + index] == target:
+        index = np.searchsorted(
+            self.edge_index[1, self.adj_index[source] : self.adj_index[source + 1]],
+            target,
+        )
+        if (
+            index < self.degree[source]
+            and self.edge_index[1, self.adj_index[source] + index] == target
+        ):
             return True
-        else:
-            return False
+
+        return False
 
     def sample_negative_edges(self, num_samples):
+        """TODO: docstring for sample_negative_edges."""
         i = 0
         sampled_edges = np.empty((2, num_samples), dtype=np.int64)
         while i < num_samples:
@@ -379,22 +415,26 @@ class JitGraph:
         return sampled_edges
 
     def adj(self, node):
-        return self.edge_index[1][self.adj_index[node]:self.adj_index[node+1]]
+        """TODO: docstring for adj."""
+        return self.edge_index[1][self.adj_index[node] : self.adj_index[node + 1]]
 
     def neighbours(self, nodes):
+        """TODO: docstring for neighbours."""
         size = self.degree[nodes].sum()
         out = np.empty((size,), dtype=np.int64)
         it = 0
         for node in nodes:
-            out[it:it+self.degree[node]] = self.adj(node)
+            out[it : it + self.degree[node]] = self.adj(node)
             it += self.degree[node]
         return np.unique(out)
 
     def sample_positive_edges(self, num_samples):
+        """TODO: docstring for sample_positive_edges."""
         index = np.random.randint(self.num_edges, (num_samples,))
         return self.edge_index[:, index]
 
     def subgraph_edges(self, sources):
+        """TODO: docstring for subgraph_edges."""
         max_edges = self.degree[sources].sum()
         subgraph_edge_index = np.empty((2, max_edges), dtype=np.int64)
         index = np.empty((max_edges,), dtype=np.int64)
@@ -402,8 +442,8 @@ class JitGraph:
         target_index[sources] = np.arange(len(sources))
         count = 0
 
-        for s in range(len(sources)):
-            for ei in range(self.adj_index[sources[s]], self.adj_index[sources[s]+1]):
+        for s, source in enumerate(sources):
+            for ei in range(self.adj_index[source], self.adj_index[source + 1]):
                 t = target_index[self.edge_index[1][ei]]
                 if t >= 0:
                     subgraph_edge_index[0, count] = s
@@ -413,13 +453,15 @@ class JitGraph:
         return subgraph_edge_index[:, :count], index[:count]
 
     def subgraph(self, sources):
+        """TODO: docstring for subgraph."""
         edge_index, _ = self.subgraph_edges(sources)
         return JitGraph(edge_index, len(sources), None, None)
 
     def partition_graph_edges(self, partition, self_loops):
+        """TODO: docstring for partition_graph_edges."""
         num_edges = self.num_edges
         with numba.objmode:
-            print('finding partition edges')
+            print("finding partition edges")
             progress.reset(num_edges)
         num_clusters = partition.max() + 1
         edge_counts = np.zeros((num_clusters, num_clusters), dtype=np.int64)
@@ -441,20 +483,21 @@ class JitGraph:
         return partition_edges, weights
 
     def partition_graph(self, partition, self_loops):
+        """TODO: docstring for partition_graph."""
         edge_index, _ = self.partition_graph_edges(partition, self_loops)
         return JitGraph(edge_index, None, None, None)
 
     def connected_component_ids(self):
         """
-                return nodes in breadth-first-search order
+        return nodes in breadth-first-search order
 
-                Args:
-                    start: index of starting node (default: 0)
+        Args:
+            start: index of starting node (default: 0)
 
-                Returns:
-                    tensor of node indeces
+        Returns:
+            tensor of node indeces
 
-                """
+        """
         components = np.full((self.num_nodes,), -1, dtype=np.int64)
         not_visited = np.ones(self.num_nodes, dtype=np.bool)
         component_id = 0
@@ -478,7 +521,7 @@ class JitGraph:
             not_visited[new_nodes] = False
             bfs_list.extend(new_nodes)
 
-        num_components = components.max()+1
+        num_components = components.max() + 1
         component_size = np.zeros((num_components,), dtype=np.int64)
         for i in components:
             component_size[i] += 1
@@ -493,4 +536,5 @@ class JitGraph:
 
     @property
     def num_edges(self):
+        """TODO: docstring for num_edges."""
         return self.edge_index.shape[1]
