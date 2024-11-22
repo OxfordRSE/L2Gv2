@@ -17,7 +17,7 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-import typing as _t
+"""TODO: module docstring for network/tgraph.py"""
 
 import networkx as nx
 import torch
@@ -26,40 +26,56 @@ import torch_geometric as tg
 
 from .graph import Graph
 
-
+# pylint: disable=too-many-instance-attributes
 class TGraph(Graph):
     """Wrapper class for pytorch-geometric edge_index providing fast adjacency look-up."""
+
     @staticmethod
-    def _convert_input(input):
-        if input is None:
+    def _convert_input(inp):
+        if inp is None:
             return None
-        else:
-            return torch.as_tensor(input)
+
+        return torch.as_tensor(inp)
 
     def __init__(self, *args, ensure_sorted=False, **kwargs):
         super().__init__(*args, **kwargs)
 
         if self.num_nodes is None:
-            self.num_nodes = int(torch.max(self.edge_index)+1)  #: number of nodes
+            self.num_nodes = int(torch.max(self.edge_index) + 1)  #: number of nodes
 
         if ensure_sorted:
-            index = torch.argsort(self.edge_index[0]*self.num_nodes+self.edge_index[1])
+            index = torch.argsort(
+                self.edge_index[0] * self.num_nodes + self.edge_index[1]
+            )
             self.edge_index = self.edge_index[:, index]
             if self.edge_attr is not None:
                 self.edge_attr = self.edge_attr[index]
 
         if self.adj_index is None:
-            self.degree = torch.zeros(self.num_nodes, dtype=torch.long, device=self.device)  #: tensor of node degrees
-            self.degree.index_add_(0, self.edge_index[0],
-                                   torch.ones(1, dtype=torch.long, device=self.device).expand(self.num_edges))  # use expand to avoid actually allocating large array
-            self.adj_index = torch.zeros(self.num_nodes + 1, dtype=torch.long)  #: adjacency index such that edges starting at node ``i`` are given by ``edge_index[:, adj_index[i]:adj_index[i+1]]``
+            self.degree = torch.zeros(
+                self.num_nodes, dtype=torch.long, device=self.device
+            )  #: tensor of node degrees
+            self.degree.index_add_(
+                0,
+                self.edge_index[0],
+                torch.ones(1, dtype=torch.long, device=self.device).expand(
+                    self.num_edges
+                ),
+            )  # use expand to avoid actually allocating large array
+            self.adj_index = torch.zeros(
+                self.num_nodes + 1, dtype=torch.long
+            )
+            #: adjacency index such that edges starting at node ``i``
+            # are given by ``edge_index[:, adj_index[i]:adj_index[i+1]]``
             self.adj_index[1:] = torch.cumsum(self.degree, 0)
         else:
             self.degree = self.adj_index[1:] - self.adj_index[:-1]
 
         if self.weighted:
             self.weights = self.edge_attr
-            self.strength = torch.zeros(self.num_nodes, device=self.device, dtype=self.weights.dtype)  #: tensor of node strength
+            self.strength = torch.zeros(
+                self.num_nodes, device=self.device, dtype=self.weights.dtype
+            )  #: tensor of node strength
             self.strength.index_add_(0, self.edge_index[0], self.weights)
         else:
             # use expand to avoid actually allocating large array
@@ -67,10 +83,16 @@ class TGraph(Graph):
             self.strength = self.degree
 
         if self.undir is None:
-            index = torch.argsort(self.edge_index[1]*self.num_nodes+self.edge_index[0])
-            self.undir = torch.equal(self.edge_index, self.edge_index[:, index].flip((0,)))
+            index = torch.argsort(
+                self.edge_index[1] * self.num_nodes + self.edge_index[0]
+            )
+            self.undir = torch.equal(
+                self.edge_index, self.edge_index[:, index].flip((0,))
+            )
             if self.weighted:
-                self.undir = self.undir and torch.equal(self.weights, self.weights[index])
+                self.undir = self.undir and torch.equal(
+                    self.weights, self.weights[index]
+                )
 
     @property
     def device(self):
@@ -81,21 +103,38 @@ class TGraph(Graph):
         """
         return list of edges where each edge is a tuple ``(source, target)``
         """
-        return ((self.edge_index[0, e].item(), self.edge_index[1, e].item()) for e in range(self.num_edges))
+        return (
+            (self.edge_index[0, e].item(), self.edge_index[1, e].item())
+            for e in range(self.num_edges)
+        )
 
     def edges_weighted(self):
         """
         return list of edges where each edge is a tuple ``(source, target, weight)``
         """
-        return ((self.edge_index[0, e].item(), self.edge_index[1, e].item(), self.weights[e].cpu().numpy()
-                 if self.weights.ndim > 1 else self.weights[e].item()) for e in range(self.num_edges))
+        return (
+            (
+                self.edge_index[0, e].item(),
+                self.edge_index[1, e].item(),
+                self.weights[e].cpu().numpy()
+                if self.weights.ndim > 1
+                else self.weights[e].item(),
+            )
+            for e in range(self.num_edges)
+        )
 
     def is_edge(self, source, target):
-        index = torch.bucketize(target, self.edge_index[1, self.adj_index[source]:self.adj_index[source+1]])
-        if index < self.degree[source] and self.edge_index[1, self.adj_index[source]+index] == target:
+        index = torch.bucketize(
+            target,
+            self.edge_index[1, self.adj_index[source] : self.adj_index[source + 1]],
+        )
+        if (
+            index < self.degree[source]
+            and self.edge_index[1, self.adj_index[source] + index] == target
+        ):
             return True
-        else:
-            return False
+
+        return False
 
     def neighbourhood(self, nodes: torch.Tensor, hops: int = 1):
         """
@@ -133,7 +172,14 @@ class TGraph(Graph):
             subgraph
 
         """
-        index = torch.cat([torch.arange(self.adj_index[node], self.adj_index[node + 1], dtype=torch.long) for node in nodes])
+        index = torch.cat(
+            [
+                torch.arange(
+                    self.adj_index[node], self.adj_index[node + 1], dtype=torch.long
+                )
+                for node in nodes
+            ]
+        )
         node_mask = torch.zeros(self.num_nodes, dtype=torch.bool, device=self.device)
         node_mask[nodes] = True
         node_ids = torch.zeros(self.num_nodes, dtype=torch.long, device=self.device)
@@ -155,29 +201,46 @@ class TGraph(Graph):
         else:
             y = None
 
-        return self.__class__(edge_index=node_ids[self.edge_index[:, index]],
-                              edge_attr=edge_attr[index] if edge_attr is not None else None,
-                              num_nodes=len(nodes),
-                              ensure_sorted=True,
-                              undir=self.undir,
-                              x=x,
-                              y=y,
-                              nodes=node_labels
-                              )
+        return self.__class__(
+            edge_index=node_ids[self.edge_index[:, index]],
+            edge_attr=edge_attr[index] if edge_attr is not None else None,
+            num_nodes=len(nodes),
+            ensure_sorted=True,
+            undir=self.undir,
+            x=x,
+            y=y,
+            nodes=node_labels,
+        )
 
     def connected_component_ids(self):
-        """Find the (weakly)-connected components. Component ids are sorted by size, such that id=0 corresponds
-         to the largest connected component"""
+        """ Find the (weakly)-connected components. 
+            Component ids are sorted by size, such that id=0 corresponds
+            to the largest connected component
+        """
         edge_index = self.edge_index
         is_undir = self.undir
-        last_components = torch.full((self.num_nodes,), self.num_nodes, dtype=torch.long, device=self.device)
+        last_components = torch.full(
+            (self.num_nodes,), self.num_nodes, dtype=torch.long, device=self.device
+        )
         components = torch.arange(self.num_nodes, dtype=torch.long, device=self.device)
         while not torch.equal(last_components, components):
             last_components[:] = components
-            components = ts.scatter(last_components[edge_index[0]], edge_index[1], out=components, reduce='min')
+            components = ts.scatter(
+                last_components[edge_index[0]],
+                edge_index[1],
+                out=components,
+                reduce="min",
+            )
             if not is_undir:
-                components = ts.scatter(last_components[edge_index[1]], edge_index[0], out=components, reduce='min')
-        component_id, inverse, component_size = torch.unique(components, return_counts=True, return_inverse=True)
+                components = ts.scatter(
+                    last_components[edge_index[1]],
+                    edge_index[0],
+                    out=components,
+                    reduce="min",
+                )
+        _, inverse, component_size = torch.unique(
+            components, return_counts=True, return_inverse=True
+        )
         new_id = torch.argsort(component_size, descending=True)
         return new_id[inverse]
 
@@ -194,10 +257,10 @@ class TGraph(Graph):
         nxgraph.add_nodes_from(range(self.num_nodes))
         if self.x is not None:
             for i in range(self.num_nodes):
-                nxgraph.nodes[i]['x'] = self.x[i, :]
+                nxgraph.nodes[i]["x"] = self.x[i, :]
         if self.y is not None:
             for i in range(self.num_nodes):
-                nxgraph.nodes[i]['y'] = self.y[i]
+                nxgraph.nodes[i]["y"] = self.y[i]
         if self.weighted:
             nxgraph.add_weighted_edges_from(self.edges_weighted())
         else:
@@ -216,22 +279,27 @@ class TGraph(Graph):
 
         """
         if args:
-            if not (graph_cls is None):
-                raise ValueError("Both positional and graph_cls keyword argument specified.")
-            elif len(args) == 1:
+            if graph_cls is not None:
+                raise ValueError(
+                    "Both positional and graph_cls keyword argument specified."
+                )
+            if len(args) == 1:
                 arg = args[0]
                 if isinstance(arg, type) and issubclass(arg, Graph):
                     graph_cls = arg
                     if kwargs:
-                        raise ValueError("Cannot specify additional keyword arguments when converting between graph classes.")
+                        raise ValueError(
+                            "Cannot specify additional keyword arguments "
+                            "when converting between graph classes."
+                        )
 
         if graph_cls is not None:
             return super().to(graph_cls)
-        else:
-            for key, value in self.__dict__.items():
-                if isinstance(value, torch.Tensor):
-                    self.__dict__[key] = value.to(*args, **kwargs)
-            return self
+
+        for key, value in self.__dict__.items():
+            if isinstance(value, torch.Tensor):
+                self.__dict__[key] = value.to(*args, **kwargs)
+        return self
 
     def bfs_order(self, start=0):
         """
@@ -244,7 +312,9 @@ class TGraph(Graph):
             tensor of node indeces
 
         """
-        bfs_list = torch.full((self.num_nodes,), -1, dtype=torch.long, device=self.device)
+        bfs_list = torch.full(
+            (self.num_nodes,), -1, dtype=torch.long, device=self.device
+        )
         not_visited = torch.ones(self.num_nodes, dtype=torch.bool, device=self.device)
         bfs_list[0] = start
         not_visited[start] = False
@@ -262,20 +332,29 @@ class TGraph(Graph):
             new_nodes = new_nodes[not_visited[new_nodes]]
             number_new_nodes = len(new_nodes)
             not_visited[new_nodes] = False
-            bfs_list[append_pointer:append_pointer+number_new_nodes] = new_nodes
+            bfs_list[append_pointer : append_pointer + number_new_nodes] = new_nodes
             append_pointer += number_new_nodes
         return bfs_list
 
     def partition_graph(self, partition, self_loops=True):
         num_clusters = torch.max(partition) + 1
-        pe_index = partition[self.edge_index[0]]*num_clusters + partition[self.edge_index[1]]
+        pe_index = (
+            partition[self.edge_index[0]] * num_clusters + partition[self.edge_index[1]]
+        )
         partition_edges, weights = torch.unique(pe_index, return_counts=True)
-        partition_edges = torch.stack((partition_edges // num_clusters, partition_edges % num_clusters), dim=0)
+        partition_edges = torch.stack(
+            (partition_edges // num_clusters, partition_edges % num_clusters), dim=0
+        )
         if not self_loops:
             valid = partition_edges[0] != partition_edges[1]
             partition_edges = partition_edges[:, valid]
             weights = weights[valid]
-        return self.__class__(edge_index=partition_edges, edge_attr=weights, num_nodes=num_clusters, undir=self.undir)
+        return self.__class__(
+            edge_index=partition_edges,
+            edge_attr=weights,
+            num_nodes=num_clusters,
+            undir=self.undir,
+        )
 
     def sample_negative_edges(self, num_samples):
         return tg.utils.negative_sampling(self.edge_index, self.num_nodes, num_samples)
@@ -283,3 +362,4 @@ class TGraph(Graph):
     def sample_positive_edges(self, num_samples):
         index = torch.randint(self.num_edges, (num_samples,), dtype=torch.long)
         return self.edge_index[:, index]
+# pylint: enable=too-many-instance-attributes

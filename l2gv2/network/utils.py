@@ -52,6 +52,7 @@ class UnionFind:
       http://www.ics.uci.edu/~eppstein/PADS/UnionFind.py
 
     """
+
     parents: numba.int64[:]
     weights: numba.int64[:]
 
@@ -98,8 +99,11 @@ def conductance(graph: Graph, source, target=None):
 
     Args:
         graph: input graph
+
         source: set of source nodes
-        target: set of target nodes (if ``target=None``, consider all nodes that are not in ``source`` as target)
+
+        target: set of target nodes (if ``target=None``,
+            consider all nodes that are not in ``source`` as target)
 
     Returns:
         conductance
@@ -114,7 +118,7 @@ def conductance(graph: Graph, source, target=None):
     out = torch.cat([graph.adj(node) for node in source])
     cond = torch.sum(target_mask[out]).float()
     s_deg = graph.degree[source].sum()
-    t_deg = graph.num_edges-s_deg if target is None else graph.degree[target].sum()
+    t_deg = graph.num_edges - s_deg if target is None else graph.degree[target].sum()
     cond /= torch.minimum(s_deg, t_deg)
     return cond
 
@@ -136,7 +140,12 @@ def spanning_tree(graph: TGraph, maximise=False):
         weights = graph.edge_attr[edge_mask]
     else:
         weights = None
-    return TGraph(edge_index=edge_index, edge_attr=weights, num_nodes=graph.num_nodes, ensure_sorted=False)
+    return TGraph(
+        edge_index=edge_index,
+        edge_attr=weights,
+        num_nodes=graph.num_nodes,
+        ensure_sorted=False,
+    )
 
 
 def spanning_tree_mask(graph: Graph, maximise=False):
@@ -152,7 +161,9 @@ def spanning_tree_mask(graph: Graph, maximise=False):
 
     # find positions of reverse edges
     if graph.undir:
-        reverse_edge_index = np.argsort(graph.edge_index[1]*graph.num_nodes+graph.edge_index[0])
+        reverse_edge_index = np.argsort(
+            graph.edge_index[1] * graph.num_nodes + graph.edge_index[0]
+        )
         forward_edge_index = np.flatnonzero(graph.edge_index[0] < graph.edge_index[1])
         edges = graph.edge_index[:, forward_edge_index]
         weights = graph.weights[forward_edge_index]
@@ -168,17 +179,20 @@ def spanning_tree_mask(graph: Graph, maximise=False):
         index = index[::-1]
 
     edge_mask = np.zeros(graph.num_edges, dtype=bool)
-    edge_mask = _spanning_tree_mask(edge_mask, edges, index, graph.num_nodes, forward_edge_index, reverse_edge_index)
+    edge_mask = _spanning_tree_mask(
+        edge_mask, edges, index, graph.num_nodes, forward_edge_index, reverse_edge_index
+    )
     if convert_to_tensor:
         edge_mask = torch.as_tensor(edge_mask)
     return edge_mask
 
 
 @numba.njit
-def _spanning_tree_mask(edge_mask, edges, index, num_nodes, forward_edge_index, reverse_edge_index):
+def _spanning_tree_mask(
+    edge_mask, edges, index, num_nodes, forward_edge_index, reverse_edge_index
+):
     subtrees = UnionFind(num_nodes)
-    for it in range(len(index)):
-        i = index[it]
+    for i in index:
         u = edges[0, i]
         v = edges[1, i]
         if subtrees.find(u) != subtrees.find(v):
