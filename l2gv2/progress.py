@@ -23,16 +23,15 @@ from tqdm.auto import tqdm
 
 def reset(total):
     """ TODO: docstring for reset"""
-    global pbar
-    pbar = tqdm(total=total)
+    return tqdm(total=total)
 
 
-def update(iterations):
+def update(pbar, iterations):
     """ TODO: docstring for update"""
     pbar.update(iterations)
 
 
-def close():
+def close(pbar):
     """ TODO: docstring for close"""
     pbar.update(pbar.total - pbar.n)
     pbar.close()

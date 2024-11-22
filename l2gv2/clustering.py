@@ -192,7 +192,7 @@ def _fennel_clustering(
     deltas = -alpha * gamma * (partition_sizes ** (gamma - 1))
 
     with numba.objmode:
-        progress.reset(num_nodes)
+        pbar = progress.reset(num_nodes)
 
     for it in range(num_iters):
         not_converged = 0
@@ -227,9 +227,9 @@ def _fennel_clustering(
             if i % 10000 == 0 and i > 0:
                 progress_it = i
                 with numba.objmode:
-                    progress.update(10000)
+                    progress.update(pbar, 10000)
         with numba.objmode:
-            progress.update(num_nodes - progress_it)
+            progress.update(pbar, num_nodes - progress_it)
 
         print("iteration: " + str(it) + ", not converged: " + str(not_converged))
 
@@ -237,7 +237,7 @@ def _fennel_clustering(
             print(f"converged after {it} iterations.")
             break
     with numba.objmode:
-        progress.close()
+        progress.close(pbar)
 
     return clusters
 # pylint: enable=too-many-branches
