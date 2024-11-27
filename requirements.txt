@@ -6,8 +6,6 @@
 #
 --find-links https://data.pyg.org/whl/torch-2.4.0+cpu.html
 
--e .
-    # via -r requirements.in
 accessible-pygments==0.0.5
     # via pydata-sphinx-theme
 aiohappyeyeballs==2.4.3
