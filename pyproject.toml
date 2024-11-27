@@ -37,7 +37,7 @@ disable = [
     "duplicate-code",
     "too-many-locals",
     "too-many-arguments",
-    "E1121"
+    "too-many-positional-arguments"
 ]
 
 # pyright
