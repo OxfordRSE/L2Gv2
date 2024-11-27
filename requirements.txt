@@ -6,7 +6,10 @@
 #
 --find-links https://data.pyg.org/whl/torch-2.4.0+cpu.html
 
+-e .
     # via -r requirements.in
+accessible-pygments==0.0.5
+    # via pydata-sphinx-theme
 aiohappyeyeballs==2.4.3
     # via
     #   -r requirements.in
@@ -65,11 +68,15 @@ attrs==24.2.0
 autograd==1.7.0
     # via -r requirements.in
 babel==2.16.0
-    # via sphinx
+    # via
+    #   pydata-sphinx-theme
+    #   sphinx
 backoff==2.2.1
     # via
     #   -r requirements.in
     #   gql
+beautifulsoup4==4.12.3
+    # via pydata-sphinx-theme
 bitarray==3.0.0
     # via
     #   -r requirements.in
@@ -179,6 +186,7 @@ docstring-parser==0.16
     #   local2global-embedding
 docutils==0.21.2
     # via
+    #   pydata-sphinx-theme
     #   sphinx
     #   sphinx-markdown-builder
     #   sphinx-rtd-theme
@@ -643,6 +651,8 @@ pydantic-core==2.23.4
     # via
     #   -r requirements.in
     #   pydantic
+pydata-sphinx-theme==0.16.0
+    # via -r requirements.in
 pydeck==0.9.1
     # via
     #   -r requirements.in
@@ -650,7 +660,9 @@ pydeck==0.9.1
 pygments==2.18.0
     # via
     #   -r requirements.in
+    #   accessible-pygments
     #   ipython
+    #   pydata-sphinx-theme
     #   rich
     #   sphinx
 pylint==3.3.1
@@ -801,9 +813,12 @@ sortedcontainers==2.4.0
     # via
     #   -r requirements.in
     #   distributed
+soupsieve==2.6
+    # via beautifulsoup4
 sphinx==8.1.3
     # via
     #   -r requirements.in
+    #   pydata-sphinx-theme
     #   sphinx-autobuild
     #   sphinx-markdown-builder
     #   sphinx-rtd-theme
@@ -932,6 +947,7 @@ typing-extensions==4.12.2
     #   eth-typing
     #   pydantic
     #   pydantic-core
+    #   pydata-sphinx-theme
     #   sqlalchemy
     #   streamlit
     #   torch
