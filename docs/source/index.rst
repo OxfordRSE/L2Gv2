@@ -7,7 +7,7 @@ l2gv2 documentation
 ====================
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 3
 
    intro
    reference/modules
