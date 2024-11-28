@@ -26,30 +26,6 @@ autodoc_default_options = {
 templates_path = ["_templates"]
 exclude_patterns = []
 
-autodoc_mock_imports = [
-    "optuna",
-    "autograd",
-    "pymanopt",
-    "tqdm",
-    "torch",
-    "numba",
-    "numpy",
-    "pandas",
-    "sklearn",
-    "scipy",
-    "community",
-    "torch_geometric",
-    "torch_scatter",
-    "local2global",
-    "raphtory",
-    "local2global_embedding",
-    "networkx",
-    "matplotlib",
-    "nfts",
-    "polars",
-]
-
-
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
