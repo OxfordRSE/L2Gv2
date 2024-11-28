@@ -7,13 +7,13 @@ on:
       - '.github/workflows/tests.yml'
       - 'l2gv2/**.py'
       - 'tests/**.py'
-      - 'requirements.txt'
+      - 'pyproject.toml'
   pull_request:
     paths:
       - '.github/workflows/tests.yml'
       - 'l2gv2/**.py'
       - 'tests/**.py'
-      - 'requirements.txt'
+      - 'pyproject.toml'
 jobs:
   ci:
     runs-on: ubuntu-22.04
@@ -25,7 +25,7 @@ jobs:
         python-version: "3.10"
     - name: Install dependencies
       run: |
-        python3 -m pip install '.[tests]' --find-links https://data.pyg.org/whl/torch-2.4.1%2Bcpu.html
+        python3 -m pip install '.[dev]' --find-links https://data.pyg.org/whl/torch-2.4.1%2Bcpu.html
     - name: Test with pytest
       run: |
         python3 -m pytest
