@@ -10,8 +10,8 @@ import torch
 import numba
 from tqdm.auto import tqdm
 
-from l2gv2.network import TGraph, spanning_tree_mask, spanning_tree
-from l2gv2.clustering import Partition
+from .network import TGraph, spanning_tree_mask, spanning_tree
+from .clustering import Partition
 
 
 rg = np.random.default_rng()
@@ -67,7 +67,7 @@ def _sample_edges(graph, n_desired_edges, ensure_connected=True):
 
 
 @numba.njit
-def _multi_arange(start, stop):
+def _multi_arange(start: np.ndarray, stop: np.ndarray) -> np.ndarray:
     count = np.sum(stop - start)
     out = np.empty((count,), dtype=np.int64)
     i = 0
@@ -87,7 +87,7 @@ def resistance_sparsify(
     Args:
         graph: input graph
         target_mean_degree: desired mean degree after sparsification
-        ensure_connected: if ``True``, first add edges of a maximum spanning tree 
+        ensure_connected: if ``True``, first add edges of a maximum spanning tree
             based on the resistance weights to ensure that the
             sparsified graph remains connected if the input graph is connected
         epsilon: tolerance for effective resistance computation
@@ -98,10 +98,10 @@ def resistance_sparsify(
     This algorithm is based on the method of
 
         D. A. Spielman and N. Srivastava.
-        “Graph sparsification by effective resistances”. 
+        “Graph sparsification by effective resistances”.
         SIAM Journal on Computing 40.6 (2011), pp. 1913–1926.
 
-    However, a fixed number of edges are sampled without replacement, 
+    However, a fixed number of edges are sampled without replacement,
     and optionally a maximum spanning tree is kept
     to ensure the connectedness of the sparsified graph.
 
@@ -128,7 +128,7 @@ def resistance_sparsify(
 
 
 def conductance_weighted_graph(graph: TGraph):
-    """ TODO: docstring for conductance_weighted_graph """
+    """TODO: docstring for conductance_weighted_graph"""
     weights = graph.weights / torch.minimum(
         graph.strength[graph.edge_index[0]], graph.strength[graph.edge_index[1]]
     )
@@ -240,7 +240,9 @@ def _compute_Z(graph: TGraph, epsilon=10.0**-2.0):
 
         # TODO: fix tol not an argument:
         # https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.lgmres.html
+        # pylint: disable=unexpected-keyword-arg
         Z[:, i], flag = sc.sparse.linalg.lgmres(L, y, M=P, tol=delta)
+        # pylint: enable=unexpected-keyword-arg
 
         if flag > 0:
             warnings.warn(f"BiCGstab not converged after {flag} iterations")
@@ -253,13 +255,13 @@ def _compute_Z(graph: TGraph, epsilon=10.0**-2.0):
     return Z
 
 
-def relaxed_spanning_tree(graph: TGraph, maximise=False, gamma=1):
+def relaxed_spanning_tree(graph: TGraph, maximise: bool = False, gamma: int = 1):
     r"""compute relaxed minimum or maximum spanning tree
 
     This implements the relaxed minimum spanning tree algorithm of
 
         M. Beguerisse-Díaz, B. Vangelov, and M. Barahona.
-        “Finding role communities in directed networks using Role-Based Similarity, 
+        “Finding role communities in directed networks using Role-Based Similarity,
         Markov Stability and the Relaxed Minimum Spanning Tree”.
         In: 2013 IEEE Global Conference on Signal and Information Processing (GlobalSIP).
         IEEE, 2013, pp. 937–940. isbn: 978-1-4799-0248-4.
@@ -275,13 +277,13 @@ def relaxed_spanning_tree(graph: TGraph, maximise=False, gamma=1):
     if maximise:
         reduce_fun = torch.minimum
         d = torch.tensor(
-            [torch.max(graph.adj_weighted(node)[1]) for node in range(graph.num_nodes)],
+            [max(graph.adj_weighted(node)[1]) for node in range(graph.num_nodes)],
             device=graph.device,
         )
     else:
         reduce_fun = torch.maximum
         d = torch.tensor(
-            [torch.min(graph.adj_weighted(node)[1]) for node in range(graph.num_nodes)],
+            [min(graph.adj_weighted(node)[1]) for node in range(graph.num_nodes)],
             device=graph.device,
         )
     target_mask = torch.full(
@@ -337,7 +339,7 @@ def relaxed_spanning_tree(graph: TGraph, maximise=False, gamma=1):
 
 
 def edge_sampling_sparsify(graph: TGraph, target_degree, ensure_connected=True):
-    """ TODO: docstring for edge_sampling_sparsify """
+    """TODO: docstring for edge_sampling_sparsify"""
     n_desired_edges = (
         int(target_degree * graph.num_nodes / 2) * 2
     )  # round down to an even number of edges
@@ -368,7 +370,7 @@ def edge_sampling_sparsify(graph: TGraph, target_degree, ensure_connected=True):
 
 
 def nearest_neighbor_sparsify(graph: TGraph, target_degree, ensure_connected=True):
-    """ TODO: docstring for nearest_neighbor_sparsify """
+    """TODO: docstring for nearest_neighbor_sparsify"""
     if ensure_connected:
         edge_mask = spanning_tree_mask(graph, maximise=True)
     else:
@@ -414,7 +416,7 @@ def hierarchical_sparsify(
     ensure_connected=True,
     sparsifier=edge_sampling_sparsify,
 ):
-    """ TODO: docstring for hierarchical_sparsify """
+    """TODO: docstring for hierarchical_sparsify"""
     rgraph = graph
     edge_mask = torch.zeros(graph.num_edges, dtype=torch.bool, device=graph.device)
     node_map = np.array(graph.nodes)

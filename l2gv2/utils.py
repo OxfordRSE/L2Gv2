@@ -25,7 +25,7 @@ import torch
 import torch.nn
 
 
-def speye(n, dtype=torch.float):
+def speye(n: int, dtype: torch.dtype = torch.float) -> torch.Tensor:
     """identity matrix of dimension n as sparse_coo_tensor."""
     return torch.sparse_coo_tensor(
         torch.tile(torch.arange(n, dtype=torch.long), (2, 1)),
@@ -34,21 +34,19 @@ def speye(n, dtype=torch.float):
     )
 
 
-def get_device(model: torch.nn.Module):
-    """ TODO: docstring for get_device."""
+def get_device(model: torch.nn.Module) -> torch.device:
+    """TODO: docstring for get_device."""
     return next(model.parameters()).device
 
 
-def set_device(device):
-    """ TODO: docstring for set_device."""
+def set_device(device: str | None = None):
+    """TODO: docstring for set_device."""
     if device is None:
         if torch.cuda.is_available():
-            device = torch.device("cuda")
-        else:
-            device = torch.device("cpu")
-    else:
-        device = torch.device(device)
-    return device
+            return torch.device("cuda")
+        return torch.device("cpu")
+
+    return torch.device(device)
 
 
 class EarlyStopping:
@@ -56,7 +54,7 @@ class EarlyStopping:
     Context manager for early stopping
     """
 
-    def __init__(self, patience, delta=0):
+    def __init__(self, patience: int, delta: float = 0):
         """
         Initialise early stopping context manager
 
@@ -80,7 +78,7 @@ class EarlyStopping:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._file.close()
 
-    def _save_model(self, model):
+    def _save_model(self, model: torch.nn.Module):
         self._file.seek(0)
         torch.save(model.state_dict(), self._file)
 
@@ -88,13 +86,13 @@ class EarlyStopping:
         self._file.seek(0)
         model.load_state_dict(torch.load(self._file))
 
-    def __call__(self, loss, model):
+    def __call__(self, loss: float, model: torch.nn.Module) -> bool:
         """
         check stopping criterion and save or restore model state as appropriate
 
         Args:
             loss: loss value for stopping
-            model:
+            model: [description]
 
         Returns:
             ``True`` if training should be stopped, ``False`` otherwise
@@ -126,32 +124,33 @@ class Timer:
     """
 
     def __init__(self):
-        self.total = 0.0
-        self.tic = None
+        self.total: float = 0.0
+        self.tic: float | None = None
 
     def __enter__(self):
         self.tic = perf_counter()
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb):
-        self.total += perf_counter() - self.tic
+        if self.tic is not None:
+            self.total += perf_counter() - self.tic
 
 
-def flatten(l, ltypes=(list, tuple)):
-    """ TODO: docstring for flatten."""
-    if isinstance(l, ltypes):
-        ltype = type(l)
-        l = list(l)
+def flatten(lst, ltypes=(list, tuple)):
+    """TODO: docstring for flatten."""
+    if isinstance(lst, ltypes):
+        ltype = type(lst)
+        lst = list(lst)
         i = 0
-        while i < len(l):
-            while isinstance(l[i], ltypes):
-                if not l[i]:
-                    l.pop(i)
+        while i < len(lst):
+            while isinstance(lst[i], ltypes):
+                if not lst[i]:
+                    lst.pop(i)
                     i -= 1
                     break
 
-                l[i : i + 1] = l[i]
+                lst[i : i + 1] = lst[i]
             i += 1
-        return ltype(l)
+        return ltype(lst)
 
-    return l
+    return lst

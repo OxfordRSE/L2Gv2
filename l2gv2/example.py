@@ -3,7 +3,7 @@ Code from https://github.com/LJeub/Local2Global/blob/master/local2global/example
 
 import argparse
 import csv
-from typing import Optional, Tuple, List, Type
+from typing import Type
 from copy import copy
 from os import path
 from collections import Counter
@@ -18,31 +18,32 @@ from scipy.spatial import procrustes
 from sklearn.cluster import KMeans
 import networkx as nx
 
-from l2gv2.patch import utils as ut
-from l2gv2.patch.patch import Patch
+from .patch import utils as ut
+from .patch.patch import Patch
+
 
 def generate_data(
     n_clusters: int,
-    scale: Optional[float] = 1.0,
-    std: Optional[float] = 0.5,
-    max_size: Optional[int] = 200,
-    min_size: Optional[int] = 10,
-    dim: Optional[int] = 2,
+    scale: float = 1.0,
+    std: float = 0.5,
+    max_size: int = 200,
+    min_size: int = 10,
+    dim: int = 2,
 ) -> np.ndarray:
     """Generate test data with normally-distributed clusters centered on a sphere.
 
     Args:
         n_clusters (int): Number of clusters.
 
-        scale (Optional[float]): Radius of sphere for cluster centers, default is 1.0].
+        scale: Radius of sphere for cluster centers, default is 1.0].
 
-        std (Optional[float]): Standard deviation for cluster points, default is 0.5].
+        std: Standard deviation for cluster points, default is 0.5].
 
-        max_size (Optional[int]): Maximum cluster size, default is 200.
+        max_size: Maximum cluster size, default is 200.
 
-        min_size (Optional[int]): Minimum cluster size, default is 10.
+        min_size: Minimum cluster size, default is 10.
 
-        dim (Optional[int]): Data dimension, default is 2.
+        dim: Data dimension, default is 2.
 
     Returns:
         np.ndarray: Generated data points.
@@ -77,19 +78,20 @@ def generate_data(
     ]
     return np.vstack(list_of_clusters)
 
+
 # TODO: fix too-many-branches, too-many-statements
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-statements
 def voronoi_patches(
     points: np.ndarray,
-    sample_size: Optional[int] = 100,
-    min_degree: Optional[int] = None,
-    min_overlap: Optional[int] = None,
-    min_size: Optional[int] = None,
-    eps: Optional[float] = 1.6,
-    return_graph: Optional[bool] = False,
-    kmeans: Optional[bool] = True,
-) -> Tuple[List[Patch], Optional[nx.Graph]]:
+    sample_size: int = 100,
+    min_degree: int | None = None,
+    min_overlap: int | None = None,
+    min_size: int | None = None,
+    eps: float = 1.6,
+    return_graph: bool = False,
+    kmeans: bool = True,
+) -> tuple[list[Patch], nx.Graph]:
     """Create patches for points. Starts by sampling patch centers and
     assigning points to the nearest center and any center that is within `eps`
     of the nearest center to create patches. Patches are then grown by incrementally
@@ -100,29 +102,29 @@ def voronoi_patches(
     Args:
         points (np.ndarray): ndarray of floats of shape (N, d), d-dimensional embedding.
 
-        sample_size (Optional[int]): Number of patches splitting the set of N points, 
+        sample_size: Number of patches splitting the set of N points,
             default is 100.
 
-        min_degree (Optional[int]): Minimum patch degree, defaults to `d + 1`.
+        min_degree: Minimum patch degree, defaults to `d + 1`.
 
-        min_overlap (Optional[int]): Minimum overlap to consider two patches connected, 
+        min_overlap: Minimum overlap to consider two patches connected,
             default is `d + 1`.
 
-        min_size (Optional[int]): Minimum patch size, defaults to `len(points) / sample_size`, 
+        min_size: Minimum patch size, defaults to `len(points) / sample_size`,
             default is None.
 
-        eps (Optional[float]): Tolerance for expanding initial Voronoi patches, default is 1.6.
+        eps: Tolerance for expanding initial Voronoi patches, default is 1.6.
 
-        return_graph (Optional[bool]): If True, returns the patch graph as a networkx Graph, 
+        return_graph: If True, returns the patch graph as a networkx Graph,
             default is False.
 
-        kmeans (Optional[bool]): If True, chooses patch centers using k-means,
+        kmeans: If True, chooses patch centers using k-means,
             otherwise, patch centers are sampled uniformly at random from points, default is True.
 
     Returns:
-        list[Patch]: List of patches.
+        List of patches.
 
-        networkx.Graph (optional): Patch graph if `return_graph=True`.
+        Patch graph if `return_graph=True`.
     """
     n, d = points.shape
     if min_size is None:
@@ -253,24 +255,27 @@ def voronoi_patches(
         return [Patch(nodes, points[nodes, :]) for nodes in node_lists], patch_network
 
     return [Patch(nodes, points[nodes, :]) for nodes in node_lists]
+
+
 # pylint: enable=too-many-statements
 # pylint: enable=too-many-branches
 
+
 def rand_scale_patches(
-    alignment_problem: ut.AlignmentProblem, min_scale: Optional[float] = 1e-2
-) -> List[float]:
+    alignment_problem: ut.AlignmentProblem, min_scale: float = 1e-2
+) -> list[float]:
     """
     randomly scale patches of alignment problem and return the true scales (used for testing)
 
     Args:
         alignment_problem (AlignmentProblem): Alignment problem to be rescaled.
 
-        min_scale (Optional[float]): Minimum scale factor (scale factors are sampled
-                           log-uniformly from the interval [min_scale, 1/min_scale]), 
+        min_scale: Minimum scale factor (scale factors are sampled
+                           log-uniformly from the interval [min_scale, 1/min_scale]),
                            default is 1e-2.
 
     Returns:
-        List[float]: List of true scales.
+        List of true scales.
     """
 
     scales = np.exp(
@@ -282,14 +287,14 @@ def rand_scale_patches(
     return scales
 
 
-def rand_rotate_patches(alignment_problem: ut.AlignmentProblem) -> List[np.ndarray]:
+def rand_rotate_patches(alignment_problem: ut.AlignmentProblem) -> list[np.ndarray]:
     """Randomly rotate patches of alignment problem and return true rotations (used for testing)
 
     Args:
-        alignment_problem (AlignmentProblem): Alignment problem to be transformed.
+        alignment_problem: Alignment problem to be transformed.
 
     Returns:
-        List[np.ndarray]: List of true rotations.
+        List of true rotations.
     """
 
     rotations = [rand_orth(alignment_problem.dim) for _ in alignment_problem.patches]
@@ -298,14 +303,14 @@ def rand_rotate_patches(alignment_problem: ut.AlignmentProblem) -> List[np.ndarr
 
 
 def rand_shift_patches(
-    alignment_problem: ut.AlignmentProblem, shift_scale: Optional[float] = 100.0
+    alignment_problem: ut.AlignmentProblem, shift_scale: float = 100.0
 ) -> np.ndarray:
     """Randomly shift patches by adding a normally distributed vector (used for testing)
 
     Args:
         alignment_problem (AlignmentProblem): Alignment problem to be transformed.
 
-        shift_scale (Optional[float]): Standard deviation for shifts, default is 100.0.
+        shift_scale: Standard deviation for shifts, default is 100.0.
 
     Returns:
         np.ndarray: Array of true shifts.
@@ -321,17 +326,17 @@ def rand_shift_patches(
 
 def add_noise(
     alignment_problem: ut.AlignmentProblem,
-    noise_level: Optional[float] = 1,
-    scales: Optional[np.ndarray] = None,
+    noise_level: float = 1,
+    scales: np.ndarray | None = None,
 ):
     """Add random normally-distributed noise to each point in each patch.
 
     Args:
         alignment_problem (AlignmentProblem): The alignment problem to be transformed.
 
-        noise_level (Optional[float]): Standard deviation of noise, default is 1.
+        noise_level: Standard deviation of noise, default is 1.
 
-        scales (Optional[np.ndarray]): Array of scales for each patch, default is None.
+        scales: Array of scales for each patch, default is None.
             Noise for each patch is multiplied by the corresponding scale.
 
     """
@@ -346,42 +351,42 @@ def add_noise(
 def noise_profile(
     points: np.ndarray,
     base_problem: ut.AlignmentProblem,
-    max_noise: Optional[float] = 0.5,
-    steps: Optional[int] = 101,
-    scales: Optional[np.ndarray] = None,
-    types: Optional[List[Type[ut.AlignmentProblem]]] = None,
-    labels: Optional[List[str]] = None,
-    min_overlap: Optional[List[int]] = None,
-    plot: Optional[bool] = True,
-) -> Tuple[np.ndarray, List[List[float]]]:
+    max_noise: float = 0.5,
+    steps: int = 101,
+    scales: np.ndarray | None = None,
+    types: list[Type[ut.AlignmentProblem]] | None = None,
+    labels: list[str] | None = None,
+    min_overlap: list[int] | None = None,
+    plot: bool | None = True,
+) -> tuple[np.ndarray, list[list[float]]]:
     """
     Plot procrustes reconstruction errors as a function of the noise level.
 
     Args:
         points (np.ndarray): True data.
 
-        base_problem (AlignmentProblem): Alignment problem without noise 
+        base_problem (AlignmentProblem): Alignment problem without noise
             (usually should have rotated/shifted/scaled patches).
 
-        max_noise (Optional[float]): Maximum standard deviation for noise, default is 0.5.
+        max_noise: Maximum standard deviation for noise, default is 0.5.
 
-        steps (Optional[int]): Number of noise steps between 0 and `max_noise`, default is 101.
+        steps: Number of noise steps between 0 and `max_noise`, default is 101.
 
-        scales (Optional[np.ndarray]): Scales of patches (noise is scaled accordingly), 
+        scales: Scales of patches (noise is scaled accordingly),
             default is None.
 
-        types (lOptional[ist[AlignmentProblem]]): List of AlignmentProblem subclasses to test
+        types: List of AlignmentProblem subclasses to test
             (each is tested with the same noise), default is None.
 
-        labels (Optional[list[str]]): Labels to use for the legend, default is None.
+        labels: Labels to use for the legend, default is None.
 
-        min_overlap (Optional[list[int]]): Values of `min_overlap` to include in the test, 
+        min_overlap: Values of `min_overlap` to include in the test,
             default is None.
 
-        plot (Optional[bool]): Plot results, default is True.
+        plot: Plot results, default is True.
 
     Returns:
-        Tuple[np.ndarray, list[list[float]]]: noise_levels, errors.
+        noise_levels, errors.
     """
 
     # set up labels and min_overlap
@@ -429,16 +434,16 @@ def noise_profile(
 
 
 def plot_reconstruction(
-    points: np.ndarray, problem: ut.AlignmentProblem, scale: Optional[bool] = True
+    points: np.ndarray, problem: ut.AlignmentProblem, scale: bool = True
 ) -> float:
     """Plot the reconstruction error for each point.
 
     Args:
-        points (np.ndarray): True positions.
+        points: True positions.
 
-        problem (AlignmentProblem): Alignment problem.
+        problem: Alignment problem.
 
-        scale (Optional[bool]): Rescale patches, default is True.
+        scale: Rescale patches, default is True.
 
     Returns:
         float: Reconstruction error.
@@ -464,12 +469,12 @@ def plot_reconstruction(
 def save_data(points: np.ndarray, filename: str):
     """Save an array of points to a CSV file.
 
-    Ensures the specified filename has a `.csv` extension and 
+    Ensures the specified filename has a `.csv` extension and
     writes the data to a CSV file with UTF-8 encoding.
 
     Args:
         points (np.ndarray): Array of data points to save, where each row is a data point.
-        filename (str): Desired filename for saving the data. 
+        filename (str): Desired filename for saving the data.
 
     """
     filename = ut.ensure_extension(filename, ".csv")
@@ -503,7 +508,7 @@ def rand_orth(dim: int) -> np.ndarray:
 
 
 def main(arguments: argparse.Namespace):
-    """ Generate synthetic data and test the alignment algorithms.
+    """Generate synthetic data and test the alignment algorithms.
 
     Args:
 
@@ -569,11 +574,13 @@ def main(arguments: argparse.Namespace):
             problem.__class__ = problem_cls
             error = plot_reconstruction(points, problem)
             plt.title(f"Noise: {noise}, error: {error}")
-            plt.savefig(path.join(arguments.outdir, f"errorplot_{label}_noise{noise}.pdf"))
+            plt.savefig(
+                path.join(arguments.outdir, f"errorplot_{label}_noise{noise}.pdf")
+            )
             plt.close()
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Run local2global example.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

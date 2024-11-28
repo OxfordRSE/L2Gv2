@@ -1,7 +1,6 @@
 """This module contains the functions to compute the
 embeddings of a list of patches using VGAE and Node2Vec."""
 
-from typing import Tuple
 import numpy as np
 from tqdm import tqdm
 import torch
@@ -10,8 +9,8 @@ import torch_geometric as tg
 from torch_geometric.utils.convert import from_networkx
 from torch_geometric.nn import Node2Vec
 
-from l2gv2.patch.patch import Patch
-from l2gv2.patch.utils import WeightedAlignmentProblem
+from .patch.patch import Patch
+from .patch.utils import WeightedAlignmentProblem
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -34,6 +33,7 @@ def speye(n: int, dtype: torch.dtype = torch.float) -> torch.Tensor:
         torch.ones(n, dtype=dtype),
         (n, n),
     )
+
 
 # TODO: fix too-few-public-methods
 # pylint: disable=too-few-public-methods
@@ -76,7 +76,7 @@ class VGAEconv(torch.nn.Module):
             normalize=normalize,
         )
 
-    def forward(self, data: tg.data.Data) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(self, data: tg.data.Data) -> tuple[torch.Tensor, torch.Tensor]:
         """Forward pass.
 
         Args:
@@ -96,7 +96,10 @@ class VGAEconv(torch.nn.Module):
         mu = self.mean_conv2(x, edge_index)
         sigma = self.var_conv2(x, edge_index)
         return mu, sigma
+
+
 # pylint: enable=too-few-public-methods
+
 
 def train(
     data: tg.data.Data,
@@ -150,7 +153,7 @@ def vgae_patch_embeddings(
     num_epochs: int = 100,
     decoder=None,
     lr: float = 0.01,
-) -> Tuple[list[Patch], list[torch.nn.Module]]:
+) -> tuple[list[Patch], list[torch.nn.Module]]:
     """TODO: docstring for `vgae_patch_embeddings`
 
     Args:
@@ -239,7 +242,7 @@ def node2vec_(
         num_epoch: number of epochs to train the model, default is 100.
 
     Returns:
-        
+
         [description]
     """
 
@@ -343,7 +346,7 @@ def node2vec_patch_embeddings(
 
 def chunk_embedding(
     chunk_size: int, patches: list[Patch], dim=2
-) -> Tuple[np.ArrayLike, WeightedAlignmentProblem]:
+) -> tuple[np.ArrayLike, WeightedAlignmentProblem]:
     """TODO: docstring for `chunk_embedding`
 
     Note: this only works for Autonomous System dataset.

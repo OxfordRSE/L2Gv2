@@ -6,8 +6,8 @@ from copy import copy
 from statistics import mean
 import pytest
 import numpy as np
-import local2global.utils as ut
-import local2global.example as ex
+from l2gv2.patch import utils as ut
+import l2gv2.example as ex
 
 
 # fixed seed
@@ -16,8 +16,8 @@ _seed = np.random.SeedSequence(10)
 # random seed
 # _seed = np.random.SeedSequence()
 
-ut.seed(_seed)
-print(_seed.entropy)
+# ut.seed(_seed)
+# print(_seed.entropy)
 
 # test parameters
 NOISE_SCALES = np.linspace(0, 0.1, 11)[1:]
@@ -46,7 +46,7 @@ points_list = [
     for d in DIMS
 ]
 patches_list = [
-    ex.Voronoi_patches(
+    ex.voronoi_patches(
         points=points,
         sample_size=SAMPLE_SIZE,
         min_overlap=2 * mo,
@@ -85,7 +85,7 @@ def iter_seed(it: int) -> None:
 
 @pytest.mark.skipif(
     os.getenv("GITHUB_ACTIONS") == "true",
-    reason="local2global tests disabled in GitHub Actions"
+    reason="local2global tests disabled in GitHub Actions",
 )
 @pytest.mark.parametrize("it", range(100))
 @pytest.mark.parametrize("problem_cls", test_classes)
@@ -94,13 +94,13 @@ def test_stability(it, problem_cls, patches, min_overlap):
     """Test stability of eigenvector calculations
 
     Args:
-        it ([type]): [description]
+        it: [description]
 
-        problem_cls ([type]): [description]
+        problem_cls: [description]
 
-        patches ([type]): [description]
+        patches: [description]
 
-        min_overlap ([type]): [description]
+        min_overlap: [description]
 
         Returns:
         [type]: [description]
@@ -115,9 +115,10 @@ def test_stability(it, problem_cls, patches, min_overlap):
     print(f"Mean error is {error}")
     assert error < TOL
 
+
 @pytest.mark.skipif(
     os.getenv("GITHUB_ACTIONS") == "true",
-    reason="local2global tests disabled in GitHub Actions"
+    reason="local2global tests disabled in GitHub Actions",
 )
 @pytest.mark.parametrize("problem_cls", test_classes)
 @pytest.mark.parametrize("patches,min_overlap", zip(patches_list, MIN_OVERLAP))
@@ -125,11 +126,11 @@ def test_calc_synchronised_rotations(problem_cls, patches, min_overlap):
     """TODO: docstring for `test_calc_synchronised_rotations`
 
     Args:
-        problem_cls ([type]): [description]
+        problem_cls: [description]
 
-        patches ([type]): [description]
+        patches: [description]
 
-        min_overlap ([type]): [description]
+        min_overlap: [description]
 
     Returns:
         [type]: [description]
@@ -142,9 +143,10 @@ def test_calc_synchronised_rotations(problem_cls, patches, min_overlap):
     print(f"Mean error is {error}")
     assert error < TOL
 
+
 @pytest.mark.skipif(
     os.getenv("GITHUB_ACTIONS") == "true",
-    reason="local2global tests disabled in GitHub Actions"
+    reason="local2global tests disabled in GitHub Actions",
 )
 @pytest.mark.xfail(reason="Noisy tests may fail, though many failures are a bad sign")
 @pytest.mark.parametrize("test_class", test_classes)
@@ -154,13 +156,13 @@ def test_noisy_calc_synchronised_rotations(noise, test_class, patches, min_overl
     """TODO: doccstring for `test_noisy_calc_synchronised_rotations`
 
     Args:
-        noise ([type]): [description]
+        noise: [description]
 
-        test_class ([type]): [description]
+        test_class: [description]
 
-        patches ([type]): [description]
+        patches: [description]
 
-        min_overlap ([type]): [description
+        min_overlap: [description
     """
     problem = test_class(patches, min_overlap=min_overlap)
     rotations = ex.rand_rotate_patches(problem)
@@ -190,9 +192,10 @@ def test_noisy_calc_synchronised_rotations(noise, test_class, patches, min_overl
     )
     assert error < max(max_err, TOL)
 
+
 @pytest.mark.skipif(
     os.getenv("GITHUB_ACTIONS") == "true",
-    reason="local2global tests disabled in GitHub Actions"
+    reason="local2global tests disabled in GitHub Actions",
 )
 @pytest.mark.parametrize("problem_cls", test_classes)
 @pytest.mark.parametrize("patches,min_overlap", zip(patches_list, MIN_OVERLAP))
@@ -200,11 +203,11 @@ def test_calc_synchronised_scales(problem_cls, patches, min_overlap):
     """TODO: docstring for `test_calc_synchronised_scales`
 
     Args:
-        problem_cls ([type]): [description]
+        problem_cls: [description]
 
-        patches ([type]): [description]
+        patches: [description]
 
-        min_overlap ([type]): [description]
+        min_overlap: [description]
 
     Returns:
         [type]: [description]
@@ -218,9 +221,10 @@ def test_calc_synchronised_scales(problem_cls, patches, min_overlap):
     print(f"Mean error is {error}")
     assert error < TOL
 
+
 @pytest.mark.skipif(
     os.getenv("GITHUB_ACTIONS") == "true",
-    reason="local2global tests disabled in GitHub Actions"
+    reason="local2global tests disabled in GitHub Actions",
 )
 @pytest.mark.xfail(reason="Noisy tests may fail, though many failures are a bad sign")
 @pytest.mark.parametrize("problem_cls", test_classes)
@@ -230,13 +234,13 @@ def test_noisy_calc_synchronised_scales(problem_cls, noise, patches, min_overlap
     """TODO: docstring for `test_noisy_calc_synchronised_scales`
 
     Args:
-        problem_cls ([type]): [description]
+        problem_cls: [description]
 
-        noise ([type]): [description]
+        noise: [description]
 
-        patches ([type]): [description]
+        patches: [description]
 
-        min_overlap ([type]): [description]
+        min_overlap: [description]
 
     Returns:
         [type]: [description]
@@ -269,9 +273,10 @@ def test_noisy_calc_synchronised_scales(problem_cls, noise, patches, min_overlap
     )
     assert error < max_err + TOL
 
+
 @pytest.mark.skipif(
     os.getenv("GITHUB_ACTIONS") == "true",
-    reason="local2global tests disabled in GitHub Actions"
+    reason="local2global tests disabled in GitHub Actions",
 )
 @pytest.mark.parametrize("problem_cls", test_classes)
 @pytest.mark.parametrize("patches,min_overlap", zip(patches_list, MIN_OVERLAP))
@@ -279,11 +284,11 @@ def test_calc_synchronised_translations(problem_cls, patches, min_overlap):
     """TODO: docstring for `test_calc_synchronised_translations`
 
     Args:
-        problem_cls ([type]): [description]
+        problem_cls: [description]
 
-        patches ([type]): [description]
+        patches: [description]
 
-        min_overlap ([type]): [description]
+        min_overlap: [description]
 
     Returns:
         [type]: [description]
@@ -295,9 +300,10 @@ def test_calc_synchronised_translations(problem_cls, patches, min_overlap):
     print(f"Mean error is {error}")
     assert error < TOL
 
+
 @pytest.mark.skipif(
     os.getenv("GITHUB_ACTIONS") == "true",
-    reason="local2global tests disabled in GitHub Actions"
+    reason="local2global tests disabled in GitHub Actions",
 )
 @pytest.mark.xfail(reason="Noisy tests may fail, though many failures are a bad sign")
 @pytest.mark.parametrize("noise", NOISE_SCALES)
@@ -306,11 +312,11 @@ def test_noisy_calc_synchronised_translations(noise, patches, min_overlap):
     """TODO: docstring for `test_noisy_calc_synchronised_translations`
 
     Args:
-        noise ([type]): [description]
+        noise: [description]
 
-        patches ([type]): [description]
+        patches: [description]
 
-        min_overlap ([type]): [description]
+        min_overlap: [description]
 
     Returns:
         [type]: [description]
@@ -323,9 +329,10 @@ def test_noisy_calc_synchronised_translations(noise, patches, min_overlap):
     print(f"Mean error is {error}")
     assert error < noise + TOL
 
+
 @pytest.mark.skipif(
     os.getenv("GITHUB_ACTIONS") == "true",
-    reason="local2global tests disabled in GitHub Actions"
+    reason="local2global tests disabled in GitHub Actions",
 )
 @pytest.mark.parametrize("problem_cls", test_classes)
 @pytest.mark.parametrize(
@@ -335,13 +342,13 @@ def test_get_aligned_embedding(problem_cls, patches, min_overlap, points):
     """TODO: docstring for `test_get_aligned_embedding`
 
     Args:
-        problem_cls ([type]): [description]
+        problem_cls: [description]
 
-        patches ([type]): [description]
+        patches: [description]
 
-        min_overlap ([type]): [description]
+        min_overlap: [description]
 
-        points ([type]): [description]
+        points: [description]
 
     Returns:
         [type]: [description]
@@ -355,9 +362,10 @@ def test_get_aligned_embedding(problem_cls, patches, min_overlap, points):
     print(f"Procrustes error is {error}")
     assert error < TOL
 
+
 @pytest.mark.skipif(
     os.getenv("GITHUB_ACTIONS") == "true",
-    reason="local2global tests disabled in GitHub Actions"
+    reason="local2global tests disabled in GitHub Actions",
 )
 @pytest.mark.xfail(reason="Noisy tests may fail, though many failures are a bad sign")
 @pytest.mark.parametrize("problem_cls", test_classes)
@@ -372,17 +380,17 @@ def test_noisy_get_aligned_embedding(
     """TODO: docstring for `test_noisy_get_aligned_embedding`
 
     Args:
-        problem_cls ([type]): [description]
+        problem_cls: [description]
 
-        noise ([type]): [description]
+        noise: [description]
 
-        it ([type]): [description]
+        it: [description]
 
-        patches ([type]): [description]
+        patches: [description]
 
-        min_overlap ([type]): [description]
+        min_overlap: [description]
 
-        points ([type]): [description]
+        points: [description]
 
     Returns:
         [type]: [description]

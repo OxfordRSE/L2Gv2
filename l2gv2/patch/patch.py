@@ -20,22 +20,25 @@
 """TODO: module docstring"""
 
 import copy
-
 import numpy as np
-from l2gv2.patch.lazy import BaseLazyCoordinates, LazyMeanAggregatorCoordinates, LazyFileCoordinates
+from lazy import (
+    BaseLazyCoordinates,
+    LazyMeanAggregatorCoordinates,
+    LazyFileCoordinates,
+)
 
 
 class Patch:
-    """ Class for patch embedding """
+    """Class for patch embedding"""
 
-    index = None
+    index: dict[int, int]
     """mapping of node index to patch coordinate index"""
 
-    coordinates = None
+    coordinates: np.ArrayLike
     """patch embedding coordinates"""
 
     def __init__(self, nodes: iter, coordinates: np.ArrayLike | None = None):
-        """ Initialise a patch from a list of nodes and corresponding coordinates
+        """Initialise a patch from a list of nodes and corresponding coordinates
 
         Args:
             nodes: Iterable of integer node indeces for patch
@@ -52,7 +55,7 @@ class Patch:
 
     @property
     def shape(self):
-        """ Shape of patch coordinates
+        """Shape of patch coordinates
 
         (`shape[0]` is the number of nodes in the patch
         and `shape[1]` is the embedding dimension)
@@ -60,7 +63,7 @@ class Patch:
         return self.coordinates.shape
 
     def get_coordinates(self, nodes: iter):
-        """ Get coordinates for a list of nodes
+        """Get coordinates for a list of nodes
 
         Args:
             nodes: Iterable of node indeces
@@ -68,7 +71,7 @@ class Patch:
         return self.coordinates[[self.index[node] for node in nodes], :]
 
     def get_coordinate(self, node: int):
-        """ Get coordinate for a single node
+        """Get coordinate for a single node
 
         Args:
             node: The node index
@@ -76,7 +79,7 @@ class Patch:
         return self.coordinates[self.index[node], :]
 
     def __copy__(self):
-        """ Return a copy of the patch"""
+        """Return a copy of the patch"""
         instance = self.__class__.__new__(self.__class__)
         # TODO: review, this was changed from original code
         # instance = self.__new__(type(self))
@@ -86,7 +89,7 @@ class Patch:
 
 
 class MeanAggregatorPatch(Patch):
-    """ TODO: docstring for `MeanAggregatorPatch`"""
+    """TODO: docstring for `MeanAggregatorPatch`"""
 
     def __init__(self, patches):
         coordinates = LazyMeanAggregatorCoordinates(patches)
@@ -107,7 +110,7 @@ class MeanAggregatorPatch(Patch):
 
 
 class FilePatch(Patch):
-    """ TODO: docstring for `FilePatch`"""
+    """TODO: docstring for `FilePatch`"""
 
     def __init__(self, nodes, filename, shift=None, scale=None, rot=None):
         super().__init__(
