@@ -51,6 +51,12 @@ Setup the virtual environment
    pip install '.[docs]'
    ```
 
+4. To install the development dependencies
+
+   ```shell
+   pip install '.[dev]'
+   ```
+
 ## License
 
 ## Contributors
