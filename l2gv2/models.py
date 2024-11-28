@@ -2,7 +2,7 @@
 embeddings of a list of patches using VGAE and Node2Vec."""
 
 from typing import Tuple
-import numpy as np
+import numpy.typing as npt
 from tqdm import tqdm
 import torch
 import torch.nn.functional as F
@@ -34,6 +34,7 @@ def speye(n: int, dtype: torch.dtype = torch.float) -> torch.Tensor:
         torch.ones(n, dtype=dtype),
         (n, n),
     )
+
 
 # TODO: fix too-few-public-methods
 # pylint: disable=too-few-public-methods
@@ -96,7 +97,10 @@ class VGAEconv(torch.nn.Module):
         mu = self.mean_conv2(x, edge_index)
         sigma = self.var_conv2(x, edge_index)
         return mu, sigma
+
+
 # pylint: enable=too-few-public-methods
+
 
 def train(
     data: tg.data.Data,
@@ -239,7 +243,7 @@ def node2vec_(
         num_epoch: number of epochs to train the model, default is 100.
 
     Returns:
-        
+
         [description]
     """
 
@@ -343,7 +347,7 @@ def node2vec_patch_embeddings(
 
 def chunk_embedding(
     chunk_size: int, patches: list[Patch], dim=2
-) -> Tuple[np.ArrayLike, WeightedAlignmentProblem]:
+) -> Tuple[npt.ArrayLike, WeightedAlignmentProblem]:
     """TODO: docstring for `chunk_embedding`
 
     Note: this only works for Autonomous System dataset.
