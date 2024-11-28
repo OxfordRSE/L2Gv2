@@ -37,11 +37,14 @@ dependencies = [
     "torch == 2.5.*; sys_platform == 'darwin'",
     "torch-geometric ~= 2.6",
     "torch-scatter ~= 2.1",
-    "tqdm >= 4",
-    "local2global @ git+https://github.com/LJeub/Local2Global.git@master"
+    "tqdm >= 4"
 ]
 
 [project.optional-dependencies]
+dev = [
+    "pylint == 3.3.1",
+    "pre_commit == 4.0.1"
+]
 tests = [
     "pytest >= 8",
     "pytest-cov",
