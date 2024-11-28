@@ -4,9 +4,9 @@ Introduction
 Setup
 -----
 
-**Supported Python Versions**: 3.10, 3.11, 3.12 
+**Supported Python Versions**: 3.10, 3.11, 3.12
 
-**Supported Operating Systems**: macOS, Linux  
+**Supported Operating Systems**: macOS, Linux
 
 Clone the repository on your machine
 
@@ -27,22 +27,31 @@ Setup the virtual environment
 
    .. code-block:: bash
 
-       pip install -r requirements.txt
+       pip install . --find-links https://data.pyg.org/whl/torch-{version}%2Bcpu.html
 
-The unified ``requirements.in`` file includes both shared and platform-specific dependencies with version constraints where necessary. To update dependencies, modify ``requirements.in`` and then recompile ``requirements.txt``:
+    For the above, select 2.5.1 for macOS and 2.4.1 for Linux. Note that this
+    installs CPU versions of the dependencies. To install GPU versions, consult the
+    pytorch-geometric_ documentation for the appropriate repository links, or visit
+    https://data.pyg.org/whl/ to see all possible torch/GPU supported versions.
 
-.. code-block:: bash
 
-    pip-compile requirements.in --verbose
+3. To build docs and for tests install the corresponding optional dependency sets
+
+   .. code-block:: bash
+
+      pip install '.[tests]'
+      pip install '.[docs]'
+
+.. _pytorch-geometric: https://pypi.org/project/torch-geometric/
 
 GitHub actions & pre-commit integration
 ------------------------------------------
 
 This project uses `pylint` for code quality and linting checks, integrated with both GitHub Actions for continuous integration and `pre-commit` (`pre-commit.com <href https://pre-commit.com>`_) for local development checks.
 
-The pylint GitHub workflow file is located at ``.github/workflows/pylint.yml`` 
+The pylint GitHub workflow file is located at ``.github/workflows/pylint.yml``
 
-The `pre-commit` hook is set up to automatically run `pylint` on files within the ``l2gv2`` folder whenever code is committed locally (``.pre-commit-config.yaml``). This helps catch and resolve linting issues before they are pushed to the repository. 
+The `pre-commit` hook is set up to automatically run `pylint` on files within the ``l2gv2`` folder whenever code is committed locally (``.pre-commit-config.yaml``). This helps catch and resolve linting issues before they are pushed to the repository.
 
 To set up the pre-commit hook
 
@@ -68,7 +77,7 @@ To set up the pre-commit hook
 Documentation
 -------------
 
-The project is setup to generate documentation with `Sphinx <https://www.sphinx-doc.org/en/master/index.html>`_). 
+The project is setup to generate documentation with `Sphinx <https://www.sphinx-doc.org/en/master/index.html>`_).
 
 Documentation is available at `l2gv2.readthedocs.io <https://l2gv2.readthedocs.io>`_
 
@@ -88,5 +97,5 @@ Generate `html` or `markdown` documentation locally
 Automatically refresh and serve the html documentation locally at `http://127.0.0.1:8000 <http://127.0.0.1:8000>`_ upon file updates during development
 
 .. code-block:: bash
-   
-   sphinx-autobuild docs/source docs/build/html 
+
+   sphinx-autobuild docs/source docs/build/html
