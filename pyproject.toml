@@ -7,11 +7,11 @@ build-backend = "pdm.backend"
 # #######
 [project]
 name = "l2gv2"
-version = "0.0.1"
+version = "0.1.0"
 authors = [
   { name="Martin Lotz", email="martin.lotz@warwick.ac.uk" }
 ]
-description = ""
+description = "Infer global embeddings from local graph embeddings trained in parallel"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
@@ -20,9 +20,43 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+dependencies = [
+    "autograd ~= 1.7",
+    "ilupp == 1.0.*",
+    "networkx ~= 3.4",
+    "numba >= 0.60",
+    "numpy == 1.*",
+    "polars ~= 1.15",
+    "pymanopt ~= 2.2",
+    "pymetis",
+    "python-louvain == 0.16",  # imported as 'community'
+    "raphtory >= 0.13",
+    "scikit-learn >= 1",
+    "scipy == 1.*",
+    "torch == 2.4.*; sys_platform == 'linux'",
+    "torch == 2.5.*; sys_platform == 'darwin'",
+    "torch-geometric ~= 2.6",
+    "torch-scatter ~= 2.1",
+    "tqdm >= 4",
+    "local2global @ git+https://github.com/LJeub/Local2Global.git@master"
+]
+
+[project.optional-dependencies]
+tests = [
+    "pytest >= 8",
+    "pytest-cov",
+    "pylint"
+]
+docs = [
+    "Sphinx == 8.*",
+    "sphinx-markdown-builder==0.6.*",
+    "myst-parser >= 4",
+    "pydata-sphinx-theme"
+]
+
 [project.urls]
-"Homepage" = "https://github.com/lotzma/L2Gv2"
-"Bug Tracker" = "https://github.com/lotzma/L2Gv2/issues"
+"Homepage" = "https://github.com/OxfordRSE/L2Gv2"
+"Bug Tracker" = "https://github.com/OxfordRSE/L2Gv2/issues"
 
 # pylint
 # ######

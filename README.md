@@ -15,13 +15,13 @@ Full documentation available [here](https://l2gv2.readthedocs.io/en/latest/)
 ## Setup
 
 
-**Supported Python Versions**: 3.10, 3.11, 3.12  
-**Supported Operating Systems**: macOS, Linux  
+**Supported Python Versions**: 3.10, 3.11, 3.12
+**Supported Operating Systems**: macOS, Linux
 
 Clone the repository on your machine
 
 ```shell
-git clone https://github.com/lotzma/L2Gv2.git
+git clone https://github.com/OxfordRSE/L2Gv2.git
 ```
 
 Setup the virtual environment
@@ -35,20 +35,27 @@ Setup the virtual environment
 2. Install the dependencies
 
     ```shell
-    pip install -r requirements.txt
+    pip install . --find-links https://data.pyg.org/whl/torch-{version}%2Bcpu.html
     ```
 
-The unified `requirements.in` file includes both shared and platform-specific dependencies with version constraints where necessary. To update dependencies, modify `requirements.in` and then recompile `requirements.txt`
+   For the above, select 2.5.1 for macOS and 2.4.1 for Linux. Note that this installs
+   CPU versions of the dependencies. To install GPU versions, consult the
+   [pytorch-geometric](https://pypi.org/project/torch-geometric/) documentation
+   for the appropriate repository links, or visit https://data.pyg.org/whl to see
+   all possible torch/GPU supported versions.
 
-```shell
-pip-compile requirements.in --verbose
-```
+3. To build docs and for tests install the corresponding optional dependency sets
+
+   ```shell
+   pip install '.[tests]'
+   pip install '.[docs]'
+   ```
 
 ## License
 
 ## Contributors
 
-The following people contributed to this project ([emoji key](https://allcontributors.org/docs/en/emoji-key)). 
+The following people contributed to this project ([emoji key](https://allcontributors.org/docs/en/emoji-key)).
 
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification.
