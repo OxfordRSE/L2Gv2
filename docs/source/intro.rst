@@ -12,7 +12,7 @@ Clone the repository on your machine
 
 .. code-block:: bash
 
-    git clone https://github.com/lotzma/L2Gv2.git
+    git clone https://github.com/OxfordRSE/L2Gv2.git
 
 Setup the virtual environment
 
@@ -41,6 +41,12 @@ Setup the virtual environment
 
       pip install '.[tests]'
       pip install '.[docs]'
+
+4. To install the development dependencies
+
+   .. code-block:: bash
+
+      pip install '.[dev]'
 
 .. _pytorch-geometric: https://pypi.org/project/torch-geometric/
 
