@@ -35,11 +35,10 @@ Setup the virtual environment
     https://data.pyg.org/whl/ to see all possible torch/GPU supported versions.
 
 
-3. To build docs and for tests install the corresponding optional dependency sets
+3. To build docs
 
    .. code-block:: bash
 
-      pip install '.[tests]'
       pip install '.[docs]'
 
 4. To install the development dependencies
