@@ -3,7 +3,6 @@ Datasets loader for l2gv2, main file
 """
 
 import datetime
-from typing import Union
 from pathlib import Path
 
 from tqdm import tqdm
@@ -196,7 +195,7 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
 
     def get_networkx(
         self, temp: bool = True
-    ) -> Union[nx.Graph, dict[datetime.datetime, nx.Graph]]:
+    ) -> nx.Graph | dict[datetime.datetime, nx.Graph]:
         """Returns networkx.DiGraph representation
 
         Args:
@@ -221,7 +220,7 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
 
     def get_edge_index(
         self, temp: bool = True
-    ) -> Union[torch.Tensor, dict[str, torch.Tensor]]:
+    ) -> torch.Tensor | dict[str, torch.Tensor]:
         """Returns edge index as torch tensors
 
         Args:
@@ -249,9 +248,7 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
 
     def get_tgeometric(
         self, temp: bool = True
-    ) -> Union[
-        torch_geometric.data.Data, dict[datetime.datetime, torch_geometric.data.Data]
-    ]:
+    ) -> torch_geometric.data.Data | dict[datetime.datetime, torch_geometric.data.Data]:
         """Returns torch_geometric representation
 
         Args:

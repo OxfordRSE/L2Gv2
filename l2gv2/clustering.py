@@ -10,8 +10,8 @@ import pymetis
 import numpy as np
 import numba
 
-from l2gv2.network import TGraph, NPGraph
-from l2gv2 import progress
+from network import TGraph, NPGraph
+from . import progress
 
 
 def distributed_clustering(graph: TGraph, beta, rounds=None, patience=3, min_samples=2):
@@ -98,7 +98,7 @@ def fennel_clustering(
     num_iters=1,
     clusters=None,
 ):
-    """ TODO: docstring for fennel_clustering. """
+    """TODO: docstring for fennel_clustering."""
     graph = graph.to(NPGraph)
 
     if clusters is None:
@@ -126,6 +126,7 @@ def fennel_clustering(
         )
     return torch.as_tensor(clusters)
 
+
 # pylint: disable=too-many-branches
 @numba.njit
 def _fennel_clustering(
@@ -148,18 +149,18 @@ def _fennel_clustering(
         graph: input graph
 
         num_clusters: target number of clusters
-        
-        load_limit: maximum cluster size is 
+
+        load_limit: maximum cluster size is
             ``load_limit * graph.num_nodes / num_clusters`` (default: ``1.1``)
-        
+
         alpha: :math:`\alpha` value for the algorithm (default as suggested in [#fennel]_)
-        
+
         gamma: :math:`\gamma` value for the algorithm (default: 1.5)
-        
+
         randomise_order: if ``True``, randomise order, else use breadth-first-search order.
-        
+
         clusters: input clustering to refine (optional)
-        
+
         num_iters: number of cluster assignment iterations (default: ``1``)
 
     Returns:
@@ -240,7 +241,10 @@ def _fennel_clustering(
         progress.close(pbar)
 
     return clusters
+
+
 # pylint: enable=too-many-branches
+
 
 def louvain_clustering(graph: TGraph, *args, **kwargs):
     r"""
@@ -300,7 +304,7 @@ def metis_clustering(graph: TGraph, num_clusters):
 
 
 def spread_clustering(graph, num_clusters, max_degree_init=True):
-    """ TODO: docstring for spread_clustering. """
+    """TODO: docstring for spread_clustering."""
 
     clusters = torch.full((graph.num_nodes,), -1, dtype=torch.long, device=graph.device)
     if max_degree_init:
@@ -377,7 +381,7 @@ def spread_clustering(graph, num_clusters, max_degree_init=True):
 def hierarchical_aglomerative_clustering(
     graph, method=spread_clustering, levels=None, branch_factors=None
 ):
-    """ TODO: docstring for hierarchical_aglomerative_clustering. """
+    """TODO: docstring for hierarchical_aglomerative_clustering."""
 
     if branch_factors is None:
         branch_factors = [graph.num_nodes ** (1 / (levels + 1)) for _ in range(levels)]
@@ -400,7 +404,8 @@ def hierarchical_aglomerative_clustering(
 
 
 class Partition(Sequence):
-    """ TODO: docstring for Partition. """
+    """TODO: docstring for Partition."""
+
     def __init__(self, partition_tensor):
         partition_tensor = torch.as_tensor(partition_tensor)
         counts = torch.bincount(partition_tensor)
