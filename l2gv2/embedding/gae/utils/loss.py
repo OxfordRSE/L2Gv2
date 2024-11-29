@@ -17,7 +17,8 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-""" TODO: module docstring for embedding/gae/utils/loss.py. """
+"""TODO: module docstring for embedding/gae/utils/loss.py."""
+
 
 # pylint: disable=invalid-name
 def VGAE_loss(model, data):
@@ -35,7 +36,10 @@ def VGAE_loss(model, data):
         model.recon_loss(model.encode(data), data.edge_index)
         + model.kl_loss() / data.num_nodes
     )
+
+
 # pylint: enable=invalid-name
+
 
 # pylint: disable=invalid-name
 def GAE_loss(model, data):
@@ -50,4 +54,6 @@ def GAE_loss(model, data):
         reconstruction loss
     """
     return model.recon_loss(model.encode(data), data.edge_index)
+
+
 # pylint: enable=invalid-name

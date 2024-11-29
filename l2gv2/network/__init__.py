@@ -17,7 +17,9 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-""" TODO: module docstring for network/__init__.py"""
+"""TODO: module docstring for network/__init__.py"""
+
 from .npgraph import NPGraph
 from .tgraph import TGraph
-from .utils import *  # TODO: this should be removed
+
+__all__ = ["NPGraph", "TGraph"]

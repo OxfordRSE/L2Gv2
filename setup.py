@@ -1,4 +1,5 @@
-""" Setuptools configuration for the project. """
+"""Setuptools configuration for the project."""
+
 import setuptools
 
 if __name__ == "__main__":
