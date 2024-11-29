@@ -1,17 +1,19 @@
-""" TODO: module docstring for dgi/layers/discriminator.py. """
+"""TODO: module docstring for dgi/layers/discriminator.py."""
+
 import torch
 from torch import nn
 
 
 class Discriminator(nn.Module):
-    """ TODO: class docstring for Discriminator. """
+    """TODO: class docstring for Discriminator."""
+
     def __init__(self, n_h):
         super().__init__()
         self.f_k = nn.Bilinear(n_h, n_h, 1)
         self.reset_parameters()
 
     def reset_parameters(self):
-        """ TODO: method docstring for Discriminator.reset_parameters. """
+        """TODO: method docstring for Discriminator.reset_parameters."""
         for m in self.modules():
             if isinstance(m, nn.Bilinear):
                 torch.nn.init.xavier_uniform_(m.weight.data)
@@ -19,7 +21,7 @@ class Discriminator(nn.Module):
                     m.bias.data.fill_(0.0)
 
     def forward(self, c, h_pl, h_mi, s_bias1=None, s_bias2=None):
-        """ TODO: method docstring for Discriminator.forward. """
+        """TODO: method docstring for Discriminator.forward."""
         c_x = torch.unsqueeze(c, 0)
         c_x = c_x.expand_as(h_pl)
 

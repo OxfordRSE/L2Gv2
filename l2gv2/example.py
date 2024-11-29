@@ -1,5 +1,4 @@
-"""Generate synthetic test data.
-Code from https://github.com/LJeub/Local2Global/blob/master/local2global/example.py"""
+"""Generate synthetic test data."""
 
 import argparse
 import csv

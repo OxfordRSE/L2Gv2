@@ -17,13 +17,14 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-""" TODO: module docstring for embedding/gae/layers/decoders.py. """
+"""TODO: module docstring for embedding/gae/layers/decoders.py."""
+
 import torch
 
 
 class DistanceDecoder(torch.nn.Module):
     """
-    implements the distance decoder which predicts the probability of an edge as 
+    implements the distance decoder which predicts the probability of an edge as
     the exponential of the negative euclidean distance between nodes
     """
 
@@ -37,10 +38,10 @@ class DistanceDecoder(torch.nn.Module):
 
         Args:
             z [type]: input coordinates
-            
+
             edge_index [type]: edges
-            
-            sigmoid [type]: if ``True``, return exponential of negative distance, 
+
+            sigmoid [type]: if ``True``, return exponential of negative distance,
                 else return negative distance
 
         """
@@ -54,7 +55,7 @@ class DistanceDecoder(torch.nn.Module):
         Args:
             z [type]: input coordinates
 
-            sigmoid [type]: if ``True``, return exponential of negative distance, 
+            sigmoid [type]: if ``True``, return exponential of negative distance,
                 else return negative distance
 
         """
