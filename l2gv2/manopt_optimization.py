@@ -8,8 +8,7 @@ import pymanopt
 import pymanopt.manifolds
 import pymanopt.optimizers
 import numpy as np
-import local2global as l2g
-
+from .patch import utils as ut
 from .patch.patch import Patch
 
 
@@ -466,7 +465,7 @@ def optimization(
     translations = result.point[n_patches : 2 * n_patches]
 
     scales = result.point[2 * n_patches :]
-    emb_problem = l2g.AlignmentProblem(patches)
+    emb_problem = ut.AlignmentProblem(patches)
 
     if emb_problem.n_nodes is None or emb_problem.dim is None:
         raise ValueError("Both n_nodes and dim must be set to integer values.")
