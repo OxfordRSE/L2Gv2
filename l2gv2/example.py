@@ -465,18 +465,18 @@ def plot_reconstruction(
     return error
 
 
-def save_data(points: np.ndarray, filename: str):
+def save_data(points: np.ndarray, fname: str):
     """Save an array of points to a CSV file.
 
     Ensures the specified filename has a `.csv` extension and
     writes the data to a CSV file with UTF-8 encoding.
 
     Args:
-        points (np.ndarray): Array of data points to save, where each row is a data point.
-        filename (str): Desired filename for saving the data.
+        points: Array of data points to save, where each row is a data point.
+        fname: Desired filename for saving the data.
 
     """
-    filename = ut.ensure_extension(filename, ".csv")
+    filename = ut.ensure_extension(fname, ".csv")
     with open(filename, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerows(points)
@@ -531,7 +531,7 @@ def main(arguments: argparse.Namespace):
         dim=arguments.dim,
     )
     outdir = Path(arguments.outdir)
-    save_data(points, filename=outdir / "points.csv")
+    save_data(points, fname=outdir / "points.csv")
     patches = voronoi_patches(
         points=points,
         sample_size=arguments.sample_size,
