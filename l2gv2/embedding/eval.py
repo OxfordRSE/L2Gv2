@@ -17,13 +17,13 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-""" TODO: module docstring for embedding/eval.py. """
+"""TODO: module docstring for embedding/eval.py."""
 
 import numpy as np
 from scipy.special import expit
 import torch
 from sklearn.metrics import roc_auc_score
-from local2global_embedding.network import Graph
+from .network import Graph
 
 
 def reconstruction_auc(coordinates, graph: Graph, dist=False, max_samples=int(1e6)):
@@ -34,21 +34,21 @@ def reconstruction_auc(coordinates, graph: Graph, dist=False, max_samples=int(1e
         coordinates (torch.tensor): embedding to evaluate
         graph: network data
 
-        dist: if ``True``, use distance decoder to evaluate embedding, 
+        dist: if ``True``, use distance decoder to evaluate embedding,
             otherwise use inner-product decoder
               (default: ``False``)
-        
-        max_samples: maximum number of edges to use for evaluation. 
+
+        max_samples: maximum number of edges to use for evaluation.
             If graph has less than ``max_samples``
             edges, all edges are used as positive examples,
-            otherwise, max_samples edges are sampled with replacement. 
+            otherwise, max_samples edges are sampled with replacement.
             In both cases, the number of negative
             samples is the same as positive samples.
 
     Returns:
         ROC-AUC for correctly classifying true edges versus non-edges
 
-    By default the function samples the same number of non-edges as there are true edges, 
+    By default the function samples the same number of non-edges as there are true edges,
     such that a score of 0.5 corresponds to random classification.
 
     """

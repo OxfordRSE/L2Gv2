@@ -26,6 +26,7 @@ import torch_geometric as tg
 
 from .graph import Graph
 
+
 # pylint: disable=too-many-instance-attributes
 class TGraph(Graph):
     """Wrapper class for pytorch-geometric edge_index providing fast adjacency look-up."""
@@ -62,9 +63,7 @@ class TGraph(Graph):
                     self.num_edges
                 ),
             )  # use expand to avoid actually allocating large array
-            self.adj_index = torch.zeros(
-                self.num_nodes + 1, dtype=torch.long
-            )
+            self.adj_index = torch.zeros(self.num_nodes + 1, dtype=torch.long)
             #: adjacency index such that edges starting at node ``i``
             # are given by ``edge_index[:, adj_index[i]:adj_index[i+1]]``
             self.adj_index[1:] = torch.cumsum(self.degree, 0)
@@ -213,9 +212,9 @@ class TGraph(Graph):
         )
 
     def connected_component_ids(self):
-        """ Find the (weakly)-connected components. 
-            Component ids are sorted by size, such that id=0 corresponds
-            to the largest connected component
+        """Find the (weakly)-connected components.
+        Component ids are sorted by size, such that id=0 corresponds
+        to the largest connected component
         """
         edge_index = self.edge_index
         is_undir = self.undir
@@ -362,4 +361,6 @@ class TGraph(Graph):
     def sample_positive_edges(self, num_samples):
         index = torch.randint(self.num_edges, (num_samples,), dtype=torch.long)
         return self.edge_index[:, index]
+
+
 # pylint: enable=too-many-instance-attributes

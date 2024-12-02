@@ -17,17 +17,20 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-""" TODO: module docstring for embedding/gae/models/gae.py. """
+"""TODO: module docstring for embedding/gae/models/gae.py."""
+
 import torch_geometric as tg
 
 from ..utils.mixins import EmbeddingMixin
 from ..layers.decoders import DistanceDecoder
 from ..layers.GAEconv import GAEconv
 
+
 # TODO: fix too-few-public-methods for embedding/gae/models/gae.py GAE
 # pylint: disable=too-few-public-methods
 class GAE(tg.nn.GAE, EmbeddingMixin):
-    """ TODO: class docstring for GAE. """
+    """TODO: class docstring for GAE."""
+
     def __init__(self, dim, hidden_dim, num_features, dist=False):
         """
         initialise a Graph Auto-Encoder model
@@ -36,7 +39,7 @@ class GAE(tg.nn.GAE, EmbeddingMixin):
             dim: output dimension
             hidden_dim: inner hidden dimension
             num_features: number of input features
-            dist: if ``True`` use distance decoder, 
+            dist: if ``True`` use distance decoder,
                 otherwise use inner product decoder (default: ``False``)
 
         Returns:
@@ -55,4 +58,6 @@ class GAE(tg.nn.GAE, EmbeddingMixin):
                     dim, num_node_features=num_features, hidden_dim=hidden_dim
                 )
             )
+
+
 # pylint: enable=too-few-public-methods

@@ -17,21 +17,22 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-""" TODO: module docstring for progress. """
+"""TODO: module docstring for progress."""
+
 from tqdm.auto import tqdm
 
 
 def reset(total):
-    """ TODO: docstring for reset"""
+    """TODO: docstring for reset"""
     return tqdm(total=total)
 
 
 def update(pbar, iterations):
-    """ TODO: docstring for update"""
+    """TODO: docstring for update"""
     pbar.update(iterations)
 
 
 def close(pbar):
-    """ TODO: docstring for close"""
+    """TODO: docstring for close"""
     pbar.update(pbar.total - pbar.n)
     pbar.close()

@@ -3,7 +3,6 @@ Datasets loader for l2gv2, main file
 """
 
 import datetime
-from typing import Union
 from pathlib import Path
 
 from tqdm import tqdm
@@ -60,9 +59,10 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
         if not self.temporal:
             self.edges = self.edges.with_columns(pl.lit(0).alias("timestamp"))
         else:  # convert timestamp to datetime format
-            self.edges = self.edges.with_columns(
-                pl.col("timestamp").str.to_datetime(self.timestamp_fmt)
-            )
+            if self.edges["timestamp"].dtype == pl.Utf8:
+                self.edges = self.edges.with_columns(
+                    pl.col("timestamp").str.to_datetime(self.timestamp_fmt)
+                ) 
 
         self.datelist = self.edges.select("timestamp").to_series().unique()
 
@@ -78,9 +78,10 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
                         "Nodes dataset missing 'timestamp' column, required"
                         " when edges dataset has 'timestamp'"
                     )
-                self.nodes = self.nodes.with_columns(
-                    pl.col("timestamp").str.to_datetime(self.timestamp_fmt)
-                )
+                if self.nodes["timestamp"].dtype == pl.Utf8:
+                    self.nodes = self.nodes.with_columns(
+                        pl.col("timestamp").str.to_datetime(self.timestamp_fmt)
+                    )
         else:
             # build nodes from edges dataset
             self.nodes = (
@@ -196,7 +197,7 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
 
     def get_networkx(
         self, temp: bool = True
-    ) -> Union[nx.Graph, dict[datetime.datetime, nx.Graph]]:
+    ) -> nx.Graph | dict[datetime.datetime, nx.Graph]:
         """Returns networkx.DiGraph representation
 
         Args:
@@ -221,7 +222,7 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
 
     def get_edge_index(
         self, temp: bool = True
-    ) -> Union[torch.Tensor, dict[str, torch.Tensor]]:
+    ) -> torch.Tensor | dict[str, torch.Tensor]:
         """Returns edge index as torch tensors
 
         Args:
@@ -249,9 +250,7 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
 
     def get_tgeometric(
         self, temp: bool = True
-    ) -> Union[
-        torch_geometric.data.Data, dict[datetime.datetime, torch_geometric.data.Data]
-    ]:
+    ) -> torch_geometric.data.Data | dict[datetime.datetime, torch_geometric.data.Data]:
         """Returns torch_geometric representation
 
         Args:

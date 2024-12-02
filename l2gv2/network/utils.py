@@ -27,6 +27,7 @@ from numba.experimental import jitclass
 
 from .npgraph import NPGraph
 from .tgraph import TGraph
+
 from .graph import Graph
 
 
