@@ -10,7 +10,8 @@ import torch
 import numba
 from tqdm.auto import tqdm
 
-from .network import TGraph, spanning_tree_mask, spanning_tree
+from .network.utils import spanning_tree_mask, spanning_tree
+from .network.tgraph import TGraph
 from .clustering import Partition
 
 
