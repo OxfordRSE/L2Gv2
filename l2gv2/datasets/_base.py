@@ -60,9 +60,10 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
         if not self.temporal:
             self.edges = self.edges.with_columns(pl.lit(0).alias("timestamp"))
         else:  # convert timestamp to datetime format
-            self.edges = self.edges.with_columns(
-                pl.col("timestamp").str.to_datetime(self.timestamp_fmt)
-            )
+            if self.edges["timestamp"].dtype == pl.Utf8:
+                self.edges = self.edges.with_columns(
+                    pl.col("timestamp").str.to_datetime(self.timestamp_fmt)
+                ) 
 
         self.datelist = self.edges.select("timestamp").to_series().unique()
 
@@ -78,9 +79,10 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
                         "Nodes dataset missing 'timestamp' column, required"
                         " when edges dataset has 'timestamp'"
                     )
-                self.nodes = self.nodes.with_columns(
-                    pl.col("timestamp").str.to_datetime(self.timestamp_fmt)
-                )
+                if self.nodes["timestamp"].dtype == pl.Utf8:
+                    self.nodes = self.nodes.with_columns(
+                        pl.col("timestamp").str.to_datetime(self.timestamp_fmt)
+                    )
         else:
             # build nodes from edges dataset
             self.nodes = (
