@@ -11,6 +11,7 @@ build:
    jobs:
       pre_build:
          - "pip install '.[docs]' --find-links https://data.pyg.org/whl/torch-2.4.1%2Bcpu.html"
+         - "sphinx-apidoc -o docs/source/reference -H 'Code Reference' l2gv2 '*/execute.py'" # ignores execute.py script
 
 sphinx:
    configuration: docs/source/conf.py
