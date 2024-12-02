@@ -62,7 +62,7 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
             if self.edges["timestamp"].dtype == pl.Utf8:
                 self.edges = self.edges.with_columns(
                     pl.col("timestamp").str.to_datetime(self.timestamp_fmt)
-                ) 
+                )
 
         self.datelist = self.edges.select("timestamp").to_series().unique()
 
