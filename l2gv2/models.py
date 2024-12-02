@@ -3,6 +3,7 @@ embeddings of a list of patches using VGAE and Node2Vec."""
 
 from typing import Tuple
 import numpy.typing as npt
+
 from tqdm import tqdm
 import torch
 import torch.nn.functional as F
@@ -10,8 +11,8 @@ import torch_geometric as tg
 from torch_geometric.utils.convert import from_networkx
 from torch_geometric.nn import Node2Vec
 
-from l2gv2.patch.patch import Patch
-from l2gv2.patch.utils import WeightedAlignmentProblem
+from .patch.patch import Patch
+from .patch.utils import WeightedAlignmentProblem
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -77,7 +78,7 @@ class VGAEconv(torch.nn.Module):
             normalize=normalize,
         )
 
-    def forward(self, data: tg.data.Data) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(self, data: tg.data.Data) -> tuple[torch.Tensor, torch.Tensor]:
         """Forward pass.
 
         Args:
@@ -154,7 +155,7 @@ def vgae_patch_embeddings(
     num_epochs: int = 100,
     decoder=None,
     lr: float = 0.01,
-) -> Tuple[list[Patch], list[torch.nn.Module]]:
+) -> tuple[list[Patch], list[torch.nn.Module]]:
     """TODO: docstring for `vgae_patch_embeddings`
 
     Args:
@@ -348,6 +349,7 @@ def node2vec_patch_embeddings(
 def chunk_embedding(
     chunk_size: int, patches: list[Patch], dim=2
 ) -> Tuple[npt.ArrayLike, WeightedAlignmentProblem]:
+
     """TODO: docstring for `chunk_embedding`
 
     Note: this only works for Autonomous System dataset.

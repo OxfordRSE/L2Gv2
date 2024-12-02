@@ -29,6 +29,7 @@ SOCIAL_EDGES = [
 # disable missing-function-docstring, redefined-outer-name (pytest fixtures)
 # pylint: disable=C0116,W0621
 
+
 def test_dataloader_invalid_dataset():
     with pytest.raises(ValueError):
         DataLoader(TEST_DATASETS / "invalid")

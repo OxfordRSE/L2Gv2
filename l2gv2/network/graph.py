@@ -24,6 +24,7 @@ from abc import abstractmethod
 import networkx as nx
 import numpy as np
 
+
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=too-many-public-methods
 class Graph:
@@ -41,7 +42,7 @@ class Graph:
 
     @classmethod
     def from_tg(cls, data):
-        """ TODO: docstring for from_tg."""
+        """TODO: docstring for from_tg."""
         return cls(
             edge_index=data.edge_index,
             edge_attr=data.edge_attr,
@@ -52,7 +53,7 @@ class Graph:
 
     @classmethod
     def from_networkx(cls, nx_graph: nx.Graph, weight=None):
-        """ TODO: docstring for from_networkx."""
+        """TODO: docstring for from_networkx."""
         undir = not nx_graph.is_directed()
         if undir:
             nx_graph = nx_graph.to_directed(as_view=True)
@@ -93,16 +94,16 @@ class Graph:
         Initialise graph
 
         Args:
-            edge_index: edge index such that ``edge_index[0]`` lists the source 
+            edge_index: edge index such that ``edge_index[0]`` lists the source
                 and ``edge_index[1]`` the target node for each edge
 
             edge_attr: optionally provide edge weights
-            
+
             num_nodes: specify number of nodes (default: ``max(edge_index)+1``)
-            
+
             ensure_sorted: if ``False``, assume that the ``edge_index`` input is already sorted
-            
-            undir: boolean indicating if graph is directed. 
+
+            undir: boolean indicating if graph is directed.
                 If not provided, the ``edge_index`` is checked to determine this value.
         """
         self.edge_index = self._convert_input(edge_index)
@@ -123,23 +124,23 @@ class Graph:
 
     @property
     def num_edges(self):
-        """ TODO: docstring for num_edges."""
+        """TODO: docstring for num_edges."""
         return self.edge_index.shape[1]
 
     @property
     def num_features(self):
-        """ TODO: docstring for num_features."""
+        """TODO: docstring for num_features."""
         return 0 if self.x is None else self.x.shape[1]
 
     @property
     def nodes(self):
-        """ TODO: docstring for nodes."""
+        """TODO: docstring for nodes."""
         if self._nodes is None:
             return range(self.num_nodes)
         return self._nodes
 
     def has_node_labels(self):
-        """ TODO: docstring for has_node_labels."""
+        """TODO: docstring for has_node_labels."""
         return self._nodes is not None
 
     def adj(self, node: int):
@@ -185,7 +186,7 @@ class Graph:
 
     @abstractmethod
     def is_edge(self, source, target):
-        """ TODO: docstring for is_edge."""
+        """TODO: docstring for is_edge."""
         raise NotImplementedError
 
     @abstractmethod
@@ -235,7 +236,7 @@ class Graph:
         return (i for i, c in enumerate(self.connected_component_ids()) if c == 0)
 
     def lcc(self, relabel=False):
-        """ TODO: docstring for lcc."""
+        """TODO: docstring for lcc."""
         return self.subgraph(self.nodes_in_lcc(), relabel)
 
     def to_networkx(self):
@@ -252,7 +253,7 @@ class Graph:
         return nxgraph
 
     def to(self, graph_cls):
-        """ TODO: docstring for to."""
+        """TODO: docstring for to."""
         if self.__class__ is graph_cls:
             return self
 
@@ -284,16 +285,18 @@ class Graph:
 
     @abstractmethod
     def partition_graph(self, partition, self_loops=True):
-        """ TODO: docstring for partition_graph."""
+        """TODO: docstring for partition_graph."""
         raise NotImplementedError
 
     @abstractmethod
     def sample_negative_edges(self, num_samples):
-        """ TODO: docstring for sample_negative_edges."""
+        """TODO: docstring for sample_negative_edges."""
         raise NotImplementedError
 
     def sample_positive_edges(self, num_samples):
-        """ TODO: docstring for sample_positive_edges."""
+        """TODO: docstring for sample_positive_edges."""
         raise NotImplementedError
+
+
 # pylint: enable=too-many-public-methods
 # pylint: enable=too-many-instance-attributes

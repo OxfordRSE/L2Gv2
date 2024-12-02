@@ -1,4 +1,5 @@
-""" TODO: module docstring for dgi/execute.py. """
+"""TODO: module docstring for dgi/execute.py."""
+
 import argparse
 import torch
 from torch import nn

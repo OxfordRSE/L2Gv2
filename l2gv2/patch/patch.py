@@ -20,7 +20,6 @@
 """TODO: module docstring"""
 
 import copy
-
 import numpy as np
 import numpy.typing as npt
 from l2gv2.patch.lazy import (
@@ -33,11 +32,12 @@ from l2gv2.patch.lazy import (
 class Patch:
     """Class for patch embedding"""
 
-    index = None
+    index: dict[int, int]
     """mapping of node index to patch coordinate index"""
 
-    coordinates = None
+    coordinates: np.ArrayLike
     """patch embedding coordinates"""
+
 
     def __init__(self, nodes: iter, coordinates: npt.ArrayLike | None = None):
         """Initialise a patch from a list of nodes and corresponding coordinates
