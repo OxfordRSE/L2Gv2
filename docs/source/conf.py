@@ -42,7 +42,6 @@ autodoc_mock_imports = [
     "torch_scatter",
     "local2global",
     "raphtory",
-    "local2global_embedding",
     "networkx",
     "matplotlib",
     "nfts",

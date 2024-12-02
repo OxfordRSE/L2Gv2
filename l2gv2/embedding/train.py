@@ -17,10 +17,11 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-""" TODO: module docstring for embedding/train.py. """
+"""TODO: module docstring for embedding/train.py."""
+
 import torch
 
-from local2global_embedding.utils import EarlyStopping
+from .utils import EarlyStopping
 
 
 def lr_grid_search(
@@ -78,22 +79,22 @@ def train(
     Args:
         data: network data
 
-        
+
         model: embedding auto-encoder model
-        
+
         loss_fun: loss function to use with model (takes arguments ``model``, ``data``)
-        
+
         num_epochs: number of training epochs
-        
+
         patience: patience for early stopping
-        
+
         lr: learining rate (default: 0.01)
-        
+
         weight_decay: weight decay for optimizer (default: 0.0)
-        
+
         verbose: if ``True``, display training progress (default: ``True``)
-        
-        logger: function that receives the training loss as input and 
+
+        logger: function that receives the training loss as input and
             is called after each epoch (does nothing by default)
 
     Returns:

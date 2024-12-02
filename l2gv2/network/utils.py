@@ -25,7 +25,7 @@ import numpy as np
 import numba
 from numba.experimental import jitclass
 
-from local2global_embedding.network import NPGraph, TGraph
+from .network import NPGraph, TGraph
 from .graph import Graph
 
 
