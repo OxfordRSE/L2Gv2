@@ -2,7 +2,7 @@
 embeddings of the patches using the manopt library."""
 
 import random
-from typing import Tuple, Optional, Any, Literal
+from typing import Any, Literal
 import autograd.numpy as anp
 import pymanopt
 import pymanopt.manifolds
@@ -10,7 +10,7 @@ import pymanopt.optimizers
 import numpy as np
 import local2global as l2g
 
-from l2gv2.patch.patch import Patch
+from .patch.patch import Patch
 
 
 def double_intersections_nodes(
@@ -42,34 +42,34 @@ def total_loss(
     patches,
     dim,
     k,
-    rand: Optional[bool] = False,
+    rand: bool = False,
 ) -> tuple[np.floating[Any] | float, dict]:
     """TODO: docstring for `total_loss`.
 
     R: list of orthogonal matrices for embeddings of patches.
 
     Args:
-        rotations ([type]): [description]
+        rotations: [description]
 
-        scales ([type]): [description]
+        scales: [description]
 
-        translations ([type]): [description]
+        translations: [description]
 
-        nodes ([type]): [description]
+        nodes: [description]
 
-        patches ([type]): [description]
+        patches: [description]
 
         dim (int): [description]
 
         k (int): [description]
 
-        rand (Optional[bool]): [description], default is False.
+        rand: [description], default is False.
 
     Returns:
         float: [description]
     """
 
-    l = 0
+    loss_value = 0
     fij = {}
 
     for i, p in enumerate(patches):
@@ -85,7 +85,7 @@ def total_loss(
                         scales[j + i + 1] * q.get_coordinate(n) @ rotations[j + i + 1]
                         + translations[j + i + 1]
                     )
-                    l += np.linalg.norm(theta1 - theta2) ** 2
+                    loss_value += np.linalg.norm(theta1 - theta2) ** 2
 
                     fij[(i, j + 1 + i, n)] = [theta1, theta2]
 
@@ -98,11 +98,11 @@ def total_loss(
                         scales[j + i + 1] * rotations[j + i + 1] @ q.get_coordinate(n)
                         + translations[j + i + 1]
                     )
-                    l += np.linalg.norm(theta1 - theta2) ** 2
+                    loss_value += np.linalg.norm(theta1 - theta2) ** 2
 
                     fij[(i, j + 1 + i, n)] = [theta1, theta2]
 
-    return 1 / len(patches) * l, fij
+    return 1 / len(patches) * loss_value, fij
 
 
 def loss(
@@ -113,11 +113,11 @@ def loss(
     patches,
     dim,
     k,
-    consecutive: Optional[bool] = False,
-    random_choice_in_intersections: Optional[bool] = False,
-    fij: Optional[bool] = False,
+    consecutive: bool = False,
+    random_choice_in_intersections: bool = False,
+    fij: bool = False,
 ) -> (
-    Tuple[np.floating[Any] | float | Literal[0], dict | None]
+    tuple[np.floating[Any] | float | Literal[0], dict | None]
     | np.floating[Any]
     | Literal[0]
 ):
@@ -127,25 +127,25 @@ def loss(
 
     Args:
 
-        rotations ([type]): [description]
+        rotations: [description]
 
-        scales ([type]): [description]
+        scales: [description]
 
-        translations ([type]): [description]
+        translations: [description]
 
-        nodes ([type]): [description]
+        nodes: [description]
 
-        patches ([type]): [description]
+        patches: [description]
 
         dim (int): [description]
 
         k (int): [description]
 
-        consecutive (Optional[bool]): [description], default is False.
+        consecutive: [description], default is False.
 
-        random_choice_in_intersections (Optional[bool]): [description], default is False.
+        random_choice_in_intersections: [description], default is False.
 
-        fij (Optional[bool]): [description], default is False.
+        fij: [description], default is False.
 
     Returns:
 
@@ -156,7 +156,7 @@ def loss(
     """
 
     if consecutive:
-        l, f = consecutive_loss(
+        loss_value, f = consecutive_loss(
             rotations,
             scales,
             translations,
@@ -167,11 +167,11 @@ def loss(
             rand=random_choice_in_intersections,
         )
         if fij:
-            return l, f
+            return loss_value, f
 
-        return l
+        return loss_value
 
-    l, f = total_loss(
+    loss_value, f = total_loss(
         rotations,
         scales,
         translations,
@@ -182,34 +182,34 @@ def loss(
         rand=random_choice_in_intersections,
     )
     if fij:
-        return l, f
+        return loss_value, f
 
-    return l, None
+    return loss_value, None
 
 
 def consecutive_loss(
-    rotations, scales, translations, nodes, patches, dim, k, rand: Optional[bool] = True
+    rotations, scales, translations, nodes, patches, dim, k, rand: bool = True
 ):
     """TODO: docstring for `consecutive_loss`.
     R: list of orthogonal matrices for embeddings of patches.
 
     Args:
 
-        rotations ([type]): [description]
+        rotations: [description]
 
-        scales ([type]): [description]
+        scales: [description]
 
-        translations ([type]): [description]
+        translations: [description]
 
-        nodes ([type]): [description]
+        nodes: [description]
 
-        patches ([type]): [description]
+        patches: [description]
 
         dim (int): [description]
 
         k (int): [description]
 
-        rand (Optional[bool]): [description], default is True.
+        rand: [description], default is True.
 
     Returns:
 
@@ -219,7 +219,7 @@ def consecutive_loss(
 
     """
 
-    l = 0
+    loss_value = 0
     fij = {}
 
     for i in range(len(patches) - 1):
@@ -235,7 +235,7 @@ def consecutive_loss(
                     scales[i + 1] * patches[i + 1].get_coordinate(n) @ rotations[i + 1]
                     + translations[i + 1]
                 )
-                l += np.linalg.norm(theta1 - theta2) ** 2
+                loss_value += np.linalg.norm(theta1 - theta2) ** 2
 
                 fij[(i, 1 + i, n)] = [theta1, theta2]
         else:
@@ -248,18 +248,18 @@ def consecutive_loss(
                     scales[i + 1] * patches[i + 1].get_coordinate(n) @ rotations[i + 1]
                     + translations[i + 1]
                 )
-                l += np.linalg.norm(theta1 - theta2) ** 2
+                loss_value += np.linalg.norm(theta1 - theta2) ** 2
 
                 fij[(i, 1 + i, n)] = [theta1, theta2]
 
-    return l, fij
+    return loss_value, fij
 
 
 # pylint: disable=invalid-name
 # pylint: disable=no-member
 # pylint does not infer autograd.numpy.linalg.norm so disable no-member
 def ANPloss_nodes_consecutive_patches(
-    rotations, scales, translations, patches, nodes, dim, k, rand: Optional[bool] = True
+    rotations, scales, translations, patches, nodes, dim, k, rand: bool = True
 ):
     """TODO: docstring for `ANPloss_nodes_consecutive_patches`.
 
@@ -267,28 +267,28 @@ def ANPloss_nodes_consecutive_patches(
 
     Args:
 
-        rotations ([type]): [description]
+        rotations: [description]
 
-        scales ([type]): [description]
+        scales: [description]
 
-        translations ([type]): [description]
+        translations: [description]
 
-        patches ([type]): [description]
+        patches: [description]
 
-        nodes ([type]): [description]
+        nodes: [description]
 
         dim (int): [description]
 
         k (int): [description]
 
-        rand (Optional[bool]): [description], default is True.
+        rand: [description], default is True.
 
     Returns:
 
         float: [description]
 
     """
-    l = 0
+    loss_value = 0
     # fij=dict()
     for i in range(len(patches) - 1):
         if rand:
@@ -303,7 +303,7 @@ def ANPloss_nodes_consecutive_patches(
                     scales[i + 1] * patches[i + 1].get_coordinate(n) @ rotations[i + 1]
                     + translations[i + 1]
                 )
-                l += anp.linalg.norm(theta1 - theta2) ** 2
+                loss_value += anp.linalg.norm(theta1 - theta2) ** 2
         else:
             for n in nodes[i, i + 1]:
                 theta1 = (
@@ -314,9 +314,9 @@ def ANPloss_nodes_consecutive_patches(
                     scales[i + 1] * patches[i + 1].get_coordinate(n) @ rotations[i + 1]
                     + translations[i + 1]
                 )
-                l += anp.linalg.norm(theta1 - theta2) ** 2
+                loss_value += anp.linalg.norm(theta1 - theta2) ** 2
 
-    return l  # , fij
+    return loss_value  # , fij
 
 
 # pylint: enable=invalid-name
@@ -327,35 +327,35 @@ def ANPloss_nodes_consecutive_patches(
 # pylint: disable=no-member
 # pylint does not infer autograd.numpy.linalg.norm so disable no-member
 def ANPloss_nodes(
-    rotations, scales, translations, patches, nodes, dim, k, rand: Optional[bool] = True
+    rotations, scales, translations, patches, nodes, dim, k, rand: bool = True
 ):
     """TODO: docstring for `ANPloss_nodes`.
     R: list of orthogonal matrices for embeddings of patches.
 
     Args:
 
-        rotations ([type]): [description]
+        rotations: [description]
 
-        scales ([type]): [description]
+        scales: [description]
 
-        translations ([type]): [description]
+        translations: [description]
 
-        patches ([type]): [description]
+        patches: [description]
 
-        nodes ([type]): [description]
+        nodes: [description]
 
         dim (int): [description]
 
         k (int): [description]
 
-        rand (Optional[bool]): [description], default is True.
+        rand: [description], default is True.
 
     Returns:
 
         float: [description]
 
     """
-    l = 0
+    loss_value = 0
     # fij=dict()
 
     for i, p in enumerate(patches):
@@ -371,7 +371,7 @@ def ANPloss_nodes(
                         scales[j + i + 1] * q.get_coordinate(n) @ rotations[j + i + 1]
                         + translations[j + i + 1]
                     )
-                    l += anp.linalg.norm(theta1 - theta2) ** 2
+                    loss_value += anp.linalg.norm(theta1 - theta2) ** 2
 
                     # fij[(i, j+1+i, n)]=[theta1, theta2]
 
@@ -384,11 +384,11 @@ def ANPloss_nodes(
                         scales[j + i + 1] * rotations[j + i + 1] @ q.get_coordinate(n)
                         + translations[j + i + 1]
                     )
-                    l += anp.linalg.norm(theta1 - theta2) ** 2
+                    loss_value += anp.linalg.norm(theta1 - theta2) ** 2
 
                     # fij[(i, j+1+i, n)]=[theta1, theta2]
 
-    return 1 / len(patches) * l  # fij
+    return 1 / len(patches) * loss_value  # fij
 
 
 # pylint enable=invalid-name
@@ -401,22 +401,22 @@ def optimization(
     patches,
     nodes,
     k,
-    consecutive: Optional[bool] = True,
-    random_choice: Optional[bool] = True,
+    consecutive: bool = True,
+    random_choice: bool = True,
 ):
     """TODO: docstring for `optimization`.
 
     Args:
 
-        patches ([type]): [description]
+        patches: [description]
 
-        nodes ([type]): [description]
+        nodes: [description]
 
-        k ([type]): [description]
+        k: [description]
 
-        consecutive (Optional[bool]): [description], default is True.
+        consecutive: [description], default is True.
 
-        random_choice (Optional[bool]): [description], default is True.
+        random_choice: [description], default is True.
 
     Returns:
 
@@ -494,15 +494,15 @@ def loss_dictionary(rs, ss, ts, nodes, patches, dim, k):
 
     Args:
 
-        Rs ([type]): [description]
+        Rs: [description]
 
-        ss ([type]): [description]
+        ss: [description]
 
-        ts ([type]): [description]
+        ts: [description]
 
-        nodes ([type]): [description]
+        nodes: [description]
 
-        patches ([type]): [description]
+        patches: [description]
 
         dim (int): [description]
 
@@ -513,10 +513,10 @@ def loss_dictionary(rs, ss, ts, nodes, patches, dim, k):
             [type]: [description]
 
     """
-    l = {}
+    loss_dict = {}
     for i in range(2):
         for j in range(2):
-            l[i, j] = loss(
+            loss_dict[i, j] = loss(
                 rs,
                 ss,
                 ts,
@@ -524,8 +524,8 @@ def loss_dictionary(rs, ss, ts, nodes, patches, dim, k):
                 patches,
                 dim,
                 k,
-                consecutive=(i>0),
-                random_choice_in_intersections=(j>0),
+                consecutive=(i > 0),
+                random_choice_in_intersections=(j > 0),
                 fij=False,
             )
-    return l
+    return loss_dict

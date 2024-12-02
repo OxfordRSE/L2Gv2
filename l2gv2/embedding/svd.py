@@ -17,7 +17,8 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-""" TODO: module docstring for embedding/svd.py """
+"""TODO: module docstring for embedding/svd.py"""
+
 # pylint: disable=invalid-name
 import scipy.sparse as ss
 import scipy.sparse.linalg as sl
@@ -86,11 +87,12 @@ def _augmented_orthonormal_cols(x, k):
 def _augmented_orthonormal_rows(x, k):
     return _augmented_orthonormal_cols(x.T, k).T
 
+
 # pylint: disable=too-many-statements
 def _svds_laplacian(
     A, k=6, tol=1e-8, maxiter=None, random_state=None, maxrestarts=10, verbose=0
 ):
-    """Compute the largest or smallest k singular values/vectors for a sparse matrix. 
+    """Compute the largest or smallest k singular values/vectors for a sparse matrix.
         The order of the singular values is not guaranteed.
 
     Parameters
@@ -225,7 +227,10 @@ def _svds_laplacian(
         vh = vh[indexes_sorted]
 
     return D1 @ u, s, vh @ D2
+
+
 # pylint: enable=too-many-statements
+
 
 def bipartite_svd_patches(A: ss.spmatrix, dim, verbose=0):
     """

@@ -28,7 +28,7 @@ import torch
 import numba
 from numba.experimental import jitclass
 
-from l2gv2 import progress
+from .. import progress
 from .graph import Graph
 
 
@@ -121,9 +121,7 @@ class NPGraph(Graph):
                 raise NotImplementedError(
                     "Sorting for memmapped arrays not yet implemented"
                 )
-            index = np.argsort(
-                self.edge_index[0] * self.num_nodes + self.edge_index[1]
-            )
+            index = np.argsort(self.edge_index[0] * self.num_nodes + self.edge_index[1])
             self.edge_index = self.edge_index[:, index]
             if self.edge_attr is not None:
                 self.edge_attr = self.edge_attr[index]
@@ -149,9 +147,7 @@ class NPGraph(Graph):
                     "Checking directedness for memmapped arrays not yet implemented"
                 )
 
-            index = np.argsort(
-                self.edge_index[1] * self.num_nodes + self.edge_index[0]
-            )
+            index = np.argsort(self.edge_index[1] * self.num_nodes + self.edge_index[0])
             edge_reverse = self.edge_index[::-1, index]
             self.undir = np.array_equal(self.edge_index, edge_reverse)
             if self.weighted:
