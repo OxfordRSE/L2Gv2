@@ -379,14 +379,22 @@ def spread_clustering(graph, num_clusters, max_degree_init=True):
 
 
 def hierarchical_aglomerative_clustering(
-    graph, method=spread_clustering, levels=None, branch_factors=None
+    graph,
+    method=spread_clustering,
+    levels: int | None = None,
+    branch_factors: int | list | None = None,
 ):
     """TODO: docstring for hierarchical_aglomerative_clustering."""
 
     if branch_factors is None:
+        if levels is None:
+            raise ValueError("both levels and branch_factors are None")
+
         branch_factors = [graph.num_nodes ** (1 / (levels + 1)) for _ in range(levels)]
     else:
         if not isinstance(branch_factors, Iterable):
+            if levels is None:
+                raise ValueError("branch_factors is not Iterable and levels is None")
             branch_factors = [branch_factors] * (levels)
         else:
             if levels is None:
