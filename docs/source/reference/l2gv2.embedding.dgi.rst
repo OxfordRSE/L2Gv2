@@ -11,17 +11,6 @@ Subpackages
    l2gv2.embedding.dgi.models
    l2gv2.embedding.dgi.utils
 
-Submodules
-----------
-
-l2gv2.embedding.dgi.execute module
-----------------------------------
-
-.. automodule:: l2gv2.embedding.dgi.execute
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 
