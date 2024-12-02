@@ -25,7 +25,9 @@ import numpy as np
 import numba
 from numba.experimental import jitclass
 
-from .network import NPGraph, TGraph
+from .npgraph import NPGraph
+from .tgraph import TGraph
+
 from .graph import Graph
 
 

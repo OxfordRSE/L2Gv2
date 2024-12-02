@@ -21,7 +21,8 @@
 
 import copy
 import numpy as np
-from lazy import (
+import numpy.typing as npt
+from l2gv2.patch.lazy import (
     BaseLazyCoordinates,
     LazyMeanAggregatorCoordinates,
     LazyFileCoordinates,
@@ -37,7 +38,8 @@ class Patch:
     coordinates: np.ArrayLike
     """patch embedding coordinates"""
 
-    def __init__(self, nodes: iter, coordinates: np.ArrayLike | None = None):
+
+    def __init__(self, nodes: iter, coordinates: npt.ArrayLike | None = None):
         """Initialise a patch from a list of nodes and corresponding coordinates
 
         Args:
