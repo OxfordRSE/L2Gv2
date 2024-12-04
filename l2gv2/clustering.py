@@ -262,7 +262,7 @@ def louvain_clustering(graph: TGraph, *args, **kwargs):
     arguments provided are passed through.
 
     References:
-        .. V. D. Blondel et al.
+        .. [#l] V. D. Blondel et al.
            “Fast unfolding of communities in large networks”.
            Journal of Statistical Mechanics: Theory and Experiment 2008.10 (2008), P10008.
            DOI: `10.1088/1742-5468/2008/10/P10008`
@@ -278,7 +278,7 @@ def louvain_clustering(graph: TGraph, *args, **kwargs):
 
 def metis_clustering(graph: TGraph, num_clusters):
     """
-    Implements clustering using metis
+    Implements clustering using metis [#metis]_
 
     Args:
         graph: input graph
