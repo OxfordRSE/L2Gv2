@@ -159,6 +159,7 @@ class Graph:
     def adj_weighted(self, node: int):
         """
         list neighbours of node and corresponding edge weight
+
         Args:
             node: source node
 
