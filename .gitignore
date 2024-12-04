@@ -1,4 +1,6 @@
 .DS_Store
 __pycache__/
+build/
+l2gv2.egg-info/
 .venv/
 docs/build/

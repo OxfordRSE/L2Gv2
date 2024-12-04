@@ -11,10 +11,10 @@ from tqdm.auto import tqdm
 
 import numba
 
-from .clustering import Partition
-from .network.tgraph import TGraph
-from .network.npgraph import JitGraph, NPGraph
-from .sparsify import (
+from ..clustering import Partition
+from ..network.tgraph import TGraph
+from ..network.npgraph import JitGraph, NPGraph
+from ..sparsify import (
     resistance_sparsify,
     relaxed_spanning_tree,
     edge_sampling_sparsify,

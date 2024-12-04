@@ -10,7 +10,8 @@ import pymetis
 import numpy as np
 import numba
 
-from network import TGraph, NPGraph
+from .network.tgraph import TGraph
+from .network.npgraph import NPGraph
 from . import progress
 
 
