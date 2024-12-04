@@ -87,10 +87,13 @@ def resistance_sparsify(
 
     Args:
         graph: input graph
+
         target_mean_degree: desired mean degree after sparsification
+
         ensure_connected: if ``True``, first add edges of a maximum spanning tree
-            based on the resistance weights to ensure that the
-            sparsified graph remains connected if the input graph is connected
+                          based on the resistance weights to ensure that the
+                          sparsified graph remains connected if the input graph is connected
+
         epsilon: tolerance for effective resistance computation
 
     Returns:
