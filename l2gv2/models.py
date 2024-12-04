@@ -2,7 +2,7 @@
 embeddings of a list of patches using VGAE and Node2Vec."""
 
 from typing import Tuple
-import numpy.typing as npt
+from numpy.typing import ArrayLike
 
 from tqdm import tqdm
 import torch
@@ -348,8 +348,7 @@ def node2vec_patch_embeddings(
 
 def chunk_embedding(
     chunk_size: int, patches: list[Patch], dim=2
-) -> Tuple[npt.ArrayLike, WeightedAlignmentProblem]:
-
+) -> Tuple[ArrayLike, WeightedAlignmentProblem]:
     """TODO: docstring for `chunk_embedding`
 
     Note: this only works for Autonomous System dataset.

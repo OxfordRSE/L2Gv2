@@ -21,7 +21,7 @@
 
 import torch
 
-from .utils import EarlyStopping
+from ..utils import EarlyStopping
 
 
 def lr_grid_search(

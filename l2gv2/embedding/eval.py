@@ -23,7 +23,7 @@ import numpy as np
 from scipy.special import expit
 import torch
 from sklearn.metrics import roc_auc_score
-from .network import Graph
+from ..network.graph import Graph
 
 
 def reconstruction_auc(coordinates, graph: Graph, dist=False, max_samples=int(1e6)):

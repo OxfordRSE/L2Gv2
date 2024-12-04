@@ -1,10 +1,6 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# For the full list of built-in configuration values, see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
-
-# -- Project information -----------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+# pylint: disable=invalid-name
+# pylint: disable=redefined-builtin
+import warnings
 
 project = "l2gv2"
 copyright = "2024"
@@ -23,8 +19,13 @@ autodoc_default_options = {
     "show-inheritance": True,
 }
 
+# diable warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+
 templates_path = ["_templates"]
 exclude_patterns = []
+
+# autodoc_mock_imports = ["torch", "torch.nn", "torch.optim", "torch_geometric"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

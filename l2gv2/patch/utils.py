@@ -34,7 +34,7 @@ import networkx as nx
 import ilupp
 
 from tqdm.auto import tqdm
-from patch import Patch
+from .patch import Patch
 
 
 def random_gen(new_seed=None) -> np.random.Generator:
