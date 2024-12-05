@@ -5,7 +5,9 @@ import numpy as np
 from .patch.patch import Patch
 
 
-def raw_anomaly_score_node_patch(aligned_patch_emb, emb, node) -> np.floating[Any]:
+def raw_anomaly_score_node_patch(
+    aligned_patch_emb: Patch, emb: list[Patch], node: int
+) -> np.floating[Any]:
     """TODO: docstring for `raw_anomaly_score_node_patch`
 
     Args:
