@@ -1,3 +1,5 @@
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments
 """TODO: module docstring for dgi/models/dgi.py."""
 
 from torch import nn

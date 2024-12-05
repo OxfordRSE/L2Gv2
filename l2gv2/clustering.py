@@ -1,3 +1,6 @@
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments
 """Graph clustering algorithms"""
 
 from math import log

@@ -1,3 +1,4 @@
+# pylint: disable=too-many-locals
 """Graph sparsification"""
 # pylint: disable=invalid-name
 

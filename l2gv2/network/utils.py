@@ -1,5 +1,3 @@
-"""Graph data handling"""
-
 #  Copyright (c) 2021. Lucas G. S. Jeub
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,6 +17,11 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
+
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments
+"""Graph data handling"""
 
 import torch
 import numpy as np

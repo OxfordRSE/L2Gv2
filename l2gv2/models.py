@@ -1,3 +1,6 @@
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments
 """This module contains the functions to compute the
 embeddings of a list of patches using VGAE and Node2Vec."""
 

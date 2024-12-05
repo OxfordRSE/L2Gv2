@@ -1,3 +1,6 @@
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments
 """Module with functions for the optimization of the
 embeddings of the patches using the manopt library."""
 

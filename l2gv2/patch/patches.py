@@ -1,3 +1,7 @@
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments
+
 """Dividing input data into overlapping patches"""
 
 from random import choice
