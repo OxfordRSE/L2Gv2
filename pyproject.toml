@@ -74,9 +74,6 @@ disable = [
     "fixme",
     "import-error",
     "duplicate-code",
-    "too-many-locals",
-    "too-many-arguments",
-    "too-many-positional-arguments"
 ]
 
 # pyright

@@ -18,6 +18,8 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 # pylint: disable=invalid-name
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments
 """TODO: module docstring for embedding/gae/layers/GAEconv.py."""
 
 import torch

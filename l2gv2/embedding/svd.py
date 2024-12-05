@@ -17,9 +17,13 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-"""TODO: module docstring for embedding/svd.py"""
 
 # pylint: disable=invalid-name
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments
+"""TODO: module docstring for embedding/svd.py"""
+
 import scipy.sparse as ss
 import scipy.sparse.linalg as sl
 import numpy as np
