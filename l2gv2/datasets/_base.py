@@ -127,7 +127,9 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
         """
         if ts is None:
             return self.nodes
-        return self.nodes.filter(pl.col("timestamp") == self.timestamp_from_string(ts))
+        if isinstance(ts, str):
+            ts = self.timestamp_from_string(ts)
+        return self.nodes.filter(pl.col("timestamp") == ts)
 
     def get_node_list(self, ts: str | None = None) -> list[str]:
         """Returns node list
@@ -139,8 +141,11 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
             list of str
         """
         nodes = self.nodes
+
         if ts is not None:
-            nodes = nodes.filter(pl.col("timestamp") == self.timestamp_from_string(ts))
+            if isinstance(ts, str):
+                ts = self.timestamp_from_string(ts)
+            nodes = nodes.filter(pl.col("timestamp") == ts)
         return nodes.select("nodes").unique(maintain_order=True).to_series().to_list()
 
     def get_node_features(self) -> list[str]:
