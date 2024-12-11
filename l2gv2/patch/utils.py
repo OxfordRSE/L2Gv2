@@ -40,6 +40,17 @@ from tqdm.auto import tqdm
 from .patch import Patch
 
 
+def seed(new_seed):
+    """
+    Change seed of random number generator.
+
+    Args:
+        new_seed: New seed value
+
+    """
+    np.random.default_rng(new_seed)
+
+
 def random_gen(new_seed=None) -> np.random.Generator:
     """Change seed of random number generator.
 
