@@ -49,6 +49,7 @@ dependencies = [
 dev = [
     "pytest >= 8",
     "pytest-cov",
+    "pytest-xdist",
     "pylint",
     "pre_commit == 4.0.1"
 ]
