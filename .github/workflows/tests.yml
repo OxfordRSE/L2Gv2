@@ -28,4 +28,4 @@ jobs:
         python3 -m pip install '.[dev]' --find-links https://data.pyg.org/whl/torch-2.4.1%2Bcpu.html
     - name: Test with pytest
       run: |
-        python3 -m pytest --ignore tests/test_local2global.py
+        python3 -m pytest -n auto

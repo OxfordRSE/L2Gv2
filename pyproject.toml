@@ -91,3 +91,6 @@ reportOptionalMemberAccess = false
 reportOptionalSubscript = false
 reportGeneralTypeIssues = false
 reportMissingTypeStubs = false
+
+[tool.coverage.run]
+omit = ["tests/*"]
