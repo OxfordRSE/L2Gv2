@@ -19,7 +19,8 @@
 #  SOFTWARE.
 """TODO: module docstring for embedding/gae/__init__.py."""
 
-from .models import VGAE, GAE
+from .models.gae import GAE
+from .models.vgae import VGAE
 from .utils.loss import VGAE_loss, GAE_loss
 
 __all__ = ["VGAE", "GAE", "VGAE_loss", "GAE_loss"]

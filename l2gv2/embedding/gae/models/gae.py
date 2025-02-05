@@ -21,14 +21,13 @@
 
 import torch_geometric as tg
 
-from ..utils.mixins import EmbeddingMixin
 from ..layers.decoders import DistanceDecoder
 from ..layers.GAEconv import GAEconv
 
 
 # TODO: fix too-few-public-methods for embedding/gae/models/gae.py GAE
 # pylint: disable=too-few-public-methods
-class GAE(tg.nn.GAE, EmbeddingMixin):
+class GAE(tg.nn.GAE):
     """TODO: class docstring for GAE."""
 
     def __init__(self, dim, hidden_dim, num_features, dist=False):
