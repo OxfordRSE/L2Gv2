@@ -1,18 +1,16 @@
 """
-Datasets loader for l2gv2, main file
+Datasets loader for l2g-light, main file
 """
 
 import datetime
 from pathlib import Path
-
-from tqdm import tqdm
 import polars as pl
 import torch
 import networkx as nx
 import raphtory as rp
 import torch_geometric.data
 
-DATA_PATH = Path(__file__).parent / "data"
+DATA_PATH = Path(__file__).parent.parent.parent / "data"
 DATASETS = [x.stem for x in DATA_PATH.glob("*") if x.is_dir()]
 EDGE_COLUMNS = {"source", "dest"}  # required columns
 
