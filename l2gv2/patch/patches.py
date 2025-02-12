@@ -2,7 +2,14 @@
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-positional-arguments
 
-"""Dividing input data into overlapping patches"""
+"""
+Dividing input data into overlapping patches
+
+This module contains functions for dividing input data into overlapping patches.
+
+The main function is `create_patch_data`, which takes a graph and a partition of the graph
+and returns a list of patches.
+"""
 
 from random import choice
 from math import ceil
@@ -18,7 +25,7 @@ import numba
 from ..clustering import Partition
 from ..network.tgraph import TGraph
 from ..network.npgraph import JitGraph, NPGraph
-from ..sparsify import (
+from .sparsify import (
     resistance_sparsify,
     relaxed_spanning_tree,
     edge_sampling_sparsify,
