@@ -1,115 +1,135 @@
 """
-Datasets loader for l2g-light, main file
+Utilities for loading graph datasets.
+
+The module provides a DataLoader class that can load graph datasets torch-geometric.data.Dataset 
+and return a polars DataFrame of the edges and nodes. It contains methods to convert the graph
+into a raphtory graph and a networkx graph.
 """
 
 import datetime
 from pathlib import Path
 import polars as pl
 import torch
+import logging
 import networkx as nx
 import raphtory as rp
 import torch_geometric.data
+from torch_geometric.data import Data, Dataset
+from typing import List
 
-DATA_PATH = Path(__file__).parent.parent.parent / "data"
-DATASETS = [x.stem for x in DATA_PATH.glob("*") if x.is_dir()]
+from l2gv2.datasets import DATASET_REGISTRY
+
+datasets = list(DATASET_REGISTRY.keys())
+
 EDGE_COLUMNS = {"source", "dest"}  # required columns
 
 EdgeList = list[tuple[str, str]]
-
 
 def is_graph_dataset(p: Path) -> bool:
     "Returns True if dataset represented by `p` is a valid dataset"
     return (p / (p.stem + "_edges.parquet")).exists()
 
-
-class DataLoader:  # pylint: disable=too-many-instance-attributes
-    """Take a dataframe representing a (temporal) graph and provide
-    methods for loading the data in different formats.
+class GraphDataLoader:
     """
+    A class for loading graph datasets and returning a polars DataFrame of the edges and nodes.
+    """
+    def __init__(self, dset: Dataset):
+        """
+        Initialize the GraphDataLoader.
 
-    def __init__(self, dset: str | Path, timestamp_fmt: str = "%Y-%m-%d"):
-        if is_graph_dataset(Path(dset)):
-            self.path = Path(dset)
-        elif is_graph_dataset(DATA_PATH / dset):
-            self.path = DATA_PATH / dset
+        Args:
+            dset (Dataset): The dataset to load.
+            timestamp_fmt (str, optional): The format of the timestamp. Defaults to "%Y-%m-%d".
+        """
+        logging.basicConfig(level=logging.INFO, 
+                            format="%(asctime)s - %(levelname)s - %(message)s")
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+        if not isinstance(self.dset, Dataset):
+            raise ValueError("dset must be a torch_geometric.data.Dataset")
+        
+        self.data = dset
+
+        if hasattr(self.data, "timestamp"):
+            self.temporal = True
+            self.datelist = self.data.timestamp
         else:
-            raise ValueError(f"Dataset either invalid or not found: {dset}")
+            self.temporal = False
+            self.datelist = None
+        
+        self._parse()
+    
+    def _parse(self):
+        """Parse the dataset into a polars DataFrame"""
 
-        self.timestamp_fmt = timestamp_fmt
-        self.paths = {"edges": self.path / (self.path.stem + "_edges.parquet")}
-        if (nodes_path := self.path / (self.path.stem + "_nodes.parquet")).exists():
-            self.paths["nodes"] = nodes_path
-
-        self._load_files()
-
-    def timestamp_from_string(self, ts: str) -> datetime.datetime:
-        "Returns timestamp from string using `timestamp_fmt`"
-        return datetime.datetime.strptime(ts, self.timestamp_fmt)
-
-    def _load_files(self):
-        "Loads dataset into memory"
-
-        self.edges = pl.read_parquet(self.paths["edges"])
-        assert EDGE_COLUMNS <= set(
-            self.edges.columns
-        ), f"Required edge columns not found: {EDGE_COLUMNS}"
-        self.temporal = "timestamp" in self.edges.columns
-        if not self.temporal:
-            self.edges = self.edges.with_columns(pl.lit(0).alias("timestamp"))
-        else:  # convert timestamp to datetime format
-            if self.edges["timestamp"].dtype == pl.Utf8:
-                self.edges = self.edges.with_columns(
-                    pl.col("timestamp").str.to_datetime(self.timestamp_fmt)
-                )
-
-        self.datelist = self.edges.select("timestamp").to_series().unique()
-
-        # Process nodes
-        if self.paths.get("nodes"):
-            self.nodes = pl.read_parquet(self.paths["nodes"])
-            assert (
-                "nodes" in self.nodes.columns
-            ), "Required node columns not found: 'nodes'"
+        dfs = []
+        for slice_data in self.data:
             if self.temporal:
-                if "timestamp" not in self.nodes.columns:
-                    raise ValueError(
-                        "Nodes dataset missing 'timestamp' column, required"
-                        " when edges dataset has 'timestamp'"
-                    )
-                if self.nodes["timestamp"].dtype == pl.Utf8:
-                    self.nodes = self.nodes.with_columns(
-                        pl.col("timestamp").str.to_datetime(self.timestamp_fmt)
-                    )
-        else:
-            # build nodes from edges dataset
-            self.nodes = (
-                pl.concat(
-                    [
-                        self.edges.select(
-                            pl.col("timestamp"), pl.col("source").alias("nodes")
-                        ),
-                        self.edges.select(
-                            pl.col("timestamp"), pl.col("dest").alias("nodes")
-                        ),
-                    ]
-                )
-                .unique()
-                .sort(by=["timestamp", "nodes"])
-            )
+                ts = slice_data.timestamp
+            else:
+                ts = 0
 
-        self.edge_features = [
-            x
-            for x in self.edges.columns
-            if x not in ["timestamp", "label"] + sorted(EDGE_COLUMNS)
-        ]
-        self.node_features = [
-            x for x in self.nodes.columns if x not in ["timestamp", "label", "nodes"]
-        ]
+            edge_index = (
+                slice_data.edge_index.numpy() 
+                if isinstance(slice_data.edge_index, torch.Tensor) 
+                else slice_data.edge_index
+            )
+            num_edges = edge_index.shape[1]
+    
+            df_dict = {'timestamp': [ts] * num_edges,
+                       'source': edge_index[0],
+                       'dest': edge_index[1]
+                       }
+
+            if hasattr(slice_data, "edge_attr"):
+                df_dict["edge_attr"] = slice_data.edge_attr
+                edge_attr = (
+                    slice_data.edge_attr.numpy() 
+                    if isinstance(slice_data.edge_attr, torch.Tensor) 
+                    else slice_data.edge_attr
+                )
+            # Handle multi-dimensional edge features (e.g., multiple features per edge).
+            if edge_attr.ndim == 2:
+                num_features = edge_attr.shape[1]
+                for i in range(num_features):
+                    df_dict[f'edge_feature_{i}'] = edge_attr[:, i]
+            else:
+                # If there's only one feature per edge, edge_attr may be 1D.
+                df_dict['edge_feature'] = edge_attr
+                dfs.append(pl.DataFrame(df_dict))
+        
+        if len(dfs) > 1:
+            self.edges = pl.concat(dfs)
+        else:
+            self.edges = dfs[0]        
+        
+        # Process nodes
+        if hasattr(self.data, 'x') and self.data.x is not None:
+            # Convert to a NumPy array if it's a torch.Tensor
+            x = self.data.x.numpy() if isinstance(self.data.x, torch.Tensor) else self.data.x
+
+            num_nodes = x.shape[0]
+            df_dict = {'node_id': list(range(num_nodes))}
+
+            # If the node feature matrix is 2D (i.e. each node has multiple features)
+            if x.ndim == 2:
+                num_features = x.shape[1]
+                for i in range(num_features):
+                    # Create a column for each node feature, e.g., feature_0, feature_1, etc.
+                    df_dict[f'feature_{i}'] = x[:, i]
+            else:
+                # If the feature matrix is 1D, treat it as a single feature column.
+                df_dict['feature'] = x
+
+            # Create the Polars DataFrame with the node data.
+            self.nodes = pl.DataFrame(df_dict)
+        else:
+            self.nodes = None
 
     def get_dates(self) -> list[str]:
         "Returns list of dates"
         return self.datelist.to_list()
-
+    
     def get_edges(self) -> pl.DataFrame:
         "Returns edges as a polars DataFrame"
         return self.edges
@@ -286,5 +306,3 @@ class DataLoader:  # pylint: disable=too-many-instance-attributes
             tg_graphs.x = torch.from_numpy(features).float()
         return tg_graphs
 
-
-# TODO: integrate summary() into DataLoader

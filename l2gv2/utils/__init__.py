@@ -2,6 +2,6 @@
 Datasets loader for l2glite
 """
 
-from .dataloader import DataLoader
+from ..datasets.base import DataLoader
 
 __all__ = ["DataLoader"]
