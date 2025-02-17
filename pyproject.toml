@@ -2,14 +2,20 @@
 requires = ['setuptools>=40.8.0']
 build-backend = 'setuptools.build_meta'
 
-[tool.setuptools]
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+  "l2gv2",
+  "l2gv2.datasets",
+  "l2gv2.embedding",
+  "l2gv2.utils",
+  "l2gv2.patch",
+  "l2gv2.graphs",
+  "l2gv2.embedding",
+  "l2gv2.embedding.svd",
+  "l2gv2.embedding.gae",
+]
 
-  [tool.setuptools.packages.find]
-    where = ["."]
-    include = ["l2gv2", "l2gv2.patch", "l2gv2.network", "l2gv2.embedding", "l2gv2.embedding.dgi.layers", "l2gv2.embedding.dgi.models", "l2gv2.embedding.dgi.utils", "l2gv2.embedding.gae.layers", "l2gv2.embedding.gae.models", "l2gv2.embedding.gae.utils", "l2gv2.datasets"]
-
-# project
-# #######
 [project]
 name = "l2gv2"
 version = "0.1.0"
