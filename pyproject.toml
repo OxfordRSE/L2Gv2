@@ -79,6 +79,32 @@ disable = [
     "fixme",
     "import-error",
     "duplicate-code",
+
+    # handled by ruff and ruff-format
+    "line-too-long",
+    "trailing-whitespace",
+    "trailing-newlines",
+    "unused-import",
+    "missing-final-newline",
+
+    # style issues
+    "wrong-import-order",
+    "invalid-name",  # matrix names are single caps, like X, Y ...
+    "logging-fstring-interpolation",
+
+    # code complexity
+    "too-many-arguments",
+    "too-many-positional-arguments",
+    "too-many-locals",
+    "too-many-branches",
+    "too-many-statements",
+
+    # documentation
+    "missing-function-docstring",
+    "missing-module-docstring",
+
+    # network timeouts
+    "missing-timeout",
 ]
 
 # pyright
