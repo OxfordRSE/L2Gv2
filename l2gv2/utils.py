@@ -19,11 +19,16 @@
 #  SOFTWARE.
 """TODO: module docstring for utils.py"""
 
-from tempfile import TemporaryFile
 from time import perf_counter
+
+from tqdm import tqdm
 import torch
 import torch.nn
 
+
+def tqdm_close(t: tqdm):
+    t.update(t.total - t.n)
+    t.close()
 
 def speye(n: int, dtype: torch.dtype = torch.float) -> torch.Tensor:
     """identity matrix of dimension n as sparse_coo_tensor."""

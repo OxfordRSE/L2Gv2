@@ -26,9 +26,10 @@ from random import randrange
 import numpy as np
 import torch
 import numba
+from tqdm import tqdm
 from numba.experimental import jitclass
 
-from ..utils import progress
+from .utils import tqdm_close
 from .graph import Graph
 
 
@@ -334,14 +335,14 @@ def _memmap_degree(edge_index, num_nodes):
     degree = np.zeros(num_nodes, dtype=np.int64)
     with numba.objmode:
         print("computing degrees")
-        pbar = progress.reset(edge_index.shape[1])
+        pbar = tqdm(total=edge_index.shape[1])
     for it, source in enumerate(edge_index[0]):
         degree[source] += 1
         if it % 1000000 == 0 and it > 0:
             with numba.objmode:
-                progress.update(pbar, 1000000)
+                pbar.update(1000000)
     with numba.objmode:
-        progress.close(pbar)
+        tqdm_close(pbar)
     return degree
 
 
@@ -458,7 +459,7 @@ class JitGraph:
         num_edges = self.num_edges
         with numba.objmode:
             print("finding partition edges")
-            pbar = progress.reset(num_edges)
+            pbar = tqdm(total=num_edges)
         num_clusters = partition.max() + 1
         edge_counts = np.zeros((num_clusters, num_clusters), dtype=np.int64)
         for i, (source, target) in enumerate(self.edge_index.T):
@@ -468,9 +469,9 @@ class JitGraph:
                 edge_counts[source, target] += 1
             if i % 1000000 == 0 and i > 0:
                 with numba.objmode:
-                    progress.update(pbar, 1000000)
+                    pbar.update(1000000)
         with numba.objmode:
-            progress.close(pbar)
+            tqdm_close(pbar)
         index = np.nonzero(edge_counts)
         partition_edges = np.vstack(index)
         weights = np.empty((len(index[0]),), dtype=np.int64)

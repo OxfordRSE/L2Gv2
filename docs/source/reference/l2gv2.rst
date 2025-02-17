@@ -63,14 +63,6 @@ l2gv2.models module
    :undoc-members:
    :show-inheritance:
 
-l2gv2.progress module
----------------------
-
-.. automodule:: l2gv2.progress
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 l2gv2.sparsify module
 ---------------------
 

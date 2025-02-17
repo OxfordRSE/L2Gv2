@@ -17,7 +17,6 @@ import numpy as np
 import numba
 
 from local2global_embedding.network import TGraph, NPGraph
-from local2global_embedding import progress
 
 
 def distributed_clustering(graph: TGraph, beta, rounds=None, patience=3, min_samples=2) -> torch.Tensor:
@@ -136,7 +135,7 @@ def _fennel_clustering(edge_index, adj_index, num_nodes, num_clusters, load_limi
     deltas = - alpha * gamma * (partition_sizes ** (gamma - 1))
 
     with numba.objmode:
-        progress.reset(num_nodes)
+        pbar = tqdm(total=num_nodes)
 
     for it in range(num_iters):
         not_converged = 0
@@ -169,9 +168,9 @@ def _fennel_clustering(edge_index, adj_index, num_nodes, num_clusters, load_limi
             if i % 10000 == 0 and i > 0:
                 progress_it = i
                 with numba.objmode:
-                    progress.update(10000)
+                    pbar.update(10000)
         with numba.objmode:
-            progress.update(num_nodes - progress_it)
+            pbar.update(num_nodes - progress_it)
 
         print('iteration: ' + str(it) + ', not converged: ' + str(not_converged))
 
@@ -179,7 +178,7 @@ def _fennel_clustering(edge_index, adj_index, num_nodes, num_clusters, load_limi
             print(f'converged after {it} iterations.')
             break
     with numba.objmode:
-        progress.close()
+        tqdm_close(pbar)
 
     return clusters
 
