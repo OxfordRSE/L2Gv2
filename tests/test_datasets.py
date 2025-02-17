@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from l2gv2.datasets import DataLoader
+from l2gv2.utils import DataLoader
 
 TEST_DATASETS = Path(__file__).parent / "datasets"
 SOCIAL_NODES = [
