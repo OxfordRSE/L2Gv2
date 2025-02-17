@@ -119,7 +119,6 @@ def _fennel_clustering(edge_index, adj_index, num_nodes, num_clusters, load_limi
         num_iters = 1
 
     num_edges = edge_index.shape[1]
-    total = num_edges * num_iters
 
     if alpha is None:
         alpha = num_edges * (num_clusters ** (gamma-1)) / (num_nodes ** gamma)
@@ -177,7 +176,7 @@ def _fennel_clustering(edge_index, adj_index, num_nodes, num_clusters, load_limi
         print('iteration: ' + str(it) + ', not converged: ' + str(not_converged))
 
         if not_converged == 0:
-            print(f'converged after ' + str(it) + ' iterations.')
+            print(f'converged after {it} iterations.')
             break
     with numba.objmode:
         progress.close()
@@ -229,7 +228,7 @@ def metis_clustering(graph: TGraph, num_clusters):
                     SIAM Journal on Scientific Computing, Vol. 20, No. 1, pp. 359—392, 1999.
     """
     graph = graph.to(NPGraph)
-    n_cuts, memberships = pymetis.part_graph(num_clusters, adjncy=graph.edge_index[1], xadj=graph.adj_index,
+    _, memberships = pymetis.part_graph(num_clusters, adjncy=graph.edge_index[1], xadj=graph.adj_index,
                                              eweights=graph.edge_attr)
     return torch.as_tensor(memberships, dtype=torch.long, device=graph.device)
 
@@ -323,6 +322,7 @@ def hierarchical_aglomerative_clustering(graph, method=spread_clustering, levels
 
 
 class Partition(Sequence):
+    "Defines a custom sequence for a Partition of the graph"
     def __init__(self, partition_tensor):
         partition_tensor = torch.as_tensor(partition_tensor)
         counts = torch.bincount(partition_tensor)

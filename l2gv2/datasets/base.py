@@ -14,8 +14,8 @@ import logging
 import networkx as nx
 import raphtory as rp
 import torch_geometric.data
-from torch_geometric.data import Data, Dataset
-from typing import List
+from torch_geometric.data import Dataset
+from tqdm import tqdm
 
 from l2gv2.datasets import DATASET_REGISTRY
 
