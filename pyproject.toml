@@ -28,20 +28,18 @@ classifiers = [
 dependencies = [
     "autograd ~= 1.7",
     "ilupp == 1.0.*",
-    "networkx ~= 3.4",
-    "numba >= 0.60",
-    "numpy == 1.*",
-    "polars ~= 1.15",
+    "networkx>=3",
+    "numba",
+    "numpy",
+    "polars",
     "pymanopt ~= 2.2",
     "pymetis",
     "python-louvain == 0.16",  # imported as 'community'
-    "raphtory >= 0.13",
-    "scikit-learn >= 1",
-    "scipy == 1.*",
-    "torch == 2.4.*; sys_platform == 'linux'",
-    "torch == 2.5.*; sys_platform == 'darwin'",
-    "torch-geometric ~= 2.6",
-    "torch-scatter ~= 2.1",
+    "raphtory",
+    "scikit-learn",
+    "scipy",
+    "torch>=2.5",
+    "torch-geometric>=2.6",
     "tqdm >= 4"
 ]
 
