@@ -8,7 +8,6 @@ include = [
   "l2gv2",
   "l2gv2.datasets",
   "l2gv2.embedding",
-  "l2gv2.utils",
   "l2gv2.patch",
   "l2gv2.graphs",
   "l2gv2.embedding",
