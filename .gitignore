@@ -4,3 +4,10 @@ build/
 l2gv2.egg-info/
 .venv/
 docs/build/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywz
+*.pyzw
