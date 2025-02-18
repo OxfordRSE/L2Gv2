@@ -23,9 +23,5 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.10"
-    - name: Install dependencies
-      run: |
-        python3 -m pip install '.[dev]' --find-links https://data.pyg.org/whl/torch-2.4.1%2Bcpu.html
-    - name: Test with pytest
-      run: |
-        python3 -m pytest -n auto
+    - name: Run tests
+      run: make

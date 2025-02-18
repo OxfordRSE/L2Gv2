@@ -11,50 +11,49 @@
 
 Full documentation available [here](https://l2gv2.readthedocs.io/en/latest/)
 
-
 ## Setup
 
-
-**Supported Python Versions**: 3.10, 3.11, 3.12
+**Supported Python Versions**: 3.10, 3.11, 3.12  
 **Supported Operating Systems**: macOS, Linux
 
-Clone the repository on your machine
+**Clone the repository** on your machine
 
 ```shell
 git clone https://github.com/OxfordRSE/L2Gv2.git
 ```
 
-Setup the virtual environment
+Create and activate a **virtual environment**
 
-1. Create and activate a virtual environment
-   ```shell
-   python3 -m venv .venv
-   source .venv/bin/activate
-   ```
+```shell
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
-2. Install the dependencies
+**Install the dependencies**
 
-    ```shell
-    pip install . --find-links https://data.pyg.org/whl/torch-{version}%2Bcpu.html
-    ```
+```shell
+pip install '.[dev,docs]'
+```
 
-   For the above, select 2.5.1 for macOS and 2.4.1 for Linux. Note that this installs
-   CPU versions of the dependencies. To install GPU versions, consult the
-   [pytorch-geometric](https://pypi.org/project/torch-geometric/) documentation
-   for the appropriate repository links, or visit https://data.pyg.org/whl to see
-   all possible torch/GPU supported versions.
+This will install dependencies, including [pytorch](https://pytorch.org) and
+[pytorch-geometric](https://pyg.org). For macOS, CPU version of pytorch will
+be installed, whereas for Linux, a GPU version targeting the latest CUDA
+release will be installed. Installation of alternate or older CUDA versions
+may be supported in the future.
 
-3. To build docs
+To simplify testing for developers, we provide a [Makefile](Makefile), which
+allows you to run the above steps and test with one command:
 
-   ```shell
-   pip install '.[docs]'
-   ```
+```shell
+make
+```
 
-4. To install the development dependencies
+Note that the above commands will install development and documentation
+dependencies. If you are only using this library as a dependency, use:
 
-   ```shell
-   pip install '.[dev]'
-   ```
+```shell
+pip install git+https://github.com/OxfordRSE/L2Gv2
+```
 
 ## License
 
