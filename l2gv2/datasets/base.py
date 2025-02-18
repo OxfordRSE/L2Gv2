@@ -1,7 +1,7 @@
 """
 Utilities for loading graph datasets.
 
-The module provides a DataLoader class that can load graph datasets torch-geometric.data.Dataset 
+The module provides a DataLoader class that can load graph datasets torch-geometric.data.Dataset
 and return a polars DataFrame of the edges and nodes. It contains methods to convert the graph
 into a raphtory graph and a networkx graph.
 """
@@ -23,14 +23,17 @@ EDGE_COLUMNS = {"source", "dest"}  # required columns
 
 EdgeList = list[tuple[str, str]]
 
+
 def is_graph_dataset(p: Path) -> bool:
     "Returns True if dataset represented by `p` is a valid dataset"
     return (p / (p.stem + "_edges.parquet")).exists()
+
 
 class GraphDataLoader:
     """
     A class for loading graph datasets and returning a polars DataFrame of the edges and nodes.
     """
+
     def __init__(self, dset: Dataset):
         """
         Initialize the GraphDataLoader.
@@ -39,14 +42,15 @@ class GraphDataLoader:
             dset (Dataset): The dataset to load.
             timestamp_fmt (str, optional): The format of the timestamp. Defaults to "%Y-%m-%d".
         """
-        logging.basicConfig(level=logging.INFO, 
-                            format="%(asctime)s - %(levelname)s - %(message)s")
+        logging.basicConfig(
+            level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+        )
         self.logger = logging.getLogger(self.__class__.__name__)
         self.dset = dset
 
         if not isinstance(self.dset, Dataset):
             raise ValueError("dset must be a torch_geometric.data.Dataset")
-        
+
         self.data = dset
 
         if hasattr(self.data, "timestamp"):
@@ -55,9 +59,9 @@ class GraphDataLoader:
         else:
             self.temporal = False
             self.datelist = None
-        
+
         self._parse()
-    
+
     def _parse(self):
         """Parse the dataset into a polars DataFrame"""
 
@@ -69,56 +73,61 @@ class GraphDataLoader:
                 ts = 0
 
             edge_index = (
-                slice_data.edge_index.numpy() 
-                if isinstance(slice_data.edge_index, torch.Tensor) 
+                slice_data.edge_index.numpy()
+                if isinstance(slice_data.edge_index, torch.Tensor)
                 else slice_data.edge_index
             )
             num_edges = edge_index.shape[1]
-    
-            df_dict = {'timestamp': [ts] * num_edges,
-                       'source': edge_index[0],
-                       'dest': edge_index[1]
-                       }
+
+            df_dict = {
+                "timestamp": [ts] * num_edges,
+                "source": edge_index[0],
+                "dest": edge_index[1],
+            }
 
             if hasattr(slice_data, "edge_attr"):
                 df_dict["edge_attr"] = slice_data.edge_attr
                 edge_attr = (
-                    slice_data.edge_attr.numpy() 
-                    if isinstance(slice_data.edge_attr, torch.Tensor) 
+                    slice_data.edge_attr.numpy()
+                    if isinstance(slice_data.edge_attr, torch.Tensor)
                     else slice_data.edge_attr
                 )
                 # Handle multi-dimensional edge features (e.g., multiple features per edge).
                 if edge_attr.ndim == 2:
                     num_features = edge_attr.shape[1]
                     for i in range(num_features):
-                        df_dict[f'edge_feature_{i}'] = edge_attr[:, i]
+                        df_dict[f"edge_feature_{i}"] = edge_attr[:, i]
                 else:
                     # If there's only one feature per edge, edge_attr may be 1D.
-                    df_dict['edge_feature'] = edge_attr
+                    df_dict["edge_feature"] = edge_attr
                     dfs.append(pl.DataFrame(df_dict))
-        
+
         if len(dfs) > 1:
             self.edges = pl.concat(dfs)
         else:
-            self.edges = dfs[0]        
-        
+            self.edges = dfs[0]
+
         # Process nodes
-        if hasattr(self.data, 'x') and self.data.x is not None:
+        if hasattr(self.data, "x") and self.data.x is not None:
             # Convert to a NumPy array if it's a torch.Tensor
-            x = self.data.x.numpy() if isinstance(self.data.x, torch.Tensor) else self.data.x
+            x = (
+                self.data.x.numpy()
+                if isinstance(self.data.x, torch.Tensor)
+                else self.data.x
+            )
 
             num_nodes = x.shape[0]
-            df_dict = {'node_id': list(range(num_nodes))}
+            df_dict = {"node_id": list(range(num_nodes))}
 
             # If the node feature matrix is 2D (i.e. each node has multiple features)
             if x.ndim == 2:
                 num_features = x.shape[1]
                 for i in range(num_features):
                     # Create a column for each node feature, e.g., feature_0, feature_1, etc.
-                    df_dict[f'feature_{i}'] = x[:, i]
+                    df_dict[f"feature_{i}"] = x[:, i]
             else:
                 # If the feature matrix is 1D, treat it as a single feature column.
-                df_dict['feature'] = x
+                df_dict["feature"] = x
 
             # Create the Polars DataFrame with the node data.
             self.nodes = pl.DataFrame(df_dict)
@@ -128,7 +137,7 @@ class GraphDataLoader:
     def get_dates(self) -> list[str]:
         "Returns list of dates"
         return self.datelist.to_list()
-    
+
     def get_edges(self) -> pl.DataFrame:
         "Returns edges as a polars DataFrame"
         return self.edges
@@ -209,4 +218,3 @@ class GraphDataLoader:
             edge_list = [tuple(x) for x in edges]
             edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous()
         return edge_index
-

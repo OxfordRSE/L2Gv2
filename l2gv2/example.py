@@ -21,6 +21,7 @@ import networkx as nx
 from l2gv2.patch import utils as ut
 from l2gv2.patch.patch import Patch
 
+
 def generate_data(
     n_clusters: int,
     scale: Optional[float] = 1.0,
@@ -98,20 +99,20 @@ def voronoi_patches(
     Args:
         points (np.ndarray): ndarray of floats of shape (N, d), d-dimensional embedding.
 
-        sample_size (Optional[int]): Number of patches splitting the set of N points, 
+        sample_size (Optional[int]): Number of patches splitting the set of N points,
             default is 100.
 
         min_degree (Optional[int]): Minimum patch degree, defaults to `d + 1`.
 
-        min_overlap (Optional[int]): Minimum overlap to consider two patches connected, 
+        min_overlap (Optional[int]): Minimum overlap to consider two patches connected,
             default is `d + 1`.
 
-        min_size (Optional[int]): Minimum patch size, defaults to `len(points) / sample_size`, 
+        min_size (Optional[int]): Minimum patch size, defaults to `len(points) / sample_size`,
             default is None.
 
         eps (Optional[float]): Tolerance for expanding initial Voronoi patches, default is 1.6.
 
-        return_graph (Optional[bool]): If True, returns the patch graph as a networkx Graph, 
+        return_graph (Optional[bool]): If True, returns the patch graph as a networkx Graph,
             default is False.
 
         kmeans (Optional[bool]): If True, chooses patch centers using k-means,
@@ -260,7 +261,7 @@ def rand_scale_patches(
         alignment_problem (AlignmentProblem): Alignment problem to be rescaled.
 
         min_scale (Optional[float]): Minimum scale factor (scale factors are sampled
-                           log-uniformly from the interval [min_scale, 1/min_scale]), 
+                           log-uniformly from the interval [min_scale, 1/min_scale]),
                            default is 1e-2.
 
     Returns:
@@ -354,14 +355,14 @@ def noise_profile(
     Args:
         points (np.ndarray): True data.
 
-        base_problem (AlignmentProblem): Alignment problem without noise 
+        base_problem (AlignmentProblem): Alignment problem without noise
             (usually should have rotated/shifted/scaled patches).
 
         max_noise (Optional[float]): Maximum standard deviation for noise, default is 0.5.
 
         steps (Optional[int]): Number of noise steps between 0 and `max_noise`, default is 101.
 
-        scales (Optional[np.ndarray]): Scales of patches (noise is scaled accordingly), 
+        scales (Optional[np.ndarray]): Scales of patches (noise is scaled accordingly),
             default is None.
 
         types (lOptional[ist[AlignmentProblem]]): List of AlignmentProblem subclasses to test
@@ -369,7 +370,7 @@ def noise_profile(
 
         labels (Optional[list[str]]): Labels to use for the legend, default is None.
 
-        min_overlap (Optional[list[int]]): Values of `min_overlap` to include in the test, 
+        min_overlap (Optional[list[int]]): Values of `min_overlap` to include in the test,
             default is None.
 
         plot (Optional[bool]): Plot results, default is True.
@@ -458,12 +459,12 @@ def plot_reconstruction(
 def save_data(points: np.ndarray, filename: str):
     """Save an array of points to a CSV file.
 
-    Ensures the specified filename has a `.csv` extension and 
+    Ensures the specified filename has a `.csv` extension and
     writes the data to a CSV file with UTF-8 encoding.
 
     Args:
         points (np.ndarray): Array of data points to save, where each row is a data point.
-        filename (str): Desired filename for saving the data. 
+        filename (str): Desired filename for saving the data.
 
     """
     filename = ut.ensure_extension(filename, ".csv")
@@ -497,7 +498,7 @@ def rand_orth(dim: int) -> np.ndarray:
 
 
 def main(arguments: argparse.Namespace):
-    """ Generate synthetic data and test the alignment algorithms.
+    """Generate synthetic data and test the alignment algorithms.
 
     Args:
 
@@ -563,11 +564,13 @@ def main(arguments: argparse.Namespace):
             problem.__class__ = problem_cls
             error = plot_reconstruction(points, problem)
             plt.title(f"Noise: {noise}, error: {error}")
-            plt.savefig(path.join(arguments.outdir, f"errorplot_{label}_noise{noise}.pdf"))
+            plt.savefig(
+                path.join(arguments.outdir, f"errorplot_{label}_noise{noise}.pdf")
+            )
             plt.close()
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Run local2global example.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

@@ -31,6 +31,7 @@ def tqdm_close(t: tqdm):
     t.update(t.total - t.n)
     t.close()
 
+
 def speye(n: int, dtype: torch.dtype = torch.float) -> torch.Tensor:
     """identity matrix of dimension n as sparse_coo_tensor."""
     return torch.sparse_coo_tensor(
@@ -119,8 +120,6 @@ class EarlyStopping:
             return True
 
         return False
-
-
 
 
 class Timer:
