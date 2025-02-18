@@ -12,8 +12,6 @@ import polars as pl
 import torch
 import logging
 import networkx as nx
-import raphtory as rp
-import torch_geometric.data
 from torch_geometric.data import Dataset
 from tqdm import tqdm
 
