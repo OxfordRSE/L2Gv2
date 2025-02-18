@@ -29,7 +29,7 @@ import numba
 from tqdm import tqdm
 from numba.experimental import jitclass
 
-from .utils import tqdm_close
+from ..utils import tqdm_close
 from .graph import Graph
 
 

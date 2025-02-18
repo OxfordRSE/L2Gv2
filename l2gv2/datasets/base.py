@@ -17,7 +17,7 @@ import torch_geometric.data
 from torch_geometric.data import Dataset
 from tqdm import tqdm
 
-from l2gv2.datasets import DATASET_REGISTRY
+from .registry import DATASET_REGISTRY
 
 datasets = list(DATASET_REGISTRY.keys())
 
@@ -44,6 +44,7 @@ class GraphDataLoader:
         logging.basicConfig(level=logging.INFO, 
                             format="%(asctime)s - %(levelname)s - %(message)s")
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.dset = dset
 
         if not isinstance(self.dset, Dataset):
             raise ValueError("dset must be a torch_geometric.data.Dataset")
@@ -88,15 +89,15 @@ class GraphDataLoader:
                     if isinstance(slice_data.edge_attr, torch.Tensor) 
                     else slice_data.edge_attr
                 )
-            # Handle multi-dimensional edge features (e.g., multiple features per edge).
-            if edge_attr.ndim == 2:
-                num_features = edge_attr.shape[1]
-                for i in range(num_features):
-                    df_dict[f'edge_feature_{i}'] = edge_attr[:, i]
-            else:
-                # If there's only one feature per edge, edge_attr may be 1D.
-                df_dict['edge_feature'] = edge_attr
-                dfs.append(pl.DataFrame(df_dict))
+                # Handle multi-dimensional edge features (e.g., multiple features per edge).
+                if edge_attr.ndim == 2:
+                    num_features = edge_attr.shape[1]
+                    for i in range(num_features):
+                        df_dict[f'edge_feature_{i}'] = edge_attr[:, i]
+                else:
+                    # If there's only one feature per edge, edge_attr may be 1D.
+                    df_dict['edge_feature'] = edge_attr
+                    dfs.append(pl.DataFrame(df_dict))
         
         if len(dfs) > 1:
             self.edges = pl.concat(dfs)
@@ -133,66 +134,6 @@ class GraphDataLoader:
     def get_edges(self) -> pl.DataFrame:
         "Returns edges as a polars DataFrame"
         return self.edges
-
-    def get_nodes(self, ts: str | None = None) -> pl.DataFrame:
-        """Returns node data as a polars DataFrame
-
-        Args:
-            ts (str, optional): if specified, only return nodes with this timestamp
-
-        Returns:
-            polars.DataFrame
-        """
-        if ts is None:
-            return self.nodes
-        if isinstance(ts, str):
-            ts = self.timestamp_from_string(ts)
-        return self.nodes.filter(pl.col("timestamp") == ts)
-
-    def get_node_list(self, ts: str | None = None) -> list[str]:
-        """Returns node list
-
-        Args:
-            ts (str, optional): if specified, only return nodes with this timestamp
-
-        Returns:
-            list of str
-        """
-        nodes = self.nodes
-
-        if ts is not None:
-            if isinstance(ts, str):
-                ts = self.timestamp_from_string(ts)
-            nodes = nodes.filter(pl.col("timestamp") == ts)
-        return nodes.select("nodes").unique(maintain_order=True).to_series().to_list()
-
-    def get_node_features(self) -> list[str]:
-        "Returns node features as a list of strings"
-        return self.node_features
-
-    def get_edge_features(self) -> list[str]:
-        "Returns edge features as a list of strings"
-        return self.edge_features
-
-    def get_graph(self) -> rp.Graph:  # pylint: disable=no-member
-        "Returns a raphtory.Graph representation"
-        g = rp.Graph()  # pylint: disable=no-member
-
-        g.load_edges_from_pandas(
-            df=self.edges.to_pandas(),
-            time="timestamp",
-            src="source",
-            dst="dest",
-            properties=self.edge_features,
-        )
-        g.load_nodes_from_pandas(
-            df=self.nodes.to_pandas(),
-            time="timestamp",
-            id="nodes",
-            properties=self.node_features,
-        )
-
-        return g
 
     def get_edge_list(
         self, temp: bool = True
@@ -270,39 +211,4 @@ class GraphDataLoader:
             edge_list = [tuple(x) for x in edges]
             edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous()
         return edge_index
-
-    def get_tgeometric(
-        self, temp: bool = True
-    ) -> torch_geometric.data.Data | dict[datetime.datetime, torch_geometric.data.Data]:
-        """Returns torch_geometric representation
-
-        Args:
-            temp (bool, optional, default=True): If true, then returns a dictionary of
-                timestamps to torch_geometric representations, if false, returns
-                a torch_geometric representation.
-        """
-        nodes = self.nodes.select("nodes").unique().to_numpy()
-        features = self.nodes.select(self.node_features).to_numpy()
-        if self.temporal and temp:
-            tg_graphs = {}
-            for d in tqdm(self.datelist):
-                edges = (
-                    self.edges.filter(pl.col("timestamp") == d)
-                    .select("source", "dest")
-                    .to_numpy()
-                )
-                edge_list = [tuple(x) for x in edges]
-                edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous()
-                tg = torch_geometric.data.Data(edge_index=edge_index)
-                tg.nodes = torch.from_numpy(nodes).int()
-                tg.x = torch.from_numpy(features).float()
-                tg_graphs[d] = tg
-        else:
-            edges = self.edges.select("source", "dest").unique().to_numpy()
-            edge_list = [tuple(x) for x in edges]
-            edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous()
-            tg_graphs = torch_geometric.data.Data(edge_index=edge_index)
-            tg_graphs.nodes = torch.Tensor(nodes).int()
-            tg_graphs.x = torch.from_numpy(features).float()
-        return tg_graphs
 

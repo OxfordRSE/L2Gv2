@@ -15,6 +15,9 @@ import torch
 import pymetis
 import numpy as np
 import numba
+from tqdm import tqdm
+
+from ..utils import tqdm_close
 
 from local2global_embedding.network import TGraph, NPGraph
 

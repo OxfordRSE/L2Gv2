@@ -19,6 +19,7 @@
 #  SOFTWARE.
 """TODO: module docstring for utils.py"""
 
+from tempfile import TemporaryFile
 from time import perf_counter
 
 from tqdm import tqdm
@@ -52,6 +53,73 @@ def set_device(device: str | None = None):
         return torch.device("cpu")
 
     return torch.device(device)
+
+
+class EarlyStopping:
+    """
+    Context manager for early stopping
+    """
+
+    def __init__(self, patience: int, delta: float = 0):
+        """
+        Initialise early stopping context manager
+
+        Args:
+            patience: wait ``patience`` number of epochs without loss improvement before stopping
+            delta: minimum improvement to consider significant (default: 0)
+        """
+        self.patience = patience
+        self.delta = delta
+        self.best_loss = float("inf")
+        self.count = 0
+        self._file = TemporaryFile()
+
+    def __enter__(self):
+        self.best_loss = float("inf")
+        self.count = 0
+        if self._file.closed:
+            self._file = TemporaryFile()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._file.close()
+
+    def _save_model(self, model: torch.nn.Module):
+        self._file.seek(0)
+        torch.save(model.state_dict(), self._file)
+
+    def _load_model(self, model: torch.nn.Module):
+        self._file.seek(0)
+        model.load_state_dict(torch.load(self._file))
+
+    def __call__(self, loss: float, model: torch.nn.Module) -> bool:
+        """
+        check stopping criterion and save or restore model state as appropriate
+
+        Args:
+            loss: loss value for stopping
+            model: [description]
+
+        Returns:
+            ``True`` if training should be stopped, ``False`` otherwise
+        """
+        loss = float(
+            loss
+        )  # make sure no tensors used here to avoid propagating gradients
+        if loss >= self.best_loss - self.delta:
+            self.count += 1
+        else:
+            self.count = 0
+
+        if loss < self.best_loss:
+            self.best_loss = loss
+            self._save_model(model)
+        if self.count > self.patience:
+            self._load_model(model)
+            return True
+
+        return False
+
 
 
 

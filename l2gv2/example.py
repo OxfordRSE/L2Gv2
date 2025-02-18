@@ -216,9 +216,11 @@ def voronoi_patches(
                 patches2 = list(patches2)
                 c2 = c1 + it + 1
                 patch_distances = cdist(centers[patches1, :], centers[patches2, :])
+                # pylint: disable=unbalanced-tuple-unpacking
                 i, j = np.unravel_index(
                     np.argmin(patch_distances), patch_distances.shape
                 )
+                # pylint: enable=unbalanced-tuple-unpacking
                 edges.append((patch_distances[i, j], patches1[i], patches2[j], c1, c2))
         edges.sort()
         component_graph = nx.Graph()
