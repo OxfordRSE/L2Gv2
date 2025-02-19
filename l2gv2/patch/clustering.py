@@ -16,8 +16,8 @@ import pymetis
 import numpy as np
 import numba
 
-from local2global_embedding.network import TGraph, NPGraph
-from local2global_embedding import progress
+from l2gv2.graphs import TGraph
+from l2gv2.utils import progress
 
 
 def distributed_clustering(graph: TGraph, beta, rounds=None, patience=3, min_samples=2) -> torch.Tensor:
@@ -89,7 +89,7 @@ def fennel_clustering(graph, num_clusters, load_limit=1.1, alpha=None, gamma=1.5
 
 
 @numba.njit
-def _fennel_clustering(edge_index, adj_index, num_nodes, num_clusters, load_limit=1.1, alpha=None, gamma=1.5, num_iters=1,
+def _fennel_clustering(edge_index: np.ndarray, adj_index: np.ndarray, num_nodes: int, num_clusters: int, load_limit: float = 1.1, alpha: float = None, gamma: float = 1.5, num_iters: int = 1,
                        clusters=np.empty(0, dtype=np.int64)):
     r"""
     FENNEL single-pass graph clustering algorithm
@@ -119,7 +119,7 @@ def _fennel_clustering(edge_index, adj_index, num_nodes, num_clusters, load_limi
         num_iters = 1
 
     num_edges = edge_index.shape[1]
-    total = num_edges * num_iters
+    #total = num_edges * num_iters
 
     if alpha is None:
         alpha = num_edges * (num_clusters ** (gamma-1)) / (num_nodes ** gamma)
@@ -128,10 +128,12 @@ def _fennel_clustering(edge_index, adj_index, num_nodes, num_clusters, load_limi
     if clusters.size == 0:
         clusters = np.full((num_nodes,), -1, dtype=np.int64)
     else:
+        # There is already a clustering, so we need to copy it and update the partition sizes
         clusters = np.copy(clusters)
         for index in clusters:
             partition_sizes[index] += 1
 
+    # Maximum number of nodes per cluster
     load_limit *= num_nodes/num_clusters
 
     deltas = - alpha * gamma * (partition_sizes ** (gamma - 1))
@@ -174,10 +176,10 @@ def _fennel_clustering(edge_index, adj_index, num_nodes, num_clusters, load_limi
         with numba.objmode:
             progress.update(num_nodes - progress_it)
 
-        print('iteration: ' + str(it) + ', not converged: ' + str(not_converged))
+        print(f'iteration: {str(it)}, not converged: {str(not_converged)}')
 
         if not_converged == 0:
-            print(f'converged after ' + str(it) + ' iterations.')
+            print(f'converged after {str(it)} iterations.')
             break
     with numba.objmode:
         progress.close()

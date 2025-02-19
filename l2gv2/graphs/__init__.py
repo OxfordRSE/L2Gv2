@@ -19,7 +19,7 @@
 #  SOFTWARE.
 """TODO: module docstring for network/__init__.py"""
 
-from .npgraph import NPGraph
 from .tgraph import TGraph
+from .graph import Graph
 
-__all__ = ["NPGraph", "TGraph"]
+__all__ = ["TGraph", "Graph"]
