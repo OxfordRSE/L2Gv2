@@ -1,7 +1,7 @@
 from .registry import get_dataset, register_dataset, DATASET_REGISTRY
-from .base import GraphDataLoader
+from .base import BaseDataset
 from .as733 import AS733Dataset
-from .cora import planetoid_cora
+from .cora import CoraDataset
 
 def list_available_datasets():
     """
@@ -9,4 +9,4 @@ def list_available_datasets():
     """
     return list(DATASET_REGISTRY.keys())
 
-__all__ = ["get_dataset", "register_dataset", "DATASET_REGISTRY", "GraphDataLoader", "AS733Dataset", "planetoid_cora", "list_available_datasets"]
+__all__ = ["get_dataset", "register_dataset", "DATASET_REGISTRY", "BaseDataset", "AS733Dataset", "CoraDataset", "list_available_datasets"]

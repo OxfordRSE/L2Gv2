@@ -24,7 +24,6 @@ import numba
 
 from .clustering import Partition
 from ..graphs.tgraph import TGraph
-from ..graphs.npgraph import JitGraph, NPGraph
 from .sparsify import (
     resistance_sparsify,
     relaxed_spanning_tree,

@@ -3,12 +3,16 @@ Graph clustering algorithms
 
 This module contains functions for clustering graphs.
 
-The main function is `distributed_clustering`, which implements the distributed clustering algorithm of [#dist]_.
+TODO:
+- Make the algorithms work with Graph objects
 """
 
+from raphtory import Graph
 from math import log
 from collections.abc import Iterable
 from typing import Sequence
+from l2gv2.utils import progress
+from l2gv2.graphs import TGraph
 
 import community
 import torch
@@ -16,11 +20,86 @@ import pymetis
 import numpy as np
 import numba
 
-from l2gv2.graphs import TGraph
-from l2gv2.utils import progress
+
+def hierarchical_clustering(
+    data: Data,
+    m: int,
+    k: int,
+    clustering_function: Callable[[Data, int], torch.Tensor]
+) -> List[torch.Tensor]:
+    """
+    Perform hierarchical clustering on a PyTorch Geometric graph.
+
+    Args:
+        data (Data): The input PyTorch Geometric graph.
+        m (int): Target number of clusters.
+        k (int): Target maximum cluster size.
+        clustering_function (Callable): A function that takes a Data object and the number of clusters `m`
+                                         and returns a cluster assignment tensor.
+
+    Returns:
+        List[torch.Tensor]: A list of cluster assignment tensors for all levels of the hierarchy.
+    """
+    def recursive_clustering(data, m, k):
+        # Apply the clustering function to get initial clusters
+        cluster_tensor = clustering_function(data, m)
+        
+        # Check the size of each cluster
+        unique_clusters, counts = torch.unique(cluster_tensor, return_counts=True)
+        
+        # Store the final cluster assignments
+        final_clusters = []
+        
+        for cluster_id in unique_clusters:
+            # Get nodes in this cluster
+            cluster_nodes = (cluster_tensor == cluster_id).nonzero(as_tuple=True)[0]
+            
+            if len(cluster_nodes) <= k:
+                # If the cluster size is within the limit, keep it as-is
+                final_clusters.append((cluster_id, cluster_nodes))
+            else:
+                # If the cluster size exceeds k, extract the subgraph and apply recursion
+                subgraph = extract_subgraph(data, cluster_nodes)
+                sub_clusters = recursive_clustering(subgraph, m, k)
+                
+                # Adjust sub-cluster IDs to avoid clashes with existing IDs
+                max_cluster_id = max(unique_clusters).item()
+                sub_clusters_adjusted = [
+                    (max_cluster_id + 1 + i, nodes) for i, (_, nodes) in enumerate(sub_clusters)
+                ]
+                final_clusters.extend(sub_clusters_adjusted)
+        
+        return final_clusters
+    
+    def extract_subgraph(data, node_indices):
+        """
+        Extract a subgraph containing only the specified nodes.
+
+        Args:
+            data (Data): The original graph.
+            node_indices (Tensor): Indices of nodes to include in the subgraph.
+
+        Returns:
+            Data: The extracted subgraph.
+        """
+        mask = torch.zeros(data.num_nodes, dtype=torch.bool)
+        mask[node_indices] = True
+        
+        edge_mask = mask[data.edge_index[0]] & mask[data.edge_index[1]]
+        edge_index = data.edge_index[:, edge_mask]
+        
+        # Reindex nodes in the subgraph
+        node_mapping = {old_idx.item(): new_idx for new_idx, old_idx in enumerate(node_indices)}
+        edge_index = torch.tensor([[node_mapping[src.item()], node_mapping[dst.item()]]
+                                    for src, dst in edge_index.t()], dtype=torch.long).t()
+        
+        return Data(edge_index=edge_index, num_nodes=len(node_indices))
+    
+    # Start recursive clustering from the root level
+    return recursive_clustering(data, m, k)
 
 
-def distributed_clustering(graph: TGraph, beta, rounds=None, patience=3, min_samples=2) -> torch.Tensor:
+def distributed_clustering(graph: Graph, beta, rounds=None, patience=3, min_samples=2, weight=None) -> torch.Tensor:
     r"""
     Distributed clustering algorithm
 
@@ -41,11 +120,14 @@ def distributed_clustering(graph: TGraph, beta, rounds=None, patience=3, min_sam
 
     """
     if rounds is None:
-        rounds = 3*int(log(graph.num_nodes))
-    strength = graph.strength
+        rounds = 3*int(log(graph.count_nodes()))
+    if weight is None:
+        weight = 1 
+    strength = compute_strength(graph)
+    num_nodes = graph.count_nodes()
 
     # sample seed nodes
-    index = torch.rand((graph.num_nodes,)) < 1/beta * log(1 / beta) * graph.strength / graph.strength.sum()
+    index = torch.rand((num_nodes,)) < 1/beta * log(1 / beta) * graph.strength / graph.strength.sum()
     while index.sum() < min_samples:
         index = torch.rand((graph.num_nodes,)) < 1/beta * log(1 / beta) * graph.strength / graph.strength.sum()
     seeds = torch.nonzero(index).flatten()
@@ -77,8 +159,7 @@ def distributed_clustering(graph: TGraph, beta, rounds=None, patience=3, min_sam
     return clusters
 
 
-def fennel_clustering(graph, num_clusters, load_limit=1.1, alpha=None, gamma=1.5, num_iters=1, clusters=None):
-    graph = graph.to(NPGraph)
+def fennel_clustering(graph: Graph, num_clusters, load_limit=1.1, alpha=None, gamma=1.5, num_iters=1, clusters=None):
 
     if clusters is None:
         clusters = _fennel_clustering(graph.edge_index, graph.adj_index, graph.num_nodes, num_clusters, load_limit, alpha, gamma, num_iters)
@@ -119,7 +200,6 @@ def _fennel_clustering(edge_index: np.ndarray, adj_index: np.ndarray, num_nodes:
         num_iters = 1
 
     num_edges = edge_index.shape[1]
-    #total = num_edges * num_iters
 
     if alpha is None:
         alpha = num_edges * (num_clusters ** (gamma-1)) / (num_nodes ** gamma)
@@ -187,7 +267,7 @@ def _fennel_clustering(edge_index: np.ndarray, adj_index: np.ndarray, num_nodes:
     return clusters
 
 
-def louvain_clustering(graph: TGraph, *args, **kwargs):
+def louvain_clustering(graph: Graph, *args, **kwargs):
     r"""
     Implements clustering using the Louvain [#l]_ algorithm for modularity optimisation
 
@@ -230,13 +310,12 @@ def metis_clustering(graph: TGraph, num_clusters):
                     George Karypis and Vipin Kumar.
                     SIAM Journal on Scientific Computing, Vol. 20, No. 1, pp. 359—392, 1999.
     """
-    graph = graph.to(NPGraph)
     n_cuts, memberships = pymetis.part_graph(num_clusters, adjncy=graph.edge_index[1], xadj=graph.adj_index,
                                              eweights=graph.edge_attr)
     return torch.as_tensor(memberships, dtype=torch.long, device=graph.device)
 
 
-def spread_clustering(graph, num_clusters, max_degree_init=True):
+def spread_clustering(graph: Graph, num_clusters, max_degree_init=True):
     clusters = torch.full((graph.num_nodes,), -1, dtype=torch.long, device=graph.device)
     if max_degree_init:
         seeds = torch.topk(torch.as_tensor(graph.degree), k=num_clusters).indices
@@ -289,7 +368,7 @@ def spread_clustering(graph, num_clusters, max_degree_init=True):
     return clusters
 
 
-def hierarchical_aglomerative_clustering(graph, method=spread_clustering, levels=None, branch_factors=None):
+def hierarchical_aglomerative_clustering(graph: Graph, method=spread_clustering, levels=None, branch_factors=None):
     r"""
     Hierarchical agglomerative clustering
 
