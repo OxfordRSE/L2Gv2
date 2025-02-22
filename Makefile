@@ -4,6 +4,9 @@ test: install-deps venv
 install-deps: venv
 	. .venv/bin/activate && pip install '.[dev]'
 
+lint: venv
+	. .venv/bin/activate && pylint {l2gv2,tests}/**/*.py
+
 venv:
 	test -d .venv || python3.10 -m venv .venv
 
@@ -13,4 +16,4 @@ ruff-checks:
 	ruff check tests
 	ruff format --check tests
 
-.PHONY: test venv install-deps
+.PHONY: test venv install-deps lint
