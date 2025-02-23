@@ -9,13 +9,13 @@ into a raphtory graph and a networkx graph.
 import logging
 from pathlib import Path
 import polars as pl
-from raphtory import Graph
+from raphtory import Graph  # pylint: disable=no-name-in-module
 from torch_geometric.data import Data, InMemoryDataset
 from torch import Tensor
 from typing import Optional, Callable, Tuple, Dict
 
 from .utils import polars_to_tg, polars_to_raphtory
-from l2gv2.datasets import DATASET_REGISTRY
+from .registry import DATASET_REGISTRY
 datasets = list(DATASET_REGISTRY.keys())
 
 class BaseDataset(InMemoryDataset):
@@ -45,6 +45,13 @@ class BaseDataset(InMemoryDataset):
     def processed_dir(self) -> str:
         return str(Path(self.root) / 'processed')
     
+    def download(self):
+        raise NotImplementedError
+
+    @property
+    def processed_file_names(self) -> str | list[str] | tuple[str, ...]:
+        raise NotImplementedError
+
     def _load_polars(self) -> Tuple[pl.DataFrame, pl.DataFrame]:
         """
         Load the processed edge and node Polars DataFrames.
@@ -53,9 +60,8 @@ class BaseDataset(InMemoryDataset):
             print("Loading edge and node data from memory")
             return self.edge_df, self.node_df
         processed_dir = Path(self.processed_dir)
-        if not Path(processed_dir / "edge_data.parquet").exists():
-            self.logger.error(f"Parquet file {processed_dir / "edge_data.parquet"} not found.")
-            raise FileNotFoundError(f"Parquet file {processed_dir / "edge_data.parquet"} not found.")
+        if not (edge_data := Path(processed_dir / "edge_data.parquet")).exists():
+            raise FileNotFoundError(f"Parquet file {edge_data} not found.")
         edge_df = pl.read_parquet(processed_dir / "edge_data.parquet")
         if Path(processed_dir / "node_data.parquet").exists():
             node_df = pl.read_parquet(processed_dir / "node_data.parquet")
@@ -78,17 +84,18 @@ class BaseDataset(InMemoryDataset):
         edge_df, node_df = self._load_polars()
         data, slices = self.collate(polars_to_tg(edge_df, node_df, self.pre_transform))
         return data, slices
-    
-    def to(self, format: str):
+
+    def to(self, fmt: str):  # pylint: disable=arguments-renamed
         """
         Convert the dataset to a different format.
         """
-        if format == "raphtory":
-            return self.raphtory_graph
-        elif format == "polars":
-            return self.edge_df, self.node_df
-        else:
-            return super().to(format)
+        match fmt:
+            case "raphtory":
+                return self.raphtory_graph
+            case "polars":
+                return self.edge_df, self.node_df
+            case _:
+                return super().to(format)
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}()"

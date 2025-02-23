@@ -195,11 +195,11 @@ def _compute_Z(graph: TGraph, epsilon=10.0 ** -2.0):
         Z[:, i], flag = sc.sparse.linalg.lgmres(L, y, M=P, rtol=delta)
 
         if flag > 0:
-            warnings.warn("BiCGstab not converged after {0} iterations".format(flag))
+            warnings.warn(f"BiCGstab not converged after {flag} iterations")
             print(Z[:, i])
 
         if flag < 0:
-            warnings.warn("BiCGstab error {0}".format(flag))
+            warnings.warn(f"BiCGstab error {flag}")
             print(Z[:, i])
 
     return Z

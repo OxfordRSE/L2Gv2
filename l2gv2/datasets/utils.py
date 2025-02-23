@@ -3,12 +3,12 @@ Utilities for converting between different graph formats.
 """
 import numpy as np
 import polars as pl
-from torch_geometric.data import Data
 from typing import Tuple, Optional, Dict, Callable, List
 import torch
 from torch import Tensor
+from torch_geometric.data import Data
 from torch_geometric.utils import coalesce
-from raphtory import Graph
+from raphtory import Graph  # pylint: disable=no-name-in-module
 
 def polars_to_tg(edge_df: pl.DataFrame, node_df: pl.DataFrame=None, pre_transform: Optional[Callable] = None) ->  Tuple[Data, Optional[Dict[str, Tensor]]]:
     """
@@ -115,53 +115,29 @@ def tg_to_polars(data_list: List[Data]) -> Tuple[pl.DataFrame, pl.DataFrame]:
         edge_dfs.append(pl.DataFrame(edge_dict))
 
         # Handle nodes
-        if hasattr(data, "x"):
-            if data.x is not None:
-                node_features = data.x.numpy()
-                node_dict = {
-                    "id": range(data.num_nodes)
-                }
-        if hasattr(data, "timestamp"):
-            node_dict["timestamp"] = data.timestamp
-        else:
-            node_dict["timestamp"] = np.int64(0)
-        for i in range(node_features.shape[1]):
-            node_dict[f"node_feature_{i}"] = node_features[:, i]
+        node_dict = None
+        if hasattr(data, "x") and data.x is not None:
+            node_features = data.x.numpy()
+            node_dict = {
+                "id": range(data.num_nodes)
+            }
+            if hasattr(data, "timestamp"):
+                node_dict["timestamp"] = data.timestamp
+            else:
+                node_dict["timestamp"] = np.int64(0)  # type: ignore
+            for i in range(node_features.shape[1]):
+                node_dict[f"node_feature_{i}"] = node_features[:, i]
 
         # Handle labels
-        if hasattr(data, "y"):
-            if data.y is not None:
-                node_dict["y"] = data.y.numpy()
+            if hasattr(data, "y"):
+                if data.y is not None:
+                    node_dict["y"] = data.y.numpy()
         
-        node_dfs.append(pl.DataFrame(node_dict))
+        if node_dict:
+            node_dfs.append(pl.DataFrame(node_dict))
 
     edge_df = pl.concat(edge_dfs)
     node_df = pl.concat(node_dfs)
 
     return edge_df, node_df
 
-def tg_to_raphtory(data_list: List[Data]) -> Graph:
-    """
-    Convert a list of PyTorch Geometric Data objects to a Raphtory graph.
-    """
-    graph = Graph()
-    for idx, data in enumerate(dataset):
-        if hasattr(data, "timestamp"):
-            timestamp = data.timestamp
-        else:
-            timestamp = idx
-        for node_idx in range(data.num_nodes):
-            node_id = str(node_idx)
-            properties = {}
-            if data.x is not None:
-                properties = {f"feature_{i}": float(value) for i, value in enumerate(data.x[node_idx])}
-            graph.add_node(timestamp=timestamp, id=node_id, properties=properties)
-        
-        edge_index = data.edge_index.t().tolist()
-        for idx, (src, dst) in enumerate(edge_index):
-            properties = {}
-            if data.edge_attr is not None:
-                properties = {f"feature_{i}": float(value) for i, value in enumerate(data.edge_attr[idx])}
-            graph.add_edge(timestamp=timestamp, src=str(src), dst=str(dst), properties=properties)
-    
-    return graph

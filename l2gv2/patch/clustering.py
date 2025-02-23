@@ -7,26 +7,29 @@ TODO:
 - Make the algorithms work with Graph objects
 """
 
-from raphtory import Graph
+from raphtory import Graph  # pylint: disable=no-name-in-module
 from math import log
 from collections.abc import Iterable
-from typing import Sequence
-from l2gv2.utils import progress
-from l2gv2.graphs import TGraph
+from typing import Sequence, Callable
+
 
 import community
 import torch
 import pymetis
 import numpy as np
 import numba
+from tqdm import tqdm
+from torch_geometric.data import Data
 
+from l2gv2.graphs import TGraph
+from l2gv2.utils import tqdm_close
 
 def hierarchical_clustering(
     data: Data,
     m: int,
     k: int,
     clustering_function: Callable[[Data, int], torch.Tensor]
-) -> List[torch.Tensor]:
+) -> list[torch.Tensor]:
     """
     Perform hierarchical clustering on a PyTorch Geometric graph.
 
@@ -45,7 +48,7 @@ def hierarchical_clustering(
         cluster_tensor = clustering_function(data, m)
         
         # Check the size of each cluster
-        unique_clusters, counts = torch.unique(cluster_tensor, return_counts=True)
+        unique_clusters, _ = torch.unique(cluster_tensor, return_counts=True)
         
         # Store the final cluster assignments
         final_clusters = []
@@ -170,7 +173,7 @@ def fennel_clustering(graph: Graph, num_clusters, load_limit=1.1, alpha=None, ga
 
 
 @numba.njit
-def _fennel_clustering(edge_index: np.ndarray, adj_index: np.ndarray, num_nodes: int, num_clusters: int, load_limit: float = 1.1, alpha: float = None, gamma: float = 1.5, num_iters: int = 1,
+def _fennel_clustering(edge_index: np.ndarray, adj_index: np.ndarray, num_nodes: int, num_clusters: int, load_limit: float = 1.1, alpha: float | None = None, gamma: float = 1.5, num_iters: int = 1,
                        clusters=np.empty(0, dtype=np.int64)):
     r"""
     FENNEL single-pass graph clustering algorithm
@@ -196,9 +199,6 @@ def _fennel_clustering(edge_index: np.ndarray, adj_index: np.ndarray, num_nodes:
                      WSDM'14 (2014) doi: `10.1145/2556195.2556213 <https://doi.org/10.1145/2556195.2556213>`_.
 
     """
-    if num_iters is None:
-        num_iters = 1
-
     num_edges = edge_index.shape[1]
 
     if alpha is None:
@@ -216,10 +216,11 @@ def _fennel_clustering(edge_index: np.ndarray, adj_index: np.ndarray, num_nodes:
     # Maximum number of nodes per cluster
     load_limit *= num_nodes/num_clusters
 
+    assert alpha
     deltas = - alpha * gamma * (partition_sizes ** (gamma - 1))
 
     with numba.objmode:
-        progress.reset(num_nodes)
+        progress = tqdm(total=num_nodes)
 
     for it in range(num_iters):
         not_converged = 0
@@ -262,7 +263,7 @@ def _fennel_clustering(edge_index: np.ndarray, adj_index: np.ndarray, num_nodes:
             print(f'converged after {str(it)} iterations.')
             break
     with numba.objmode:
-        progress.close()
+        tqdm_close(progress)
 
     return clusters
 
@@ -310,7 +311,7 @@ def metis_clustering(graph: TGraph, num_clusters):
                     George Karypis and Vipin Kumar.
                     SIAM Journal on Scientific Computing, Vol. 20, No. 1, pp. 359—392, 1999.
     """
-    n_cuts, memberships = pymetis.part_graph(num_clusters, adjncy=graph.edge_index[1], xadj=graph.adj_index,
+    _, memberships = pymetis.part_graph(num_clusters, adjncy=graph.edge_index[1], xadj=graph.adj_index,
                                              eweights=graph.edge_attr)
     return torch.as_tensor(memberships, dtype=torch.long, device=graph.device)
 
@@ -404,6 +405,7 @@ def hierarchical_aglomerative_clustering(graph: Graph, method=spread_clustering,
 
 
 class Partition(Sequence):
+    "Defines a partition of a graph"
     def __init__(self, partition_tensor):
         partition_tensor = torch.as_tensor(partition_tensor)
         counts = torch.bincount(partition_tensor)
