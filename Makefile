@@ -2,7 +2,7 @@ test: .venv
 	. .venv/bin/activate && python -m pytest -n auto
 	
 lint: .venv
-	. .venv/bin/activate && pylint {l2gv2,tests}/**/*.py
+	. .venv/bin/activate && pylint l2gv2/**/*.py && pylint tests/**/*.py
 
 .venv:
 	python3.10 -m venv .venv && . .venv/bin/activate && pip install '.[dev]'
