@@ -1,17 +1,28 @@
 name: Pylint
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - 'l2gv2/**/*.py'
+    - 'tests/**/*.py'
+    - '.github/workflows/pylint.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+    - 'l2gv2/**/*.py'
+    - 'tests/**/*.py'
+    - '.github/workflows/pylint.yml'
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.10
       uses: actions/setup-python@v5
       with:
         python-version: "3.10"
-    - name: Install dependencies
-      run: make install-deps
-    - name: Run pylint
+    - name: Run linting
       run: make lint
