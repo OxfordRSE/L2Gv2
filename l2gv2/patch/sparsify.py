@@ -192,7 +192,7 @@ def _compute_Z(graph: TGraph, epsilon=10.0 ** -2.0):
         else:
             y = Y.getrow(i).transpose().toarray()
 
-        Z[:, i], flag = sc.sparse.linalg.lgmres(L, y, M=P, tol=delta)
+        Z[:, i], flag = sc.sparse.linalg.lgmres(L, y, M=P, rtol=delta)
 
         if flag > 0:
             warnings.warn("BiCGstab not converged after {0} iterations".format(flag))
