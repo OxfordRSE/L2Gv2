@@ -102,66 +102,6 @@ def hierarchical_clustering(
     return recursive_clustering(data, m, k)
 
 
-def distributed_clustering(graph: Graph, beta, rounds=None, patience=3, min_samples=2, weight=None) -> torch.Tensor:
-    r"""
-    Distributed clustering algorithm
-
-    Implements algorithm of [#dist]_ with gpu support
-
-    Args:
-        graph: input graph
-        beta: :math:`\beta` value of the algorithm (controls the number of seeds)
-        rounds: number of iteration rounds (default: ``3*int(log(graph.num_nodes))``)
-        patience: number of rounds without label changes before early stopping (default: ``3``)
-        min_samples: minimum number of seed nodes (default: ``2``)
-
-    .. Rubric:: Reference
-
-    .. [#dist] H. Sun and L. Zanetti. “Distributed Graph Clustering and Sparsification”.
-               ACM Transactions on Parallel Computing 6.3 (2019), pp. 1–23.
-               doi: `10.1145/3364208 <https://doi.org/10.1145/3364208>`_.
-
-    """
-    if rounds is None:
-        rounds = 3*int(log(graph.count_nodes()))
-    if weight is None:
-        weight = 1 
-    strength = compute_strength(graph)
-    num_nodes = graph.count_nodes()
-
-    # sample seed nodes
-    index = torch.rand((num_nodes,)) < 1/beta * log(1 / beta) * graph.strength / graph.strength.sum()
-    while index.sum() < min_samples:
-        index = torch.rand((graph.num_nodes,)) < 1/beta * log(1 / beta) * graph.strength / graph.strength.sum()
-    seeds = torch.nonzero(index).flatten()
-    n_samples = seeds.numel()
-
-    states = torch.zeros((graph.num_nodes, n_samples), dtype=torch.double, device=graph.device)
-    states[index, torch.arange(n_samples, device=graph.device)] = 1/torch.sqrt(strength[index]).to(dtype=torch.double)
-    clusters = torch.argmax(states, dim=1)
-    weights = graph.weights / torch.sqrt(strength[graph.edge_index[0]]*strength[graph.edge_index[1]])
-    weights = weights.to(dtype=torch.double)
-    r = 0
-    num_same = 0
-    while r < rounds and num_same < patience:  # keep iterating until clustering does not change for 'patience' rounds
-        r += 1
-        states *= 0.5
-        states.index_add_(0, graph.edge_index[0], 0.5*states[graph.edge_index[1]]*weights.view(-1, 1))
-        # states = ts.scatter(out=states, dim=0, index=graph.edge_index[0],
-        #                     src=0.5*states[graph.edge_index[1]]*weights.view(-1, 1))
-        old_clusters = clusters
-        clusters = torch.argmax(states, dim=1)
-        if torch.equal(old_clusters, clusters):
-            num_same += 1
-        else:
-            num_same = 0
-    clusters[states[range(graph.num_nodes), clusters] == 0] = -1
-    uc, clusters = torch.unique(clusters, return_inverse=True)
-    if uc[0] == -1:
-        clusters -= 1
-    return clusters
-
-
 def fennel_clustering(graph: Graph, num_clusters, load_limit=1.1, alpha=None, gamma=1.5, num_iters=1, clusters=None):
 
     if clusters is None:
