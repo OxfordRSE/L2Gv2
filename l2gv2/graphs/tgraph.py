@@ -35,7 +35,6 @@ class TGraph(Graph):
     def _convert_input(inp):
         if inp is None:
             return None
-
         return torch.as_tensor(inp)
 
     def __init__(self, *args, ensure_sorted=False, **kwargs):

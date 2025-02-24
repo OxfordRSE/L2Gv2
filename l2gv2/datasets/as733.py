@@ -4,20 +4,17 @@ AS-733 dataset from SNAP.
 
 import tarfile
 import requests
-from typing import Optional, Callable
 import logging
-import torch
 import os
 from datetime import datetime
 import polars as pl
 from pathlib import Path
-from torch_geometric.data import InMemoryDataset, Data
-from torch_geometric.utils import coalesce
+from typing import Optional, Callable
 from .registry import register_dataset
-
+from .base import BaseDataset
 
 @register_dataset("as-733")
-class AS733Dataset(InMemoryDataset):
+class AS733Dataset(BaseDataset):
     """
     A PyTorch Dataset for the AS-733 dataset from SNAP.
     """
@@ -38,15 +35,9 @@ class AS733Dataset(InMemoryDataset):
         if root is None:
             root = str(Path(__file__).parent.parent.parent / "data" / "as733")
         super().__init__(root, transform, pre_transform)
-        self.data, self.slices = torch.load(self.processed_paths[0], weights_only=False)
-    
-    @property
-    def raw_dir(self) -> str:
-        return str(Path(self.root) / 'raw')
-
-    @property
-    def processed_dir(self) -> str:
-        return str(Path(self.root) / 'processed')
+        self.edge_df, self.node_df = self._load_polars()
+        self.data, self.slices = self._to_torch_geometric()
+        self.raphtory_graph = self._to_raphtory()
     
     @property
     def raw_file_names(self) -> list[str]:
@@ -64,7 +55,7 @@ class AS733Dataset(InMemoryDataset):
         """
         The processed file names for the AS-733 dataset.
         """
-        return ['data.pt']
+        return ['edge_data.parquet', 'node_data.parquet']
     
     def download(self):
         """
@@ -104,33 +95,44 @@ class AS733Dataset(InMemoryDataset):
         if not raw_dir.exists():
             self.logger.error(f"Extracted directory {raw_dir} not found.")
             raise FileNotFoundError(f"Extracted directory {raw_dir} not found in raw_dir.")
-        
-        self.logger.info("Processing raw text files into Polars DataFrames...")
+
+        # Process edges and nodes
+        if not Path(processed_dir / "edge_data.parquet").exists():
+            self.logger.info("Processing raw text files into Polars DataFrames...")
    
-        data_list = []
-        for file in sorted(raw_dir.iterdir(), key=lambda f: f.name):
-            date_str = file.stem.replace("as", "")
-            date_parsed = datetime.strptime(date_str, "%Y%m%d")
-            df = pl.read_csv(
-                file,
-                separator="\t",
-                comment_prefix="#",
-                has_header=False
-            )
-            edge_index = torch.from_numpy(df.to_numpy()).t()
-            num_nodes = edge_index.max().item() + 1
-            edge_index = coalesce(edge_index, num_nodes=num_nodes)
-            data_list.append(Data(edge_index=edge_index, 
-                                  num_nodes=num_nodes,
-                                  timestamp=date_parsed))
+            edge_dfs = []
+            node_dfs = []
+            for file in sorted(raw_dir.iterdir(), key=lambda f: f.name):
+                date_str = file.stem.replace("as", "")
+                date_parsed = datetime.strptime(date_str, "%Y%m%d")
+                edge_df = pl.read_csv(
+                    file,
+                    separator="\t",
+                    comment_prefix="#",
+                    has_header=False
+                )
+                edge_df.columns = ["src", "dst"]
+                edge_df = edge_df.with_columns(
+                        pl.lit(date_parsed).alias("timestamp")
+                    ).select(
+                        ["timestamp", "src", "dst"]
+                    ).with_columns([
+                        (pl.col("src") - 1).alias("src"),
+                        (pl.col("dst") - 1).alias("dst")
+                        ])
+                nodes = edge_df.select(["src"]).unique()
+                nodes_df = pl.DataFrame({"id": nodes["src"]}).with_columns(
+                    pl.lit(date_parsed).alias("timestamp")
+                ).select(["timestamp", "id"])
+                edge_dfs.append(edge_df)
+                node_dfs.append(nodes_df)
 
-        if self.pre_transform is not None:
-            data_list = [self.pre_transform(data) for data in data_list]
+            edge_df = pl.concat(edge_dfs, rechunk=True).sort(["timestamp", "src", "dst"])
+            node_df = pl.concat(node_dfs, rechunk=True).sort(["timestamp", "id"])
+            edge_df.write_parquet(processed_dir / "edge_data.parquet")
+            node_df.write_parquet(processed_dir / "node_data.parquet")
+            self.logger.info(f"Processing edges complete. Parquet files saved to {processed_dir}.")
 
-        torch.save(self.collate(data_list), processed_dir / "data.pt")
-
-        self.logger.info(f"Processing complete. Parquet files saved to {processed_dir}.")
-    
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}()"
     
