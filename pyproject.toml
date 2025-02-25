@@ -67,6 +67,9 @@ docs = [
 "Homepage" = "https://github.com/OxfordRSE/L2Gv2"
 "Bug Tracker" = "https://github.com/OxfordRSE/L2Gv2/issues"
 
+[tool.ruff]
+exclude = ["examples"]
+
 # pylint
 # ######
 [tool.pylint.'MASTER']
