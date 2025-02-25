@@ -5,17 +5,20 @@ from .registry import register_dataset
 from .base import BaseDataset
 from .utils import tg_to_polars
 
+
 @register_dataset("Cora")
 class CoraDataset(BaseDataset):
     """
     Cora dataset from the Planetoid dataset collection.
     """
-    def __init__(self, root: str | None=None, **kwargs):
+
+    def __init__(self, root: str | None = None, **kwargs):
         """
         Initialize the Cora dataset.
         """
-        logging.basicConfig(level=logging.INFO, 
-                            format="%(asctime)s - %(levelname)s - %(message)s")
+        logging.basicConfig(
+            level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+        )
         self.logger = logging.getLogger(self.__class__.__name__)
         if root is None:
             root = str(Path(__file__).parent.parent.parent / "data" / "cora")

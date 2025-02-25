@@ -1,7 +1,7 @@
 """
 Utilities for loading graph datasets.
 
-The module provides a DataLoader class that can load graph datasets torch-geometric.data.Dataset 
+The module provides a DataLoader class that can load graph datasets torch-geometric.data.Dataset
 and return a polars DataFrame of the edges and nodes. It contains methods to convert the graph
 into a raphtory graph and a networkx graph.
 """
@@ -16,14 +16,21 @@ from typing import Optional, Callable, Tuple, Dict
 
 from .utils import polars_to_tg, polars_to_raphtory
 from .registry import DATASET_REGISTRY
+
 datasets = list(DATASET_REGISTRY.keys())
+
 
 class BaseDataset(InMemoryDataset):
     """
     Wrapper for a PyTorch Geometric Dataset.
     """
-    
-    def __init__(self, root: str | None=None, transform: Optional[Callable]=None, pre_transform: Optional[Callable]=None):
+
+    def __init__(
+        self,
+        root: str | None = None,
+        transform: Optional[Callable] = None,
+        pre_transform: Optional[Callable] = None,
+    ):
         """
         Initialize a new BaseDataset instance.
 
@@ -32,19 +39,20 @@ class BaseDataset(InMemoryDataset):
             transform (callable, optional): A function to apply transformations to the data.
             pre_transform (callable, optional): A function to apply preprocessing transformations before the main transform.
         """
-        logging.basicConfig(level=logging.INFO, 
-                            format="%(asctime)s - %(levelname)s - %(message)s")
+        logging.basicConfig(
+            level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+        )
         self.logger = logging.getLogger(self.__class__.__name__)
         super().__init__(root, transform, pre_transform)
-    
+
     @property
     def raw_dir(self) -> str:
-        return str(Path(self.root) / 'raw')
+        return str(Path(self.root) / "raw")
 
     @property
     def processed_dir(self) -> str:
-        return str(Path(self.root) / 'processed')
-    
+        return str(Path(self.root) / "processed")
+
     def download(self):
         raise NotImplementedError
 
@@ -56,7 +64,7 @@ class BaseDataset(InMemoryDataset):
         """
         Load the processed edge and node Polars DataFrames.
         """
-        if hasattr(self, 'edge_df') and hasattr(self, 'node_df'):
+        if hasattr(self, "edge_df") and hasattr(self, "node_df"):
             print("Loading edge and node data from memory")
             return self.edge_df, self.node_df
         processed_dir = Path(self.processed_dir)
@@ -68,7 +76,7 @@ class BaseDataset(InMemoryDataset):
         else:
             node_df = None
         return edge_df, node_df
-    
+
     def _to_raphtory(self) -> Graph:
         """
         Convert the processed edge and node Polars DataFrames to a Raphtory graph.
@@ -76,8 +84,8 @@ class BaseDataset(InMemoryDataset):
         edge_df, node_df = self._load_polars()
         graph = polars_to_raphtory(edge_df, node_df)
         return graph
-        
-    def _to_torch_geometric(self) ->  Tuple[Data, Optional[Dict[str, Tensor]]]:
+
+    def _to_torch_geometric(self) -> Tuple[Data, Optional[Dict[str, Tensor]]]:
         """
         Convert the processed edge and node Polars DataFrames to a PyTorch Geometric dataset.
         """

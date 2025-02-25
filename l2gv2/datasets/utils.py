@@ -1,6 +1,7 @@
 """
 Utilities for converting between different graph formats.
 """
+
 import numpy as np
 import polars as pl
 from typing import Tuple, Optional, Dict, Callable, List
@@ -10,20 +11,30 @@ from torch_geometric.data import Data
 from torch_geometric.utils import coalesce
 from raphtory import Graph  # pylint: disable=no-name-in-module
 
-def polars_to_tg(edge_df: pl.DataFrame, node_df: pl.DataFrame=None, pre_transform: Optional[Callable] = None) ->  Tuple[Data, Optional[Dict[str, Tensor]]]:
+
+def polars_to_tg(
+    edge_df: pl.DataFrame,
+    node_df: pl.DataFrame = None,
+    pre_transform: Optional[Callable] = None,
+) -> Tuple[Data, Optional[Dict[str, Tensor]]]:
     """
     Convert a pair of Polars DataFrames (edge and node) to a list of PyTorch Geometric Data objects.
     """
     # Process nodes first to get the number of nodes and node features
-    num_nodes = max(int(edge_df["src"].max() + 1),
-                    int(edge_df["dst"].max() + 1))
+    num_nodes = max(int(edge_df["src"].max() + 1), int(edge_df["dst"].max() + 1))
     if node_df is not None:
-        feature_cols = [col for col in node_df.columns if col not in ["timestamp", "id"]]
+        feature_cols = [
+            col for col in node_df.columns if col not in ["timestamp", "id"]
+        ]
         if feature_cols:
             # Group by node id, take first occurrence of features, and sort by id
-            node_features = node_df.group_by("id").agg([
-                pl.col(col).first() for col in feature_cols
-            ]).sort("id").select(feature_cols).to_numpy
+            node_features = (
+                node_df.group_by("id")
+                .agg([pl.col(col).first() for col in feature_cols])
+                .sort("id")
+                .select(feature_cols)
+                .to_numpy
+            )
             x = torch.from_numpy(node_features)
         else:
             x = None
@@ -34,13 +45,19 @@ def polars_to_tg(edge_df: pl.DataFrame, node_df: pl.DataFrame=None, pre_transfor
     unique_timestamps = sorted(edge_df["timestamp"].unique().to_list())
     for ts in unique_timestamps:
         # Process edges
-        edges_filtered  = edge_df.filter(pl.col("timestamp") == ts).select(["src", "dst"])
+        edges_filtered = edge_df.filter(pl.col("timestamp") == ts).select(
+            ["src", "dst"]
+        )
         edge_array = edges_filtered.to_numpy()
         if edge_array.size == 0:
             continue
         edge_index = torch.from_numpy(edge_array).t()
         # Process edge features
-        edge_feature_cols = [col for col in edges_filtered.columns if col not in ["timestamp", "src", "dst"]]
+        edge_feature_cols = [
+            col
+            for col in edges_filtered.columns
+            if col not in ["timestamp", "src", "dst"]
+        ]
         if edge_feature_cols:
             edge_features = edges_filtered.select(edge_feature_cols).to_numpy()
             edge_attr = torch.from_numpy(edge_features)
@@ -50,9 +67,7 @@ def polars_to_tg(edge_df: pl.DataFrame, node_df: pl.DataFrame=None, pre_transfor
             edge_index = coalesce(edge_index, edge_attr, num_nodes=num_nodes)
         else:
             edge_index = coalesce(edge_index, num_nodes=num_nodes)
-        data = Data(edge_index=edge_index, 
-                    num_nodes=num_nodes, 
-                    timestamp=ts)
+        data = Data(edge_index=edge_index, num_nodes=num_nodes, timestamp=ts)
         if x is not None:
             data.x = x
         if edge_attr is not None:
@@ -62,7 +77,8 @@ def polars_to_tg(edge_df: pl.DataFrame, node_df: pl.DataFrame=None, pre_transfor
         data_list = [pre_transform(data) for data in data_list]
     return data_list
 
-def polars_to_raphtory(edge_df: pl.DataFrame, node_df: pl.DataFrame=None) -> Graph:
+
+def polars_to_raphtory(edge_df: pl.DataFrame, node_df: pl.DataFrame = None) -> Graph:
     """
     Convert a Polars DataFrame to a Raphtory graph.
     """
@@ -77,18 +93,23 @@ def polars_to_raphtory(edge_df: pl.DataFrame, node_df: pl.DataFrame=None) -> Gra
     graph.load_edges_from_pandas(
         edge_df_pd,
         time="timestamp",
-        src="src", 
+        src="src",
         dst="dst",
-        properties=[col for col in edge_df.columns if col not in ["timestamp", "src", "dst"]]
+        properties=[
+            col for col in edge_df.columns if col not in ["timestamp", "src", "dst"]
+        ],
     )
     if node_df is not None:
         graph.load_nodes_from_pandas(
             df=node_df_pd,
             time="timestamp",
             id="id",
-            constant_properties=[c for c in node_df.columns if c not in ["timestamp", "id"]]
+            constant_properties=[
+                c for c in node_df.columns if c not in ["timestamp", "id"]
+            ],
         )
     return graph
+
 
 def tg_to_polars(data_list: List[Data]) -> Tuple[pl.DataFrame, pl.DataFrame]:
     """
@@ -99,10 +120,7 @@ def tg_to_polars(data_list: List[Data]) -> Tuple[pl.DataFrame, pl.DataFrame]:
     for data in data_list:
         # Handle edges
         edge_index = data.edge_index.t().numpy()
-        edge_dict = {
-            "src": edge_index[:, 0],
-            "dst": edge_index[:, 1]
-        }
+        edge_dict = {"src": edge_index[:, 0], "dst": edge_index[:, 1]}
         if hasattr(data, "timestamp"):
             edge_dict["timestamp"] = data.timestamp
         else:
@@ -118,9 +136,7 @@ def tg_to_polars(data_list: List[Data]) -> Tuple[pl.DataFrame, pl.DataFrame]:
         node_dict = None
         if hasattr(data, "x") and data.x is not None:
             node_features = data.x.numpy()
-            node_dict = {
-                "id": range(data.num_nodes)
-            }
+            node_dict = {"id": range(data.num_nodes)}
             if hasattr(data, "timestamp"):
                 node_dict["timestamp"] = data.timestamp
             else:
@@ -128,11 +144,11 @@ def tg_to_polars(data_list: List[Data]) -> Tuple[pl.DataFrame, pl.DataFrame]:
             for i in range(node_features.shape[1]):
                 node_dict[f"node_feature_{i}"] = node_features[:, i]
 
-        # Handle labels
+            # Handle labels
             if hasattr(data, "y"):
                 if data.y is not None:
                     node_dict["y"] = data.y.numpy()
-        
+
         if node_dict:
             node_dfs.append(pl.DataFrame(node_dict))
 
@@ -140,4 +156,3 @@ def tg_to_polars(data_list: List[Data]) -> Tuple[pl.DataFrame, pl.DataFrame]:
     node_df = pl.concat(node_dfs)
 
     return edge_df, node_df
-
