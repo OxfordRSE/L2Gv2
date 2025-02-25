@@ -5,14 +5,14 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/ruff.yml'
-      - 'l2gv2/**.py'
-      - 'tests/**.py'
+      - 'l2gv2/**/*.py'
+      - 'tests/**/*.py'
       - 'pyproject.toml'
   pull_request:
     paths:
       - '.github/workflows/ruff.yml'
-      - 'l2gv2/**.py'
-      - 'tests/**.py'
+      - 'l2gv2/**/*.py'
+      - 'tests/**/*.py'
       - 'pyproject.toml'
 jobs:
   ruff:
