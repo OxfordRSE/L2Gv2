@@ -62,6 +62,11 @@ dependencies. If you are only using this library as a dependency, use:
 pip install git+https://github.com/OxfordRSE/L2Gv2
 ```
 
+For development, we highly recommend **installing the pre-commit hook** that
+helps lint and autoformat on every commit. To install pre-commit, run
+`pre-commit install` once in the repository; this will ensure that checks run
+before every commit.
+
 ## License
 
 This project is licensed under the [MIT](LICENSE) license.
