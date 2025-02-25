@@ -23,11 +23,9 @@ from torch_geometric.data import Data
 from l2gv2.graphs import TGraph
 from l2gv2.utils import tqdm_close
 
+
 def hierarchical_clustering(
-    data: Data,
-    m: int,
-    k: int,
-    clustering_function: Callable[[Data, int], torch.Tensor]
+    data: Data, m: int, k: int, clustering_function: Callable[[Data, int], torch.Tensor]
 ) -> list[torch.Tensor]:
     """
     Perform hierarchical clustering on a PyTorch Geometric graph.
@@ -42,20 +40,21 @@ def hierarchical_clustering(
     Returns:
         List[torch.Tensor]: A list of cluster assignment tensors for all levels of the hierarchy.
     """
+
     def recursive_clustering(data, m, k):
         # Apply the clustering function to get initial clusters
         cluster_tensor = clustering_function(data, m)
-        
+
         # Check the size of each cluster
         unique_clusters, _ = torch.unique(cluster_tensor, return_counts=True)
-        
+
         # Store the final cluster assignments
         final_clusters = []
-        
+
         for cluster_id in unique_clusters:
             # Get nodes in this cluster
             cluster_nodes = (cluster_tensor == cluster_id).nonzero(as_tuple=True)[0]
-            
+
             if len(cluster_nodes) <= k:
                 # If the cluster size is within the limit, keep it as-is
                 final_clusters.append((cluster_id, cluster_nodes))
@@ -63,16 +62,17 @@ def hierarchical_clustering(
                 # If the cluster size exceeds k, extract the subgraph and apply recursion
                 subgraph = extract_subgraph(data, cluster_nodes)
                 sub_clusters = recursive_clustering(subgraph, m, k)
-                
+
                 # Adjust sub-cluster IDs to avoid clashes with existing IDs
                 max_cluster_id = max(unique_clusters).item()
                 sub_clusters_adjusted = [
-                    (max_cluster_id + 1 + i, nodes) for i, (_, nodes) in enumerate(sub_clusters)
+                    (max_cluster_id + 1 + i, nodes)
+                    for i, (_, nodes) in enumerate(sub_clusters)
                 ]
                 final_clusters.extend(sub_clusters_adjusted)
-        
+
         return final_clusters
-    
+
     def extract_subgraph(data, node_indices):
         """
         Extract a subgraph containing only the specified nodes.
@@ -86,34 +86,75 @@ def hierarchical_clustering(
         """
         mask = torch.zeros(data.num_nodes, dtype=torch.bool)
         mask[node_indices] = True
-        
+
         edge_mask = mask[data.edge_index[0]] & mask[data.edge_index[1]]
         edge_index = data.edge_index[:, edge_mask]
-        
+
         # Reindex nodes in the subgraph
-        node_mapping = {old_idx.item(): new_idx for new_idx, old_idx in enumerate(node_indices)}
-        edge_index = torch.tensor([[node_mapping[src.item()], node_mapping[dst.item()]]
-                                    for src, dst in edge_index.t()], dtype=torch.long).t()
-        
+        node_mapping = {
+            old_idx.item(): new_idx for new_idx, old_idx in enumerate(node_indices)
+        }
+        edge_index = torch.tensor(
+            [
+                [node_mapping[src.item()], node_mapping[dst.item()]]
+                for src, dst in edge_index.t()
+            ],
+            dtype=torch.long,
+        ).t()
+
         return Data(edge_index=edge_index, num_nodes=len(node_indices))
-    
+
     # Start recursive clustering from the root level
     return recursive_clustering(data, m, k)
 
 
-def fennel_clustering(graph: Graph, num_clusters, load_limit=1.1, alpha=None, gamma=1.5, num_iters=1, clusters=None):
-
+def fennel_clustering(
+    graph: Graph,
+    num_clusters,
+    load_limit=1.1,
+    alpha=None,
+    gamma=1.5,
+    num_iters=1,
+    clusters=None,
+):
     if clusters is None:
-        clusters = _fennel_clustering(graph.edge_index, graph.adj_index, graph.num_nodes, num_clusters, load_limit, alpha, gamma, num_iters)
+        clusters = _fennel_clustering(
+            graph.edge_index,
+            graph.adj_index,
+            graph.num_nodes,
+            num_clusters,
+            load_limit,
+            alpha,
+            gamma,
+            num_iters,
+        )
     else:
-        clusters = _fennel_clustering(graph.edge_index, graph.adj_index, graph.num_nodes, num_clusters, load_limit, alpha, gamma, num_iters,
-                                      clusters)
+        clusters = _fennel_clustering(
+            graph.edge_index,
+            graph.adj_index,
+            graph.num_nodes,
+            num_clusters,
+            load_limit,
+            alpha,
+            gamma,
+            num_iters,
+            clusters,
+        )
     return torch.as_tensor(clusters)
 
 
 @numba.njit
-def _fennel_clustering(edge_index: np.ndarray, adj_index: np.ndarray, num_nodes: int, num_clusters: int, load_limit: float = 1.1, alpha: float | None = None, gamma: float = 1.5, num_iters: int = 1,
-                       clusters=np.empty(0, dtype=np.int64)):
+def _fennel_clustering(
+    edge_index: np.ndarray,
+    adj_index: np.ndarray,
+    num_nodes: int,
+    num_clusters: int,
+    load_limit: float = 1.1,
+    alpha: float | None = None,
+    gamma: float = 1.5,
+    num_iters: int = 1,
+    clusters=np.empty(0, dtype=np.int64),
+):
     r"""
     FENNEL single-pass graph clustering algorithm
 
@@ -141,7 +182,7 @@ def _fennel_clustering(edge_index: np.ndarray, adj_index: np.ndarray, num_nodes:
     num_edges = edge_index.shape[1]
 
     if alpha is None:
-        alpha = num_edges * (num_clusters ** (gamma-1)) / (num_nodes ** gamma)
+        alpha = num_edges * (num_clusters ** (gamma - 1)) / (num_nodes**gamma)
 
     partition_sizes = np.zeros(num_clusters, dtype=np.int64)
     if clusters.size == 0:
@@ -153,10 +194,10 @@ def _fennel_clustering(edge_index: np.ndarray, adj_index: np.ndarray, num_nodes:
             partition_sizes[index] += 1
 
     # Maximum number of nodes per cluster
-    load_limit *= num_nodes/num_clusters
+    load_limit *= num_nodes / num_clusters
 
     assert alpha
-    deltas = - alpha * gamma * (partition_sizes ** (gamma - 1))
+    deltas = -alpha * gamma * (partition_sizes ** (gamma - 1))
 
     with numba.objmode:
         progress = tqdm(total=num_nodes)
@@ -166,8 +207,10 @@ def _fennel_clustering(edge_index: np.ndarray, adj_index: np.ndarray, num_nodes:
 
         progress_it = 0
         for i in range(num_nodes):
-            cluster_indices = np.empty((adj_index[i+1]-adj_index[i],), dtype=np.int64)
-            for ni, index in enumerate(range(adj_index[i], adj_index[i+1])):
+            cluster_indices = np.empty(
+                (adj_index[i + 1] - adj_index[i],), dtype=np.int64
+            )
+            for ni, index in enumerate(range(adj_index[i], adj_index[i + 1])):
                 cluster_indices[ni] = clusters[edge_index[1, index]]
             old_cluster = clusters[i]
             if old_cluster >= 0:
@@ -184,9 +227,9 @@ def _fennel_clustering(edge_index: np.ndarray, adj_index: np.ndarray, num_nodes:
             clusters[i] = ind
             partition_sizes[ind] += 1
             if partition_sizes[ind] == load_limit:
-                deltas[ind] = - np.inf
+                deltas[ind] = -np.inf
             else:
-                deltas[ind] = - alpha * gamma * (partition_sizes[ind] ** (gamma - 1))
+                deltas[ind] = -alpha * gamma * (partition_sizes[ind] ** (gamma - 1))
             not_converged += ind != old_cluster
 
             if i % 10000 == 0 and i > 0:
@@ -196,10 +239,10 @@ def _fennel_clustering(edge_index: np.ndarray, adj_index: np.ndarray, num_nodes:
         with numba.objmode:
             progress.update(num_nodes - progress_it)
 
-        print(f'iteration: {str(it)}, not converged: {str(not_converged)}')
+        print(f"iteration: {str(it)}, not converged: {str(not_converged)}")
 
         if not_converged == 0:
-            print(f'converged after {str(it)} iterations.')
+            print(f"converged after {str(it)} iterations.")
             break
     with numba.objmode:
         tqdm_close(progress)
@@ -228,7 +271,9 @@ def louvain_clustering(graph: Graph, *args, **kwargs):
                 DOI: `10.1088/1742-5468/2008/10/P10008 <https://doi.org/10.1088/1742-5468/2008/10/P10008>`_
 
     """
-    clusters = community.best_partition(graph.to_networkx().to_undirected(), *args, **kwargs)
+    clusters = community.best_partition(
+        graph.to_networkx().to_undirected(), *args, **kwargs
+    )
     return torch.tensor([clusters[i] for i in range(graph.num_nodes)], dtype=torch.long)
 
 
@@ -250,8 +295,12 @@ def metis_clustering(graph: TGraph, num_clusters):
                     George Karypis and Vipin Kumar.
                     SIAM Journal on Scientific Computing, Vol. 20, No. 1, pp. 359—392, 1999.
     """
-    _, memberships = pymetis.part_graph(num_clusters, adjncy=graph.edge_index[1], xadj=graph.adj_index,
-                                             eweights=graph.edge_attr)
+    _, memberships = pymetis.part_graph(
+        num_clusters,
+        adjncy=graph.edge_index[1],
+        xadj=graph.adj_index,
+        eweights=graph.edge_attr,
+    )
     return torch.as_tensor(memberships, dtype=torch.long, device=graph.device)
 
 
@@ -260,10 +309,14 @@ def spread_clustering(graph: Graph, num_clusters, max_degree_init=True):
     if max_degree_init:
         seeds = torch.topk(torch.as_tensor(graph.degree), k=num_clusters).indices
     else:
-        seeds = torch.multinomial(torch.as_tensor(graph.degree), num_clusters, replacement=False)
+        seeds = torch.multinomial(
+            torch.as_tensor(graph.degree), num_clusters, replacement=False
+        )
 
     clusters[seeds] = torch.arange(num_clusters)
-    spread_weights = torch.zeros((num_clusters, graph.num_nodes), dtype=torch.double, device=graph.device)
+    spread_weights = torch.zeros(
+        (num_clusters, graph.num_nodes), dtype=torch.double, device=graph.device
+    )
     spread_weights[:, seeds] = -1
     unassigned = clusters < 0
     for seed in seeds:
@@ -287,28 +340,46 @@ def spread_clustering(graph: Graph, num_clusters, max_degree_init=True):
                 num_unassigned -= 1
                 inds, weights = graph.adj_weighted(node)
                 keep = unassigned[inds]
-                spread_weights[c, inds[keep]] += weights[keep] / graph.strength[inds[keep]]
+                spread_weights[c, inds[keep]] += (
+                    weights[keep] / graph.strength[inds[keep]]
+                )
         if not progress:
-            print('increasing number of clusters due to disconnected components')
+            print("increasing number of clusters due to disconnected components")
             unassigned_nodes = torch.nonzero(unassigned).ravel()
             if max_degree_init:
-                seed = unassigned_nodes[torch.argmax(torch.as_tensor(graph.degree[unassigned_nodes]))]
+                seed = unassigned_nodes[
+                    torch.argmax(torch.as_tensor(graph.degree[unassigned_nodes]))
+                ]
             else:
-                seed = unassigned_nodes[torch.multinomial(torch.as_tensor(graph.degree[unassigned_nodes]), 1)]
+                seed = unassigned_nodes[
+                    torch.multinomial(
+                        torch.as_tensor(graph.degree[unassigned_nodes]), 1
+                    )
+                ]
             clusters[seed] = num_clusters
-            spread_weights = torch.cat((spread_weights, torch.zeros((1, graph.num_nodes),
-                                                                      dtype=torch.double, device=graph.device)))
+            spread_weights = torch.cat(
+                (
+                    spread_weights,
+                    torch.zeros(
+                        (1, graph.num_nodes), dtype=torch.double, device=graph.device
+                    ),
+                )
+            )
             unassigned[seed] = False
             spread_weights[:, seed] = -1
             inds, weights = graph.adj_weighted(seed)
             keep = unassigned[inds]
-            spread_weights[num_clusters, inds[keep]] += weights[keep] / graph.strength[inds[keep]]
+            spread_weights[num_clusters, inds[keep]] += (
+                weights[keep] / graph.strength[inds[keep]]
+            )
             num_clusters += 1
             num_unassigned -= 1
     return clusters
 
 
-def hierarchical_aglomerative_clustering(graph: Graph, method=spread_clustering, levels=None, branch_factors=None):
+def hierarchical_aglomerative_clustering(
+    graph: Graph, method=spread_clustering, levels=None, branch_factors=None
+):
     r"""
     Hierarchical agglomerative clustering
 
@@ -324,7 +395,7 @@ def hierarchical_aglomerative_clustering(graph: Graph, method=spread_clustering,
         list of clusters
     """
     if branch_factors is None:
-        branch_factors = [graph.num_nodes**(1/(levels+1)) for _ in range(levels)]
+        branch_factors = [graph.num_nodes ** (1 / (levels + 1)) for _ in range(levels)]
     else:
         if not isinstance(branch_factors, Iterable):
             branch_factors = [branch_factors] * (levels)
@@ -345,6 +416,7 @@ def hierarchical_aglomerative_clustering(graph: Graph, method=spread_clustering,
 
 class Partition(Sequence):
     "Defines a partition of a graph"
+
     def __init__(self, partition_tensor):
         partition_tensor = torch.as_tensor(partition_tensor)
         counts = torch.bincount(partition_tensor)
@@ -354,7 +426,7 @@ class Partition(Sequence):
         self.part_index[1:] = torch.cumsum(counts, dim=0)
 
     def __getitem__(self, item):
-        return self.nodes[self.part_index[item]:self.part_index[item+1]]
+        return self.nodes[self.part_index[item] : self.part_index[item + 1]]
 
     def __len__(self):
         return self.num_parts
