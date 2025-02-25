@@ -8,7 +8,6 @@ TODO:
 """
 
 from raphtory import Graph  # pylint: disable=no-name-in-module
-from math import log
 from collections.abc import Iterable
 from typing import Sequence, Callable
 
