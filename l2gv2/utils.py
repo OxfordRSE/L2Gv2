@@ -20,6 +20,7 @@
 """TODO: module docstring for utils.py"""
 
 from time import perf_counter
+from tempfile import TemporaryFile
 
 from tqdm import tqdm
 import torch
