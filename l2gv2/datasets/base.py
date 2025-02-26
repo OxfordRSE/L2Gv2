@@ -53,13 +53,6 @@ class BaseDataset(InMemoryDataset):
     def processed_dir(self) -> str:
         return str(Path(self.root) / "processed")
 
-    def download(self):
-        raise NotImplementedError
-
-    @property
-    def processed_file_names(self) -> str | list[str] | tuple[str, ...]:
-        raise NotImplementedError
-
     def _load_polars(self) -> Tuple[pl.DataFrame, pl.DataFrame]:
         """
         Load the processed edge and node Polars DataFrames.
