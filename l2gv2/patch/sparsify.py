@@ -11,8 +11,8 @@ import torch
 import numba
 from tqdm.auto import tqdm
 
-from local2global_embedding.network import TGraph, spanning_tree_mask, spanning_tree
-from local2global_embedding.clustering import Partition
+from l2gv2.graphs import TGraph, spanning_tree_mask, spanning_tree
+from l2gv2.patch.clustering import Partition
 
 
 rg = np.random.default_rng()

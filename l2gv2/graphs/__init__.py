@@ -21,5 +21,15 @@
 
 from .tgraph import TGraph
 from .graph import Graph
+from .npgraph import NPGraph, JitGraph
+from .utils import spanning_tree_mask, spanning_tree, induced_subgraph
 
-__all__ = ["TGraph", "Graph"]
+__all__ = [
+    "TGraph",
+    "Graph",
+    "NPGraph",
+    "JitGraph",
+    "spanning_tree_mask",
+    "spanning_tree",
+    "induced_subgraph",
+]
