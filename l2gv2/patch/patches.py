@@ -15,12 +15,11 @@ from random import choice
 from math import ceil
 from typing import Literal
 from collections.abc import Iterable
-
 import torch
 import numpy as np
 from tqdm.auto import tqdm
-
 import numba
+from numba.typed import List
 
 from .clustering import Partition
 from ..graphs.tgraph import TGraph
@@ -191,7 +190,7 @@ def create_overlapping_patches(
 
     parts = Partition(partition_tensor)
     partition_tensor_numpy = partition_tensor.numpy()
-    patches = numba.typed.list(np.asanyarray(p) for p in parts)
+    patches = List(np.asanyarray(p) for p in parts)
     for i in tqdm(range(patch_graph.num_nodes), desc="enlarging patch overlaps"):
         part_i = parts[i].numpy()
         part_i.sort()
