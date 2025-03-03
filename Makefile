@@ -17,4 +17,10 @@ ruff-checks:
 	ruff check tests
 	ruff format --check tests
 
-.PHONY: test lint ruff-checks format
+notebooks:
+	python3.10 -m venv .venv && \
+		. .venv/bin/activate && \
+		pip install jupyter && \
+		for i in examples/*.ipynb; do jupyter execute $$i; done
+
+.PHONY: test lint ruff-checks format notebooks
