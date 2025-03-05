@@ -58,7 +58,8 @@ dev = [
     "pytest-cov",
     "pytest-xdist",
     "pylint",
-    "pre_commit == 4.0.1"
+    "pre_commit == 4.0.1",
+    "vulture>=2",
 ]
 docs = [
     "Sphinx == 8.*",
@@ -134,3 +135,8 @@ reportMissingTypeStubs = false
 
 [tool.coverage.run]
 omit = ["tests/*"]
+
+# Find unused code
+[tool.vulture]
+paths = ["l2gv2", "examples", "tests"]
+sort_by_size = true

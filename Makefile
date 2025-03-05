@@ -1,3 +1,5 @@
+REPO = https://github.com/OxfordRSE/L2Gv2/blob/main/
+
 test: .venv
 	. .venv/bin/activate && python -m pytest -n auto
 	
@@ -23,4 +25,8 @@ notebooks:
 		pip install jupyter && \
 		for i in examples/*.ipynb; do jupyter execute $$i; done
 
-.PHONY: test lint ruff-checks format notebooks
+vulture: .venv
+	@. .venv/bin/activate && vulture | grep -v variable |  awk -F : '{print "- [ ] [`" $$1 ":" $$2 "`]($(REPO)" $$1 "#L" $$2 "):" $$3}'
+
+
+.PHONY: test lint ruff-checks format notebooks vulture
