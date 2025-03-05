@@ -8,6 +8,9 @@ include = [
   "l2gv2",
   "l2gv2.datasets",
   "l2gv2.embedding",
+  "l2gv2.clustering",
+  "l2gv2.sparsify",
+  "l2gv2.align",
   "l2gv2.patch",
   "l2gv2.graphs",
   "l2gv2.embedding",
@@ -32,6 +35,7 @@ classifiers = [
 
 dependencies = [
     "autograd ~= 1.7",
+    "geotorch",
     "ilupp == 1.0.*",
     "networkx>=3",
     "numba",
@@ -54,7 +58,8 @@ dev = [
     "pytest-cov",
     "pytest-xdist",
     "pylint",
-    "pre_commit == 4.0.1"
+    "pre_commit == 4.0.1",
+    "vulture>=2",
 ]
 docs = [
     "Sphinx == 8.*",
@@ -130,3 +135,8 @@ reportMissingTypeStubs = false
 
 [tool.coverage.run]
 omit = ["tests/*"]
+
+# Find unused code
+[tool.vulture]
+paths = ["l2gv2", "examples", "tests"]
+sort_by_size = true

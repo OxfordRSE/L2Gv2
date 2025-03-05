@@ -54,6 +54,8 @@ There are additional Makefile targets to automate tasks:
 - `make lint`: runs pylint
 - `make format`: autoformats code using ruff
 - `make ruff-checks`: lints and checks that code is formatted using ruff
+- `make vulture`: uses [vulture](https://github.com/jendrikseipp/vulture) to
+  find unused code, output can be used to create GitHub issue
 
 Note that the above commands will install development and documentation
 dependencies. If you are only using this library as a dependency, use:

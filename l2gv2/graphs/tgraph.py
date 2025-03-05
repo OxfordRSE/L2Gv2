@@ -21,10 +21,12 @@
 
 import networkx as nx
 import torch
-import torch_scatter as ts
-import torch_geometric as tg
 
-from .graph import Graph
+# import torch_scatter as ts
+import torch_geometric as tg
+from torch_geometric.utils import scatter
+
+from l2gv2.graphs.graph import Graph
 
 
 # pylint: disable=too-many-instance-attributes
@@ -223,17 +225,15 @@ class TGraph(Graph):
         components = torch.arange(self.num_nodes, dtype=torch.long, device=self.device)
         while not torch.equal(last_components, components):
             last_components[:] = components
-            components = ts.scatter(
+            components = scatter(
                 last_components[edge_index[0]],
                 edge_index[1],
-                out=components,
                 reduce="min",
             )
             if not is_undir:
-                components = ts.scatter(
+                components = scatter(
                     last_components[edge_index[1]],
                     edge_index[0],
-                    out=components,
                     reduce="min",
                 )
         _, inverse, component_size = torch.unique(
