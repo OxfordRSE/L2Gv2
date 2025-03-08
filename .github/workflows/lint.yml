@@ -1,4 +1,4 @@
-name: Pylint
+name: lint
 
 on:
   push:
@@ -6,13 +6,13 @@ on:
     paths:
     - 'l2gv2/**/*.py'
     - 'tests/**/*.py'
-    - '.github/workflows/pylint.yml'
+    - '.github/workflows/lint.yml'
   pull_request:
     branches: [ main ]
     paths:
     - 'l2gv2/**/*.py'
     - 'tests/**/*.py'
-    - '.github/workflows/pylint.yml'
+    - '.github/workflows/lint.yml'
 
 jobs:
   build:
@@ -20,9 +20,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v5
+    - name: Set up nox
+      uses: wntrblm/nox@2025.02.09
       with:
-        python-version: "3.10"
+        python-versions: "3.10"
     - name: Run linting
-      run: make lint
+      run: nox -s lint
