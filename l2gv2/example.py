@@ -217,7 +217,7 @@ def voronoi_patches(
                 patches2 = list(patches2)
                 c2 = c1 + it + 1
                 patch_distances = cdist(centers[patches1, :], centers[patches2, :])
-                i, j = np.unravel_index(
+                i, j = np.unravel_index(  # pylint: disable=unbalanced-tuple-unpacking
                     np.argmin(patch_distances), patch_distances.shape
                 )
                 edges.append((patch_distances[i, j], patches1[i], patches2[j], c1, c2))
