@@ -1,3 +1,4 @@
+import glob
 import nox
 
 PYTHON_VERSIONS = "3.10"
@@ -21,6 +22,22 @@ def tests(session):
     session.run("pytest", "-n", "auto", "--cov")
 
 
+@nox.session(python=PYTHON_VERSIONS)
+def notebooks(session):
+    "Run Jupyter notebooks"
+    session.run("pip", "install", ".[dev]")
+    session.install("jupyter")
+    exit_codes = []
+    for n in glob.glob("examples/*.ipynb"):
+        try:
+            session.run("jupyter", "execute", n)
+            exit_codes.append(0)
+        except nox.command.CommandFailed as e:
+            exit_codes.append(e.reason)
+    if any(e != 0 for e in exit_codes):
+        session.error("One or more Jupyter notebooks failed to execute")
+
+
 @nox.session(name="unused-code", default=False)
 def unused_code(session):
     """Shows unused code warnings using vulture.
@@ -29,9 +46,7 @@ def unused_code(session):
     to report on unused code.
     """
     session.install("vulture")
-    out = session.run(
-        "vulture", "l2gv2", "tests", external=True, silent=True, success_codes=[0, 3]
-    )
+    out = session.run("vulture", "l2gv2", "tests", silent=True, success_codes=[0, 3])
     for line in out.splitlines():
         file, lineno, msg = line.split(":")
         if "variable" in msg:
