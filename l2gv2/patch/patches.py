@@ -14,13 +14,12 @@ and returns a list of patches.
 from random import choice
 from math import ceil
 import copy
-from typing import Literal, Callable
+from typing import Literal, Callable, List
 from collections.abc import Iterable
 import torch
 import numpy as np
 from tqdm.auto import tqdm
 import numba
-from numba.typed import List
 
 from .clustering import Partition
 from ..graphs.tgraph import TGraph
