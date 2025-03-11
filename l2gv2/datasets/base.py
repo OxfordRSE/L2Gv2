@@ -53,6 +53,28 @@ class BaseDataset(InMemoryDataset):
     def processed_dir(self) -> str:
         return str(Path(self.root) / "processed")
 
+    @property
+    def processed_file_names(self) -> str | list[str] | tuple[str, ...]:
+        """
+        The processed file names
+        """
+        if not Path(self.processed_dir).exists():
+            processed_files = []
+        else:
+            processed_files = self.data.processed_file_names
+        return processed_files
+
+    @property
+    def raw_file_names(self) -> list[str]:
+        """
+        The raw file names
+        """
+        if not Path(self.raw_dir).exists():
+            raw_files = []
+        else:
+            raw_files = self.data.raw_file_names
+        return raw_files
+
     def _load_polars(self) -> Tuple[pl.DataFrame, pl.DataFrame]:
         """
         Load the processed edge and node Polars DataFrames.

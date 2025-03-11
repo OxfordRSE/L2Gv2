@@ -21,7 +21,7 @@
 
 from time import perf_counter
 from tempfile import TemporaryFile
-
+from pathlib import Path
 from tqdm import tqdm
 import torch
 import torch.nn
@@ -54,6 +54,31 @@ def set_device(device: str | None = None):
         return torch.device("cpu")
 
     return torch.device(device)
+
+
+def ensure_extension(filename: str, extension: str) -> Path:
+    """Check filename for extension and add it if necessary
+
+    Args:
+        filename: input filename
+
+        extension: desired extension (including `.`)
+
+    Returns:
+        Path object with correct extension
+
+    Raises:
+        ValueError: if filename has the wrong extension
+
+    """
+    fname = Path(filename)
+    if fname.suffix == "":
+        fname = fname.with_suffix(extension)
+    elif fname.suffix != extension:
+        raise ValueError(
+            f"filename should have extension {extension}, not {fname.suffix}"
+        )
+    return fname
 
 
 class EarlyStopping:

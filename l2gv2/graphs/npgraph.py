@@ -29,11 +29,10 @@ import numba
 from tqdm import tqdm
 from numba.experimental import jitclass
 
-from .graph import Graph
-from ..utils import tqdm_close
+from l2gv2.graphs.graph import Graph
+from l2gv2.utils import tqdm_close
 
 rng = np.random.default_rng()
-
 
 spec = [
     ("edge_index", numba.int64[:, :]),

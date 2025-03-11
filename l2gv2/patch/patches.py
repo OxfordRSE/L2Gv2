@@ -13,7 +13,8 @@ and returns a list of patches.
 
 from random import choice
 from math import ceil
-from typing import Literal
+import copy
+from typing import Literal, Callable
 from collections.abc import Iterable
 import torch
 import numpy as np
@@ -32,6 +33,104 @@ from .sparsify import (
     nearest_neighbor_sparsify,
     conductance_weighted_graph,
 )
+
+from l2gv2.patch.lazy import (
+    BaseLazyCoordinates,
+    LazyMeanAggregatorCoordinates,
+    LazyFileCoordinates,
+)
+
+
+class Patch:
+    """
+    Class for patch embedding
+    """
+
+    index = None
+    """mapping of node index to patch coordinate index"""
+
+    coordinates = None
+    """patch embedding coordinates"""
+
+    def __init__(self, nodes, coordinates=None):
+        """
+        Initialise a patch from a list of nodes and corresponding coordinates
+
+        Args:
+            nodes: Iterable of integer node indices for patch
+            coordinates: filename for coordinate file to be loaded on demand
+        """
+        self.nodes = np.asanyarray(nodes)
+        self.index = {int(n): i for i, n in enumerate(nodes)}
+        if coordinates is not None:
+            if not isinstance(coordinates, BaseLazyCoordinates):
+                self.coordinates = np.asanyarray(coordinates)
+            else:
+                self.coordinates = coordinates
+
+    @property
+    def shape(self):
+        """
+        shape of patch coordinates
+
+        (`shape[0]` is the number of nodes in the patch
+        and `shape[1]` is the embedding dimension)
+        """
+        return self.coordinates.shape
+
+    def get_coordinates(self, nodes):
+        """
+        get coordinates for a list of nodes
+
+        Args:
+            nodes: Iterable of node indices
+        """
+        return self.coordinates[[self.index[node] for node in nodes], :]
+
+    def get_coordinate(self, node):
+        """
+        get coordinate for a single node
+
+        Args:
+            node: Integer node index
+        """
+        return self.coordinates[self.index[node], :]
+
+    def __copy__(self):
+        """return a copy of the patch"""
+        instance = type(self).__new__(type(self))
+        instance.__dict__.update(self.__dict__)
+        instance.coordinates = copy.copy(self.coordinates)
+        return instance
+
+
+class MeanAggregatorPatch(Patch):
+    """Patch class that aggregates multiple patches by taking their mean coordinates."""
+
+    def __init__(self, patches):
+        coordinates = LazyMeanAggregatorCoordinates(patches)
+        super().__init__(coordinates.nodes, coordinates)
+
+    @property
+    def patches(self):
+        return self.coordinates.patches
+
+    def get_coordinate(self, node):
+        # avoid double index conversion
+        return self.coordinates.get_coordinates([node])
+
+    def get_coordinates(self, nodes):
+        # avoid double index conversion
+        return self.coordinates.get_coordinates(nodes)
+
+
+class FilePatch(Patch):
+    """Patch class that loads coordinates from a file with optional transformations (shift, scale, rotation)."""
+
+    def __init__(self, nodes, filename, shift=None, scale=None, rot=None):
+        super().__init__(
+            nodes, LazyFileCoordinates(filename, shift=shift, scale=scale, rot=rot)
+        )
 
 
 @numba.njit
@@ -390,6 +489,28 @@ def create_patch_data(
 
 
 # pylint: enable=too-many-branches
+
+
+def create_patch_graph(
+    graph: TGraph,
+    max_num_patches: int,
+    min_overlap: int,
+    target_overlap: int,
+    clustering_function: Callable[[TGraph, int], torch.Tensor],
+) -> tuple[list, TGraph]:
+    """Create a patch graph from a graph
+
+    Args:
+        graph (TGraph): input graph
+        max_num_patches (int): maximum number of patches
+        min_overlap (int): minimum overlap for connected patches
+        target_overlap (int): maximum overlap during expansion
+
+    Returns:
+        list of patch data, patch graph
+    """
+    partition_tensor = clustering_function(graph, max_num_patches)
+    return create_patch_data(graph, partition_tensor, min_overlap, target_overlap)
 
 
 def rolling_window_graph(n_patches: int, w):

@@ -1,6 +1,6 @@
 from .gae import GAE, VGAE, VGAE_loss, GAE_loss, GAEconv, VGAEconv
 from .train import lr_grid_search, train
-from .embedding import patch_embeddings
+from .utils import patch_embeddings, get_embedding
 
 __all__ = [
     "GAE",
@@ -12,4 +12,5 @@ __all__ = [
     "lr_grid_search",
     "train",
     "patch_embeddings",
+    "get_embedding",
 ]

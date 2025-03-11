@@ -29,10 +29,9 @@ import numpy as np
 import numba
 from numba.experimental import jitclass
 
+from .graph import Graph
 from .npgraph import NPGraph
 from .tgraph import TGraph
-
-from .graph import Graph
 
 
 @jitclass
@@ -59,8 +58,8 @@ class UnionFind:
 
     """
 
-    parents: numba.int64[:]
-    weights: numba.int64[:]
+    parents: numba.int64[:]  # type: ignore
+    weights: numba.int64[:]  # type: ignore
 
     def __init__(self, size):
         """Create a new empty union-find structure.

@@ -23,6 +23,8 @@
 """TODO: module docstring for embedding/train.py."""
 
 import torch
+import torch_geometric as tg
+from typing import Callable
 
 from ..utils import EarlyStopping
 
@@ -66,44 +68,27 @@ def lr_grid_search(
 
 
 def train(
-    data,
-    model,
-    loss_fun,
-    num_epochs=10000,
-    patience=20,
-    lr=0.01,
-    weight_decay=0.0,
-    verbose=True,
-    logger=lambda loss: None,
+    data: tg.data.Data,
+    model: torch.nn.Module,
+    loss_fun: Callable,
+    num_epochs: int = 10000,
+    patience: int = 20,
+    lr: float = 0.01,
+    weight_decay: float = 0.0,
+    verbose: bool = True,
+    logger: Callable = lambda loss: None,
 ):
     """
-    train an embedding model
+    Train an embedding model
 
     Args:
-        data: network data
-
-
-        model: embedding auto-encoder model
-
-        loss_fun: loss function to use with model (takes arguments ``model``, ``data``)
-
-        num_epochs: number of training epochs
-
+        data: input data
+        model: model to train
+        loss_fun: loss function
+        num_epochs: number of epochs to train
         patience: patience for early stopping
-
-        lr: learining rate (default: 0.01)
-
-        weight_decay: weight decay for optimizer (default: 0.0)
-
-        verbose: if ``True``, display training progress (default: ``True``)
-
-        logger: function that receives the training loss as input and
-            is called after each epoch (does nothing by default)
-
-    Returns:
-        trained model
-
-    This function uses the Adam optimizer for training.
+        lr: learning rate
+        weight_decay: weight decay
     """
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
     with EarlyStopping(patience) as stop:

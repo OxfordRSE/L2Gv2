@@ -2,6 +2,7 @@ from .registry import get_dataset, register_dataset, DATASET_REGISTRY
 from .base import BaseDataset
 from .as733 import AS733Dataset
 from .cora import CoraDataset
+from .dgraph import DGraphDataset
 
 
 def list_available_datasets():
@@ -18,5 +19,6 @@ __all__ = [
     "BaseDataset",
     "AS733Dataset",
     "CoraDataset",
+    "DGraphDataset",
     "list_available_datasets",
 ]
