@@ -1,67 +1,38 @@
-#  Copyright (c) 2021. Lucas G. S. Jeub
-#
-#  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software"), to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#  copies of the Software, and to permit persons to whom the Software is
-#  furnished to do so, subject to the following conditions:
-#
-#  The above copyright notice and this permission notice shall be included in all
-#  copies or substantial portions of the Software.
-#
-#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-#  SOFTWARE.
+"""
+Utils for alignment
+"""
 
-
-import numpy as np
 import torch
-import itertools
-
-rg = np.random.default_rng()
-eps = np.finfo(float).eps
 
 
-def seed(new_seed):
+def to_device(obj, device, dtype=torch.float32):
     """
-    Change seed of random number generator.
+    Recursively moves tensors in a nested structure to the specified device
+    and converts them to the specified dtype.
 
     Args:
-        new_seed: New seed value
+        obj: The object to process (tensor, dict, list, tuple, etc.)
+        device: The target device ('cuda', 'cpu', etc.)
+        dtype: The target data type (default: torch.float32)
 
     Returns:
-        New random number generator instance
-
+        The same structure with all tensors moved to device and converted to dtype
     """
-    return np.random.default_rng(new_seed)
+    if isinstance(obj, torch.Tensor):
+        return obj.to(device=device, dtype=dtype)
+    if isinstance(obj, dict):
+        return {k: to_device(v, device, dtype) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [to_device(v, device, dtype) for v in obj]
+    if isinstance(obj, tuple):
+        return tuple(to_device(v, device, dtype) for v in obj)
+    return obj
 
 
-def preprocess_graphs(list_of_patches, nodes_dict):
-    """Preprocess the graphs to get the embedding of the patches."""
-    emb_list = []
-    for i in range(len(list_of_patches) - 1):
-        emb_list.append(
-            [
-                torch.tensor(
-                    list_of_patches[i].get_coordinates(list(nodes_dict[i, i + 1]))
-                ),
-                torch.tensor(
-                    list_of_patches[i + 1].get_coordinates(list(nodes_dict[i, i + 1]))
-                ),
-            ]
-        )
-    emb_list = list(itertools.chain.from_iterable(emb_list))
-    return emb_list
-
-
-def intersections_nodes(patches):
+def get_intersections(patches, min_overlap=0):
     """Calculate the intersection of nodes between patches."""
     intersections = {}
+    embeddings = {}
     for i, _ in enumerate(patches):
         for j in range(i + 1, len(patches)):
             intersections[(i, j)] = list(
@@ -69,4 +40,14 @@ def intersections_nodes(patches):
                     set(patches[j].nodes.tolist())
                 )
             )
-    return intersections
+            if len(intersections[(i, j)]) >= min_overlap:
+                embeddings[(i, j)] = [
+                    torch.tensor(
+                        patches[i].get_coordinates(list(intersections[(i, j)]))
+                    ),
+                    torch.tensor(
+                        patches[j].get_coordinates(list(intersections[(i, j)]))
+                    ),
+                ]
+    # embeddings = list(itertools.chain.from_iterable(embeddings))
+    return intersections, embeddings

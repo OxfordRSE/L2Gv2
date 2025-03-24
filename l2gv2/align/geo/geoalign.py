@@ -4,7 +4,7 @@ Alignment using pytorch geometric.
 
 from l2gv2.align.registry import register_aligner
 from l2gv2.align.alignment import AlignmentProblem
-from l2gv2.align.utils import preprocess_graphs, intersections_nodes
+from l2gv2.align.utils import get_intersections
 from l2gv2.align.geo.train import train_alignment_model
 from l2gv2.patch import Patch
 
@@ -23,8 +23,9 @@ class GeoAlignmentProblem(AlignmentProblem):
         copy_data=True,
         self_loops=False,
         verbose=False,
-        num_epoches: int = 100,
-        learning_rate: float = 0.01,
+        num_epoches: int = 1000,
+        learning_rate: float = 0.001,
+        model_type: str = "affine",
         device: str = "cpu",
     ):
         super().__init__(
@@ -33,20 +34,22 @@ class GeoAlignmentProblem(AlignmentProblem):
         self.num_epochs = num_epoches
         self.learning_rate = learning_rate
         self.device = device
+        self.model_type = model_type
 
     def align_patches(self, scale=False):  # pylint: disable=unused-argument
         """
         Align the patches.
         """
         n_patches = len(self.patches)
-        nodes = intersections_nodes(self.patches)
-        emb_patches = preprocess_graphs(self.patches, nodes)
+        _, embeddings = get_intersections(self.patches)
+
         res, _ = train_alignment_model(
-            emb_patches,
+            embeddings,
             n_patches,
             device=self.device,
             num_epochs=self.num_epochs,
             learning_rate=self.learning_rate,
+            model_type=self.model_type,
             verbose=self.verbose,
         )
 
