@@ -2,6 +2,7 @@
 Model for aligning patch embeddings
 """
 
+import torch
 from torch import nn
 import geotorch
 
@@ -60,9 +61,17 @@ class AffineModel(nn.Module):
         """
         super().__init__()
         self.device = device
-        self.transformation = nn.ParameterList(
-            [nn.Linear(dim, dim, bias=True).to(device) for _ in range(n_patches)]
-        )
+        linear_layers = [
+            nn.Linear(dim, dim, bias=True).to(device) for _ in range(n_patches)
+        ]
+        # Fix the first transformation to be the identity
+        fixed_layer_index = 0
+        linear_layers[fixed_layer_index].weight.data.copy_(torch.eye(dim))
+        linear_layers[fixed_layer_index].bias.data.zero_()
+        linear_layers[fixed_layer_index].weight.requires_grad = False
+        linear_layers[fixed_layer_index].bias.requires_grad = False
+
+        self.transformation = nn.ParameterList(linear_layers)
 
     def forward(self, patch_intersection):
         """

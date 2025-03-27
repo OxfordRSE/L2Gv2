@@ -14,7 +14,7 @@ and returns a list of patches.
 from random import choice
 from math import ceil
 import copy
-from typing import Literal, Callable, List
+from typing import Literal, Callable
 from collections.abc import Iterable
 import torch
 import numpy as np
@@ -288,7 +288,7 @@ def create_overlapping_patches(
 
     parts = Partition(partition_tensor)
     partition_tensor_numpy = partition_tensor.numpy()
-    patches = List(np.asanyarray(p) for p in parts)
+    patches = [np.asanyarray(p) for p in parts]
     for i in tqdm(range(patch_graph.num_nodes), desc="enlarging patch overlaps"):
         part_i = parts[i].numpy()
         part_i.sort()

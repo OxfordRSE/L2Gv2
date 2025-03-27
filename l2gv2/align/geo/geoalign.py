@@ -23,7 +23,7 @@ class GeoAlignmentProblem(AlignmentProblem):
         copy_data=True,
         self_loops=False,
         verbose=False,
-        num_epoches: int = 1000,
+        num_epochs: int = 1000,
         learning_rate: float = 0.001,
         model_type: str = "affine",
         device: str = "cpu",
@@ -31,10 +31,11 @@ class GeoAlignmentProblem(AlignmentProblem):
         super().__init__(
             patches, patch_edges, min_overlap, copy_data, self_loops, verbose
         )
-        self.num_epochs = num_epoches
+        self.num_epochs = num_epochs
         self.learning_rate = learning_rate
         self.device = device
         self.model_type = model_type
+        self.loss_hist = []
 
     def align_patches(self, scale=False):  # pylint: disable=unused-argument
         """
@@ -43,7 +44,7 @@ class GeoAlignmentProblem(AlignmentProblem):
         n_patches = len(self.patches)
         _, embeddings = get_intersections(self.patches)
 
-        res, _ = train_alignment_model(
+        res, loss_hist = train_alignment_model(
             embeddings,
             n_patches,
             device=self.device,
@@ -52,6 +53,8 @@ class GeoAlignmentProblem(AlignmentProblem):
             model_type=self.model_type,
             verbose=self.verbose,
         )
+
+        self.loss_hist = loss_hist
 
         self.rotations = [
             res.transformation[i].weight.to("cpu").detach().numpy()

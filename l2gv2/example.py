@@ -330,17 +330,27 @@ def rand_shift_patches(
     return shifts
 
 
-def random_transform_patches(patches: list[Patch]):
+def random_transform_patches(
+    patches: list[Patch], scale=True, rotation=True, translation=True
+):
     """Randomly transform patches by scaling, rotating, and translating."""
     n_patches = len(patches)
     shifts = rg.normal(loc=0.0, scale=1.0, size=(n_patches, 2))
+    shifts[0, :] = 0.0
     rotations = [rand_orth(2) for _ in range(n_patches)]
+    rotations[0] = np.eye(2)
+    scales = np.exp(rg.uniform(0.5, 2, size=n_patches))
+    scales[0] = 1.0
     transformed_patches = [copy(patches[i]) for i in range(n_patches)]
     for i, _ in enumerate(patches):
-        transformed_patches[i].coordinates += shifts[i, :]
-        transformed_patches[i].coordinates = (
-            transformed_patches[i].coordinates @ rotations[i].T
-        )
+        if rotation:
+            transformed_patches[i].coordinates = (
+                transformed_patches[i].coordinates @ rotations[i].T
+            )
+        if scale:
+            transformed_patches[i].coordinates *= scales[i]
+        if translation:
+            transformed_patches[i].coordinates += shifts[i, :]
     return transformed_patches
 
 
