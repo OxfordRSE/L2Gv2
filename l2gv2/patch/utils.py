@@ -36,7 +36,7 @@ from pathlib import Path
 import ilupp
 
 from tqdm.auto import tqdm
-from .patch import Patch
+from .patches import Patch
 
 
 def seed(new_seed):

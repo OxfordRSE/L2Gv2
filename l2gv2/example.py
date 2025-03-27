@@ -476,7 +476,7 @@ def plot_patches(patches, transformed_patches=None):
             patch.coordinates[:, 1],
             color=colors[i],
             alpha=0.5,
-            label=f"Patch {i+1}",
+            label=f"Patch {i + 1}",
         )
     ax1.set_title("Original Patches")
     ax1.set_xlabel("X Coordinate")
@@ -489,7 +489,7 @@ def plot_patches(patches, transformed_patches=None):
             patch.coordinates[:, 1],
             color=colors[i],
             alpha=0.5,
-            label=f"Patch {i+1}",
+            label=f"Patch {i + 1}",
         )
     ax2.set_title("Transformed Patches")
     ax2.set_xlabel("X Coordinate")
