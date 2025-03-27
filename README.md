@@ -22,27 +22,13 @@ Full documentation available [here](https://l2gv2.readthedocs.io/en/latest/)
 git clone https://github.com/OxfordRSE/L2Gv2.git
 ```
 
-Create and activate a **virtual environment**
+We use [`uv`](https://docs.astral.sh/uv/) for Python package management. You
+can install it on macOS or Linux using `brew install uv`. Alternatively, you
+can use uv's [installation script](https://docs.astral.sh/uv/#installation).
 
-```shell
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-**Install the dependencies**
-
-```shell
-pip install '.[dev,docs]'
-```
-
-This will install dependencies, including [pytorch](https://pytorch.org) and
-[pytorch-geometric](https://pyg.org). For macOS, CPU version of pytorch will
-be installed, whereas for Linux, a GPU version targeting the latest CUDA
-release will be installed. Installation of alternate or older CUDA versions
-may be supported in the future.
-
-To simplify testing for developers, we provide a [noxfile](noxfile.py), which
-allows you to run the above steps and test with one command. You'll first need
+[nox](https://nox.thea.codes) simplifies Python testing, particularly across
+multiple Python versions. We provide a [noxfile.py](noxfile.py), which allows you
+to run tests and perform linting with one command. You'll first need
 to install nox:
 
 ```shell
@@ -50,10 +36,12 @@ brew install nox      # macOS
 pipx install nox      # with pipx
 sudo apt install nox  # debian
 sudo dnf install nox  # fedora
-uvx nox               # with uv
+uv tool install nox   # with uv
 ```
 
-Then to run all the checks, including linting:
+To run the tests and linting with
+[pylint](https://pylint.readthedocs.io/en/stable/) and
+[ruff](https://docs.astral.sh/ruff/):
 
 ```shell
 nox
@@ -74,9 +62,18 @@ pip install git+https://github.com/OxfordRSE/L2Gv2
 ```
 
 For development, we highly recommend **installing the pre-commit hook** that
-helps lint and autoformat on every commit. To install pre-commit, run
-`pre-commit install` once in the repository; this will ensure that checks run
-before every commit.
+helps lint and autoformat on every commit:
+
+```shell
+brew install pre-commit     # macOS
+pipx install pre-commit     # with pipx
+sudo apt install pre-commit # debian
+sudo dnf install pre-commit # fedora
+uv tool install pre-commit  # with uv
+```
+
+To setup pre-commit hooks, run `pre-commit install` once in the repository;
+this will ensure that checks run before every commit.
 
 ## License
 

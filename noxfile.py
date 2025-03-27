@@ -1,14 +1,20 @@
 import glob
 import nox
 
+nox.options.default_venv_backend = "uv"
+
 PYTHON_VERSIONS = "3.10"
 REPO = "https://github.com/OxfordRSE/L2Gv2/blob/main/"
+# pylint = "uv", "run", "pylint"
+# ruff = "uv", "run", "--with", "ruff", "ruff"
 
 
 @nox.session
 def lint(session):
     "Lint code using pylint and ruff"
-    session.install("pylint", "ruff")
+    session.env.update({"UV_PROJECT_ENVIRONMENT": session.virtualenv.location})
+    session.install("pylint")
+    session.install("ruff")
     session.run("pylint", "l2gv2/**/*.py")
     session.run("pylint", "tests/**/*.py")
     session.run("ruff", "check")
@@ -17,20 +23,20 @@ def lint(session):
 
 @nox.session(python=PYTHON_VERSIONS)
 def tests(session):
-    "Run tests"
-    session.run("pip", "install", ".[dev]")
-    session.run("pytest", "-n", "auto", "--cov")
+    session.env.update({"UV_PROJECT_ENVIRONMENT": session.virtualenv.location})
+    session.run("uv", "sync", "--all-extras", "--dev")
+    session.run("uv", "run", "pytest", "-n", "auto", "--cov")
 
 
-@nox.session(python=PYTHON_VERSIONS)
+@nox.session(python=PYTHON_VERSIONS, default=False)
 def notebooks(session):
     "Run Jupyter notebooks"
-    session.run("pip", "install", ".[dev]")
-    session.install("jupyter")
+    session.env.update({"UV_PROJECT_ENVIRONMENT": session.virtualenv.location})
+    session.run("uv", "sync", "--all-extras", "--dev")
     exit_codes = []
     for n in glob.glob("examples/*.ipynb"):
         try:
-            session.run("jupyter", "execute", n)
+            session.run("uv", "run", "--with", "jupyter", "jupyter", "execute", n)
             exit_codes.append(0)
         except nox.command.CommandFailed as e:
             exit_codes.append(e.reason)
