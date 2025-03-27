@@ -4,19 +4,6 @@ build-backend = 'setuptools.build_meta'
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = [
-  "l2gv2",
-  "l2gv2.datasets",
-  "l2gv2.embedding",
-  "l2gv2.clustering",
-  "l2gv2.sparsify",
-  "l2gv2.align",
-  "l2gv2.patch",
-  "l2gv2.graphs",
-  "l2gv2.embedding",
-  "l2gv2.embedding.svd",
-  "l2gv2.embedding.gae",
-]
 
 [project]
 name = "l2gv2"
