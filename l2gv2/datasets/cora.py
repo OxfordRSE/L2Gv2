@@ -21,7 +21,7 @@ class CoraDataset(BaseDataset):
         )
         self.logger = logging.getLogger(self.__class__.__name__)
         if root is None:
-            root = str(Path(__file__).parent.parent.parent / "data" / "cora")
+            root = str(Path(__file__).parent.parent.parent / "data")
         super().__init__(root, **kwargs)
         kwargs.setdefault("name", "Cora")
         data = Planetoid(root, **kwargs)

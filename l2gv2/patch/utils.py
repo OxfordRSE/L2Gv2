@@ -22,7 +22,6 @@
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-positional-arguments
-from pathlib import Path
 import json
 import copy
 from typing import Callable, Any, cast
@@ -33,11 +32,11 @@ from scipy import sparse as ss
 from scipy.sparse.linalg import lsmr
 from scipy.spatial import procrustes
 import networkx as nx
-
+from pathlib import Path
 import ilupp
 
 from tqdm.auto import tqdm
-from .patch import Patch
+from .patches import Patch
 
 
 def seed(new_seed):
@@ -49,6 +48,31 @@ def seed(new_seed):
 
     """
     np.random.default_rng(new_seed)
+
+
+def ensure_extension(filename, extension):
+    """
+    check filename for extension and add it if necessary
+
+    Args:
+        filename: input filename
+        extension: desired extension (including `.`)
+
+    Returns:
+        filename with extension added
+
+    Raises:
+        ValueError: if filename has the wrong extension
+
+    """
+    filename = Path(filename)
+    if filename.suffix == "":
+        filename = filename.with_suffix(extension)
+    elif filename.suffix != extension:
+        raise ValueError(
+            f"filename should have extension {extension}, not {filename.suffix}"
+        )
+    return filename
 
 
 def random_gen(new_seed=None) -> np.random.Generator:
@@ -63,31 +87,6 @@ def random_gen(new_seed=None) -> np.random.Generator:
 
 rg = random_gen()
 eps = np.finfo(float).eps
-
-
-def ensure_extension(filename: str, extension: str) -> Path:
-    """Check filename for extension and add it if necessary
-
-    Args:
-        filename: input filename
-
-        extension: desired extension (including `.`)
-
-    Returns:
-        Path object with correct extension
-
-    Raises:
-        ValueError: if filename has the wrong extension
-
-    """
-    fname = Path(filename)
-    if fname.suffix == "":
-        fname = fname.with_suffix(extension)
-    elif fname.suffix != extension:
-        raise ValueError(
-            f"filename should have extension {extension}, not {fname.suffix}"
-        )
-    return fname
 
 
 def procrustes_error(coordinates1: np.ndarray, coordinates2: np.ndarray) -> float:

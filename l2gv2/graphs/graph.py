@@ -20,7 +20,9 @@
 
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-positional-arguments
-"""TODO: module docstring for network/graph.py"""
+"""
+Graph class.
+"""
 
 from typing import Sequence, Iterable
 from abc import abstractmethod
@@ -45,7 +47,9 @@ class Graph:
 
     @classmethod
     def from_tg(cls, data):
-        """TODO: docstring for from_tg."""
+        """
+        Create a graph from a torch_geometric data object.
+        """
         return cls(
             edge_index=data.edge_index,
             edge_attr=data.edge_attr,
@@ -56,7 +60,9 @@ class Graph:
 
     @classmethod
     def from_networkx(cls, nx_graph: nx.Graph, weight=None):
-        """TODO: docstring for from_networkx."""
+        """
+        Create a graph from a networkx graph.
+        """
         undir = not nx_graph.is_directed()
         if undir:
             nx_graph = nx_graph.to_directed(as_view=True)

@@ -24,14 +24,14 @@
 """Graph data handling"""
 
 import torch
+import torch_geometric as tg
 import numpy as np
 import numba
 from numba.experimental import jitclass
 
+from .graph import Graph
 from .npgraph import NPGraph
 from .tgraph import TGraph
-
-from .graph import Graph
 
 
 @jitclass
@@ -58,8 +58,8 @@ class UnionFind:
 
     """
 
-    parents: numba.int64[:]
-    weights: numba.int64[:]
+    parents: numba.int64[:]  # type: ignore
+    weights: numba.int64[:]  # type: ignore
 
     def __init__(self, size):
         """Create a new empty union-find structure.
@@ -206,3 +206,35 @@ def _spanning_tree_mask(
                 edge_mask[reverse_edge_index[i]] = True
             subtrees.union(u, v)
     return edge_mask
+
+
+def induced_subgraph(data: tg.data.Data, nodes, extend_hops=0):
+    """
+    Create a subgraph induced by the given nodes.
+
+    Args:
+        data: input graph
+        nodes: list of nodes to induce the subgraph on
+        extend_hops: number of hops to extend the subgraph
+    """
+    nodes = torch.as_tensor(nodes, dtype=torch.long)
+    if extend_hops > 0:
+        nodes, edge_index, _, edge_mask = tg.utils.k_hop_subgraph(
+            nodes, num_hops=extend_hops, edge_index=data.edge_index, relabel_nodes=True
+        )
+        edge_attr = data.edge_attr[edge_mask, :] if data.edge_attr is not None else None
+    else:
+        edge_index, edge_attr = tg.utils.subgraph(
+            nodes, data.edge_index, data.edge_attr, relabel_nodes=True
+        )
+
+    subgraph = tg.data.Data(edge_index=edge_index, edge_attr=edge_attr)
+    for key, value in data.__dict__.items():
+        if not key.startswith("edge"):
+            if hasattr(value, "shape") and value.shape[0] == data.num_nodes:
+                setattr(subgraph, key, value[nodes])
+            else:
+                setattr(subgraph, key, value)
+    subgraph.nodes = nodes
+    subgraph.num_nodes = len(nodes)
+    return subgraph

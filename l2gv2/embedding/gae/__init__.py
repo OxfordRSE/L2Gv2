@@ -21,6 +21,8 @@
 
 from .models.gae import GAE
 from .models.vgae import VGAE
+from .layers.GAEconv import GAEconv
+from .layers.VGAEconv import VGAEconv
 from .utils.loss import VGAE_loss, GAE_loss
 
-__all__ = ["VGAE", "GAE", "VGAE_loss", "GAE_loss"]
+__all__ = ["VGAE", "GAE", "VGAE_loss", "GAE_loss", "GAEconv", "VGAEconv"]

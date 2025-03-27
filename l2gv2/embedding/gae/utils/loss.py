@@ -19,9 +19,12 @@
 #  SOFTWARE.
 """TODO: module docstring for embedding/gae/utils/loss.py."""
 
+from torch import nn
+import torch_geometric as tg
+
 
 # pylint: disable=invalid-name
-def VGAE_loss(model, data):
+def VGAE_loss(model: nn.Module, data: tg.data.Data):
     """
     loss function for use with :func:`VGAE_model`
 
@@ -30,7 +33,7 @@ def VGAE_loss(model, data):
         data:
 
     Returns:
-        loss value
+        reconstruction loss
     """
     return (
         model.recon_loss(model.encode(data), data.edge_index)
@@ -42,7 +45,7 @@ def VGAE_loss(model, data):
 
 
 # pylint: disable=invalid-name
-def GAE_loss(model, data):
+def GAE_loss(model: nn.Module, data: tg.data.Data):
     """
     loss function for use with :func:`GAE_model`
 

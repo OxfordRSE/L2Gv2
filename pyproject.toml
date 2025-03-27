@@ -4,16 +4,6 @@ build-backend = 'setuptools.build_meta'
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = [
-  "l2gv2",
-  "l2gv2.datasets",
-  "l2gv2.embedding",
-  "l2gv2.patch",
-  "l2gv2.graphs",
-  "l2gv2.embedding",
-  "l2gv2.embedding.svd",
-  "l2gv2.embedding.gae",
-]
 
 [project]
 name = "l2gv2"
@@ -32,8 +22,9 @@ classifiers = [
 
 dependencies = [
     "autograd ~= 1.7",
+    "geotorch",
     "ilupp == 1.0.*",
-    "networkx>=3",
+    "networkx>=2.0",
     "numba",
     "numpy",
     "polars",
@@ -45,7 +36,8 @@ dependencies = [
     "scipy",
     "torch>=2.5",
     "torch-geometric>=2.6",
-    "tqdm >= 4"
+    "tqdm >= 4",
+    "umap-learn"
 ]
 
 [project.optional-dependencies]

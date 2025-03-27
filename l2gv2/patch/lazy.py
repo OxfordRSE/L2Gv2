@@ -18,7 +18,9 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-"""TODO: module doctring"""
+"""
+Lazy coordinates for patch embeddings
+"""
 
 import copy
 from abc import ABC, abstractmethod

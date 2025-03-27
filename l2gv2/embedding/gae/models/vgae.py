@@ -17,9 +17,11 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-"""TODO: modue docstring for embedding/gae/models/vgae.py."""
+"""
+VGAE model.
+"""
 
-import torch_geometric as tg
+from torch_geometric import nn
 
 from ..layers.decoders import DistanceDecoder
 from ..layers.VGAEconv import VGAEconv
@@ -27,8 +29,10 @@ from ..layers.VGAEconv import VGAEconv
 
 # TODO: fix too-few-public-methods for embedding/gae/models/vgae.py VGAE
 # pylint: disable=too-few-public-methods
-class VGAE(tg.nn.VGAE):
-    """TODO: class docstring for VGAE."""
+class VGAE(nn.VGAE):
+    """
+    VGAE model.
+    """
 
     def __init__(self, dim, hidden_dim, num_features, dist=False):
         """

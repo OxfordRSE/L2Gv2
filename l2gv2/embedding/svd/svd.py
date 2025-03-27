@@ -28,7 +28,7 @@ import scipy.sparse as ss
 import scipy.sparse.linalg as sl
 import numpy as np
 
-from l2gv2.patch.patch import Patch
+from l2gv2.patch.patches import Patch
 
 
 # modified from scipy.sparse.linalg.svds:
