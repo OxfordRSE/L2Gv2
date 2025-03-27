@@ -41,22 +41,33 @@ be installed, whereas for Linux, a GPU version targeting the latest CUDA
 release will be installed. Installation of alternate or older CUDA versions
 may be supported in the future.
 
-To simplify testing for developers, we provide a [Makefile](Makefile), which
-allows you to run the above steps and test with one command:
+To simplify testing for developers, we provide a [noxfile](noxfile.py), which
+allows you to run the above steps and test with one command. You'll first need
+to install nox:
 
 ```shell
-make
+brew install nox      # macOS
+pipx install nox      # with pipx
+sudo apt install nox  # debian
+sudo dnf install nox  # fedora
+uvx nox               # with uv
 ```
 
-There are additional Makefile targets to automate tasks:
+Then to run all the checks, including linting:
 
-- `make test`: runs testing framework
-- `make lint`: runs pylint
-- `make format`: autoformats code using ruff
-- `make ruff-checks`: lints and checks that code is formatted using ruff
+```shell
+nox
+```
 
-Note that the above commands will install development and documentation
-dependencies. If you are only using this library as a dependency, use:
+To display a list of tasks:
+
+```shell
+nox --list
+```
+
+To run only a task, such as `lint`, run `nox -s lint`.
+
+If you are only using this library as a dependency, use:
 
 ```shell
 pip install git+https://github.com/OxfordRSE/L2Gv2
