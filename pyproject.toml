@@ -101,7 +101,7 @@ disable = [
 
     # Abstract methods should be instantiated in derived classes
     # See https://github.com/OxfordRSE/L2Gv2/issues/45
-    "abstract-method",
+    # "abstract-method",
 ]
 
 # pyright
