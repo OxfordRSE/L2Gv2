@@ -117,29 +117,17 @@ def fennel_clustering(
     num_iters=1,
     clusters=None,
 ):
-    if clusters is None:
-        clusters = _fennel_clustering(
-            graph.edge_index,
-            graph.adj_index,
-            graph.num_nodes,
-            num_clusters,
-            load_limit,
-            alpha,
-            gamma,
-            num_iters,
-        )
-    else:
-        clusters = _fennel_clustering(
-            graph.edge_index,
-            graph.adj_index,
-            graph.num_nodes,
-            num_clusters,
-            load_limit,
-            alpha,
-            gamma,
-            num_iters,
-            clusters,
-        )
+    clusters = _fennel_clustering(
+        graph.edge_index,
+        graph.adj_index,
+        graph.num_nodes,
+        num_clusters,
+        load_limit,
+        alpha,
+        gamma,
+        num_iters,
+        clusters=np.empty(0, dtype=np.int64) if clusters is None else clusters,
+    )
     return torch.as_tensor(clusters)
 
 
