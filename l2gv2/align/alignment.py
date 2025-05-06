@@ -344,7 +344,8 @@ class AlignmentProblem:  # pylint: disable=too-many-instance-attributes
         return instance
 
 
-class WeightedAlignmentProblem(AlignmentProblem):
+# See https://github.com/OxfordRSE/L2Gv2/issues/45 for abstract method inheritance discussion
+class WeightedAlignmentProblem(AlignmentProblem):  # pylint: disable=abstract-method
     """
     Variant of the local2global algorithm where patch edges are weighted according to the number of nodes in the overlap.
     """
