@@ -61,7 +61,7 @@ Alternatively you can manually specify the package requirement in a `requirement
 TODO==0.1.0
 ```
 
-Or, in the more modern `pyproject.toml` manner:
+Or, in the more modern `pyproject.toml` format:
 
 ```toml
 dependencies = ["TODO==0.1.0"]
