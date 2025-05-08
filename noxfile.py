@@ -27,6 +27,14 @@ def tests(session):
     session.run("uv", "sync", "--all-extras", "--dev")
     session.run("uv", "run", "pytest", "-n", "auto", "--cov")
 
+@nox.session
+def docs(session):
+    "Generate documentation using jupyter-book"
+    session.env.update({"UV_PROJECT_ENVIRONMENT": session.virtualenv.location})
+    session.run("uv", "sync", "--all-extras", "--dev")
+    session.run("uv", "run", "sphinx-apidoc", "-o", "docs/reference", "-H", "Module reference", "l2gv2")
+    session.run("uv", "run", "jupyter-book", "build", "docs")
+
 
 @nox.session(python=PYTHON_VERSIONS, default=False)
 def notebooks(session):
