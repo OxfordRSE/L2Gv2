@@ -1,5 +1,5 @@
 Overview
-============
+========
 
 The `l2gv2` package is a framework for scalable graph
 representation learning, implementing algorithms such as the one depicted in
@@ -40,31 +40,14 @@ Installation
 
 We support Python versions 3.10 - 3.12 on macOS and Linux.
 
-The recommended installation method is by using a Python package manager. We publish packages to PyPi under the `TODO` name. For example, to install in a virtual environment using `pip`:
+To install in a virtual environment using `pip`, first clone the repository
 
 ```shell
+git clone https://github.com/OxfordRSE/L2Gv2
+cd L2Gv2
 python3 -m venv .venv
 source .venv/bin/activate
-pip install TODO
-```
-
-To use a package manager such as `uv` or `poetry`:
-
-```shell
-uv add TODO
-poetry add TODO
-```
-
-Alternatively you can manually specify the package requirement in a `requirements.txt`:
-
-```
-TODO==0.1.0
-```
-
-Or, in the more modern `pyproject.toml` format:
-
-```toml
-dependencies = ["TODO==0.1.0"]
+pip install .
 ```
 
 See the [demonstration Jupyter notebook](demo) to see how the library is structured and used.
